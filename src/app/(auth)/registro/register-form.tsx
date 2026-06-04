@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Car, Loader2, AlertCircle, Eye, EyeOff, Check, ArrowRight } from "lucide-react";
+import { Car, Loader2, AlertCircle, Eye, EyeOff, Check, ArrowRight, Sparkles, ShieldCheck, Zap, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Branch {
@@ -54,7 +54,7 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
       const { error: signUpError } = await authClient.signUp.email({
         email,
         password,
-        name: nombre,
+        name: `${nombre} ${apellido}`.trim(),
         rol,
         sucursalId: sucursalId || undefined,
         callbackURL: "/dashboard",
@@ -77,18 +77,20 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-center items-center px-4 sm:px-6 py-12 relative overflow-hidden selection:bg-teal-500 selection:text-zinc-950">
-      {/* Background Decorative Blur Gradients */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-zinc-950 text-zinc-100 overflow-hidden relative selection:bg-teal-500 selection:text-zinc-950">
+      
+      {/* BACKGROUND GLOWS */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Main Container */}
-      <div className="w-full max-w-lg z-10">
-        {/* Brand/Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <Link href="/" className="flex items-center gap-2.5 mb-1 group">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
-              <Car className="h-6 w-6 text-zinc-950 font-bold" />
+      {/* LEFT COLUMN: REGISTRATION FORM */}
+      <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-10 lg:p-12 relative z-10 bg-zinc-950/40 backdrop-blur-md border-r border-zinc-900/50 overflow-y-auto max-h-screen">
+        
+        {/* Header/Logo */}
+        <div className="flex items-center justify-between mb-6 lg:mb-0 shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300">
+              <Car className="h-5.5 w-5.5 text-zinc-950 font-bold" />
             </div>
             <div>
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
@@ -97,20 +99,26 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
               <span className="font-semibold text-xl text-zinc-100 tracking-tight"> Pro</span>
             </div>
           </Link>
-          <p className="text-xs text-zinc-400">Crea una nueva cuenta de personal administrativo</p>
         </div>
 
-        {/* Card wrapper */}
-        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/50">
-          <h2 className="text-lg font-bold text-white mb-5 text-center">Registrar Cuenta</h2>
+        {/* Center Form Container */}
+        <div className="w-full max-w-md mx-auto my-auto py-6">
+          <div className="space-y-2 mb-6">
+            <h2 className="text-2xl font-extrabold tracking-tight text-white">
+              Crear Cuenta Administrativa
+            </h2>
+            <p className="text-zinc-400 text-xs">
+              Únete al equipo administrativo y operativo del CarWash.
+            </p>
+          </div>
 
           {/* Success Message */}
           {success && (
             <div className="mb-5 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
               <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <Check className="h-4 w-4 stroke-[3]" />
+                <Check className="h-3.5 w-3.5 stroke-[3]" />
               </div>
-              <span>¡Registro exitoso! Redireccionando al panel...</span>
+              <span>¡Registro exitoso! Redireccionando...</span>
             </div>
           )}
 
@@ -122,63 +130,62 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nombre y Apellido */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="nombre" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+              <div className="space-y-1.5">
+                <label htmlFor="nombre" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Nombre <span className="text-teal-400">*</span>
                 </label>
                 <input
                   id="nombre"
                   type="text"
                   required
-                  disabled={isLoading || success}
                   placeholder="Juan"
+                  className="w-full h-10 px-3.5 rounded-xl border border-zinc-800/85 bg-zinc-900/30 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
+                  disabled={isLoading || success}
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  className="w-full h-10 px-3.5 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all disabled:opacity-50 text-sm"
                 />
               </div>
 
-              <div>
-                <label htmlFor="apellido" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+              <div className="space-y-1.5">
+                <label htmlFor="apellido" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Apellido
                 </label>
                 <input
                   id="apellido"
                   type="text"
-                  disabled={isLoading || success}
                   placeholder="Pérez"
+                  className="w-full h-10 px-3.5 rounded-xl border border-zinc-800/85 bg-zinc-900/30 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
+                  disabled={isLoading || success}
                   value={apellido}
                   onChange={(e) => setApellido(e.target.value)}
-                  className="w-full h-10 px-3.5 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all disabled:opacity-50 text-sm"
                 />
               </div>
             </div>
 
             {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 Correo Electrónico <span className="text-teal-400">*</span>
               </label>
               <input
                 id="email"
                 type="email"
                 required
+                placeholder="juan@carwash.com"
+                className="w-full h-10 px-3.5 rounded-xl border border-zinc-800/85 bg-zinc-900/30 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
                 disabled={isLoading || success}
-                placeholder="juan.perez@autolavado.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all disabled:opacity-50 text-sm"
               />
             </div>
 
             {/* Password y Confirm Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="password" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Contraseña <span className="text-teal-400">*</span>
                 </label>
                 <div className="relative">
@@ -186,73 +193,73 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    disabled={isLoading || success}
                     placeholder="••••••••"
+                    className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-zinc-800/85 bg-zinc-900/30 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
+                    disabled={isLoading || success}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-10 pl-3.5 pr-10 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all disabled:opacity-50 text-sm"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors focus:outline-none"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                   </button>
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="confirmPassword" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+              <div className="space-y-1.5">
+                <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Confirmar <span className="text-teal-400">*</span>
                 </label>
                 <input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   required
-                  disabled={isLoading || success}
                   placeholder="••••••••"
+                  className="w-full h-10 px-3.5 rounded-xl border border-zinc-800/85 bg-zinc-900/30 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
+                  disabled={isLoading || success}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-10 px-3.5 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 placeholder-zinc-600 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all disabled:opacity-50 text-sm"
                 />
               </div>
             </div>
 
             {/* Rol y Sucursal */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="rol" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
-                  Rol del Usuario
+              <div className="space-y-1.5">
+                <label htmlFor="rol" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Rol
                 </label>
                 <select
                   id="rol"
                   disabled={isLoading || success}
                   value={rol}
                   onChange={(e) => setRol(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all text-sm cursor-pointer"
+                  className="w-full h-10 px-3 rounded-xl border border-zinc-800/85 bg-zinc-950 text-zinc-100 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all text-sm cursor-pointer"
                 >
-                  <option value="cajero" className="bg-zinc-950 text-zinc-100">Cajero</option>
-                  <option value="supervisor" className="bg-zinc-950 text-zinc-100">Supervisor</option>
-                  <option value="admin" className="bg-zinc-950 text-zinc-100">Administrador</option>
-                  <option value="lavador" className="bg-zinc-950 text-zinc-100">Lavador</option>
+                  <option value="cajero">Cajero</option>
+                  <option value="supervisor">Supervisor</option>
+                  <option value="admin">Administrador</option>
+                  <option value="lavador">Lavador</option>
                 </select>
               </div>
 
-              <div>
-                <label htmlFor="sucursal" className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
-                  Sucursal Asignada
+              <div className="space-y-1.5">
+                <label htmlFor="sucursal" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Sucursal
                 </label>
                 <select
                   id="sucursal"
                   disabled={isLoading || success}
                   value={sucursalId}
                   onChange={(e) => setSucursalId(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-100 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all text-sm cursor-pointer"
+                  className="w-full h-10 px-3 rounded-xl border border-zinc-800/85 bg-zinc-950 text-zinc-100 focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/10 focus:outline-none transition-all text-sm cursor-pointer"
                 >
-                  <option value="" className="bg-zinc-950 text-zinc-100">Ninguna / Central</option>
+                  <option value="">Ninguna / Central</option>
                   {branches.map((branch) => (
-                    <option key={branch.id} value={branch.id} className="bg-zinc-950 text-zinc-100">
+                    <option key={branch.id} value={branch.id}>
                       {branch.nombre}
                     </option>
                   ))}
@@ -264,7 +271,7 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
             <Button
               type="submit"
               disabled={isLoading || success}
-              className="w-full h-10 mt-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-zinc-950 font-bold rounded-lg shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2 transition-all"
+              className="w-full h-10 mt-3 bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-600 bg-[length:200%_auto] hover:bg-right text-zinc-950 font-extrabold rounded-xl shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2 transition-all duration-500 cursor-pointer text-sm"
             >
               {isLoading ? (
                 <>
@@ -273,73 +280,100 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
                 </>
               ) : (
                 <>
-                  Registrar Cuenta
+                  Crear Cuenta
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </Button>
           </form>
 
-          {/* Social Sign In Divider */}
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-zinc-800" />
-            </div>
-            <div className="relative flex justify-center text-[10px] uppercase">
-              <span className="bg-zinc-900/40 px-3 text-zinc-500 font-semibold tracking-wider">O registrarse con</span>
-            </div>
-          </div>
-
-          {/* Google Sign In */}
-          <button
-            type="button"
-            onClick={async () => {
-              setError(null);
-              try {
-                await authClient.signIn.social({
-                  provider: "google",
-                  callbackURL: "/dashboard",
-                });
-              } catch (err: any) {
-                setError("Error al conectar con Google.");
-              }
-            }}
-            disabled={isLoading || success}
-            className="w-full h-10 rounded-lg border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-zinc-300 font-medium hover:text-white flex items-center justify-center gap-2.5 transition-colors text-sm disabled:opacity-50 mb-5"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            Google
-          </button>
-
-          {/* Footer Card Redirect */}
-          <div className="text-center">
+          {/* Redirection */}
+          <div className="mt-6 text-center border-t border-zinc-900/80 pt-4">
             <span className="text-xs text-zinc-500">¿Ya tienes una cuenta? </span>
             <Link
               href="/login"
-              className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors hover:underline"
+              className="text-xs font-bold text-teal-400 hover:text-teal-300 transition-colors hover:underline"
             >
               Inicia sesión aquí
             </Link>
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="text-center lg:text-left shrink-0 mt-6 lg:mt-0">
+          <Link href="/" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors inline-flex items-center gap-1">
+            ← Volver al inicio
+          </Link>
+        </div>
+
       </div>
+
+      {/* RIGHT COLUMN: PREMIUM VISUAL PANEL (Desktop only) */}
+      <div className="hidden lg:col-span-7 bg-zinc-900/10 border-l border-zinc-900 relative overflow-hidden lg:flex flex-col justify-between p-16 z-10">
+        
+        {/* Background Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-40" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-teal-500/10 to-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+        {/* Glowing badge */}
+        <div className="self-start inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-950/20 text-teal-400 text-xs font-semibold">
+          <Sparkles className="h-3.5 w-3.5" />
+          Únete a la eficiencia operativa
+        </div>
+
+        {/* Dynamic Center Graphic */}
+        <div className="my-auto max-w-lg space-y-8 relative">
+          <div className="space-y-4">
+            <h3 className="text-4xl font-extrabold tracking-tight text-white leading-tight">
+              Controla todo desde <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">cualquier lugar</span>
+            </h3>
+            <p className="text-zinc-400 leading-relaxed text-sm">
+              Al registrar tu cuenta, tendrás acceso a herramientas de alta fidelidad diseñadas para agilizar la entrada de órdenes, la facturación y el seguimiento del lavado en tiempo real.
+            </p>
+          </div>
+
+          {/* List of Benefits */}
+          <div className="space-y-4">
+            <div className="flex gap-4 items-start">
+              <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Seguridad y Roles</h4>
+                <p className="text-xs text-zinc-400 mt-0.5">Acceso personalizado según tu puesto (administrador, cajero, supervisor o lavador).</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 items-start">
+              <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
+                <Zap className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Órdenes en Tiempo Real</h4>
+                <p className="text-xs text-zinc-400 mt-0.5">Visualiza el avance del lavado de vehículos mediante un tablero ágil e interactivo.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 items-start">
+              <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
+                <Database className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Conectividad de Base de Datos</h4>
+                <p className="text-xs text-zinc-400 mt-0.5">Toda la información de tus clientes y caja está sincronizada y respaldada de manera segura.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer brand info */}
+        <div className="flex items-center justify-between text-xs text-zinc-600">
+          <span>CarWash Pro v1.0</span>
+          <span>© 2026 Jackson Tech Inc.</span>
+        </div>
+
+      </div>
+
     </div>
   );
 }
