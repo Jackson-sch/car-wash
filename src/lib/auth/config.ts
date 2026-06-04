@@ -31,16 +31,22 @@ export const auth = betterAuth({
     },
   },
   user: {
+    fields: {
+      name: 'nombre',
+    },
     additionalFields: {
       rol: {
         type: 'string',
         required: true,
         defaultValue: 'cajero',
+        input: true,
       },
       sucursalId: {
         type: 'string',
         required: false,
+        input: true,
       },
     },
   },
 });
+
