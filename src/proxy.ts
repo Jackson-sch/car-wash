@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from './lib/auth/config';
-import { updateSession } from './lib/supabase-proxy';
 
 export async function proxy(request: NextRequest) {
-  // 1. Actualizar la sesión de Supabase (refrescar cookies si es necesario)
-  const supabaseResponse = await updateSession(request);
-
   const { pathname } = request.nextUrl;
 
   // Rutas que requieren autenticación
@@ -21,7 +17,13 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/configuracion');
 
   if (isDashboardRoute) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    let session;
+    try {
+      session = await auth.api.getSession({ headers: request.headers });
+    } catch (e) {
+      console.error('Error al obtener sesión en proxy:', e);
+      session = null;
+    }
 
     if (!session) {
       const loginUrl = new URL('/login', request.url);
@@ -29,6 +31,12 @@ export async function proxy(request: NextRequest) {
     }
 
     const userRole = session.user.rol;
+
+    // Superadmin redirigido a su panel
+    if (userRole === 'superadmin' && !pathname.startsWith('/superadmin')) {
+      const superadminUrl = new URL('/superadmin', request.url);
+      return NextResponse.redirect(superadminUrl);
+    }
 
     // Proteger rutas de administración
     if (pathname.startsWith('/configuracion') && userRole !== 'admin') {
@@ -43,7 +51,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  return supabaseResponse;
+  return NextResponse.next();
 }
 
 export const config = {

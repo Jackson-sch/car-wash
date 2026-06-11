@@ -1,0 +1,83 @@
+"use server";
+
+import { db } from "@/lib/db";
+import { usuarios, sucursales } from "@/lib/db/schema";
+import { sql, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth/config";
+import { sendWelcomeEmail } from "@/lib/email";
+
+// Verifica si el sistema ya tiene algún usuario registrado
+export async function checkSystemStatus() {
+  try {
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(usuarios);
+    return { hasUsers: count > 0 };
+  } catch (error) {
+    console.error("Error al verificar el estado del sistema:", error);
+    return { hasUsers: false, dbError: true };
+  }
+}
+
+// Inicializa el sistema con la primera sucursal y el primer usuario Administrador
+export async function bootstrapSystem(data: {
+  nombre: string;
+  apellido?: string | null;
+  email: string;
+  password: string;
+  sucursalNombre: string;
+}) {
+  try {
+    // 1. Validar que la base de datos no contenga usuarios (prevención de reinicialización)
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(usuarios);
+    
+    if (count > 0) {
+      return { success: false, error: "El sistema ya cuenta con usuarios registrados." };
+    }
+
+    // 2. Crear la Sucursal Principal
+    const [sucursal] = await db
+      .insert(sucursales)
+      .values({
+        nombre: data.sucursalNombre.trim(),
+        direccion: "Dirección General Central",
+        telefono: "999-999-999",
+        ruc: "20100000001",
+        activa: true,
+        config: { igv: 18, moneda: "PEN" }
+      })
+      .returning();
+
+    // 3. Crear el primer administrador en Better Auth (crea registro en usuarios y cuentas)
+    const res = await auth.api.signUpEmail({
+      body: {
+        email: data.email.toLowerCase().trim(),
+        password: data.password,
+        name: `${data.nombre} ${data.apellido || ""}`.trim(),
+        rol: "admin",
+        sucursalId: sucursal.id,
+      }
+    });
+
+    if (!res || !res.user) {
+      throw new Error("No se pudo dar de alta el usuario administrador.");
+    }
+
+    // 4. Actualizar apellido si se proporcionó
+    if (data.apellido) {
+      await db
+        .update(usuarios)
+        .set({ apellido: data.apellido.trim() })
+        .where(eq(usuarios.id, res.user.id));
+    }
+
+    await sendWelcomeEmail(data.email, `${data.nombre} ${data.apellido || ""}`.trim());
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error durante la inicialización del sistema:", error);
+    return { success: false, error: error.message || "Error al inicializar el sistema." };
+  }
+}

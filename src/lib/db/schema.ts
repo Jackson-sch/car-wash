@@ -15,18 +15,43 @@ import {
 import { relations } from 'drizzle-orm';
 
 // Enums
-export const rolesEnum = pgEnum('rol', ['admin', 'supervisor', 'cajero', 'lavador']);
+export const rolesEnum = pgEnum('rol', ['superadmin', 'admin', 'supervisor', 'cajero', 'lavador']);
 export const tipoDocEnum = pgEnum('tipo_doc', ['DNI', 'RUC', 'CE', 'PASAPORTE']);
 export const tipoVehiculoEnum = pgEnum('tipo_vehiculo', ['sedan', 'suv', 'pickup', 'moto', 'camion', 'furgon', 'otro']);
 export const estadoOrdenEnum = pgEnum('estado_orden', ['pendiente', 'en_proceso', 'completado', 'cobrado', 'cancelado']);
 export const metodoPagoEnum = pgEnum('metodo_pago', ['efectivo', 'tarjeta', 'yape', 'plin', 'transferencia', 'otro']);
 export const tipoPuntosEnum = pgEnum('tipo_puntos', ['ganado', 'canjeado', 'ajuste']);
 export const tipoMovimientoEnum = pgEnum('tipo_movimiento', ['entrada', 'salida', 'ajuste']);
+export const tipoDescuentoEnum = pgEnum('tipo_descuento', ['porcentaje', 'fijo']);
 
 // --- TABLAS DE CONFIGURACIÓN ---
 
+export const empresas = pgTable('empresas', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  nombre: text('nombre').notNull(),
+  plan: text('plan').default('free').notNull(), // 'free', 'pro', 'enterprise'
+  activo: boolean('activo').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const planes = pgTable('planes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  codigo: text('codigo').unique().notNull(),
+  nombre: text('nombre').notNull(),
+  descripcion: text('descripcion'),
+  precio: numeric('precio', { precision: 10, scale: 2 }).default('0').notNull(),
+  limiteSucursales: integer('limite_sucursales'),
+  limiteUsuarios: integer('limite_usuarios'),
+  features: jsonb('features').default({}).notNull(),
+  activo: boolean('activo').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const sucursales = pgTable('sucursales', {
   id: uuid('id').primaryKey().defaultRandom(),
+  empresaId: uuid('empresa_id').references(() => empresas.id, { onDelete: 'cascade' }),
   nombre: text('nombre').notNull(),
   direccion: text('direccion'),
   telefono: text('telefono'),
@@ -43,6 +68,7 @@ export const sucursales = pgTable('sucursales', {
 
 export const usuarios = pgTable('usuarios', {
   id: text('id').primaryKey(),
+  empresaId: uuid('empresa_id').references(() => empresas.id, { onDelete: 'cascade' }),
   sucursalId: uuid('sucursal_id').references(() => sucursales.id),
   nombre: text('nombre').notNull(),
   apellido: text('apellido'),
@@ -275,9 +301,76 @@ export const notificaciones = pgTable('notificaciones', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
+export const auditoriaLogs = pgTable('auditoria_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  usuarioId: text('usuario_id').notNull().references(() => usuarios.id),
+  usuarioNombre: text('usuario_nombre').notNull(),
+  accion: text('accion').notNull(),
+  descripcion: text('descripcion').notNull(),
+  entidad: text('entidad'),
+  entidadId: text('entidad_id'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const configGlobal = pgTable('config_global', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  mantenimientoActivo: boolean('mantenimiento_activo').default(false).notNull(),
+  mantenimientoMensaje: text('mantenimiento_mensaje').default('Estamos realizando tareas de mantenimiento. Vuelve pronto.').notNull(),
+  nombreApp: text('nombre_app').default('WashMaster Pro').notNull(),
+  logoUrl: text('logo_url'),
+  smtpHost: text('smtp_host'),
+  smtpPort: integer('smtp_port'),
+  smtpUser: text('smtp_user'),
+  smtpPass: text('smtp_pass'),
+  smtpFromEmail: text('smtp_from_email'),
+  smtpFromName: text('smtp_from_name'),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const cupones = pgTable('cupones', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sucursalId: uuid('sucursal_id').notNull().references(() => sucursales.id),
+  codigo: text('codigo').notNull(),
+  tipoDescuento: tipoDescuentoEnum('tipo_descuento').notNull(),
+  valorDescuento: numeric('valor_descuento', { precision: 10, scale: 2 }).notNull(),
+  compraMinima: numeric('compra_minima', { precision: 10, scale: 2 }),
+  fechaInicio: timestamp('fecha_inicio', { withTimezone: true }),
+  fechaFin: timestamp('fecha_fin', { withTimezone: true }),
+  limiteTotal: integer('limite_total'),
+  limitePorCliente: integer('limite_por_cliente').default(1),
+  activo: boolean('activo').default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (t) => ({
+  uniqueCodigo: unique().on(t.sucursalId, t.codigo),
+  idxCodigo: index('idx_cupones_codigo').on(t.codigo),
+}));
+
+export const cuponServicios = pgTable('cupon_servicios', {
+  cuponId: uuid('cupon_id').notNull().references(() => cupones.id, { onDelete: 'cascade' }),
+  servicioId: uuid('servicio_id').notNull().references(() => servicios.id, { onDelete: 'cascade' }),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.cuponId, t.servicioId] }),
+}));
+
+export const cuponesUsos = pgTable('cupones_usos', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  cuponId: uuid('cupon_id').notNull().references(() => cupones.id, { onDelete: 'cascade' }),
+  clienteId: uuid('cliente_id').notNull().references(() => clientes.id),
+  ordenId: uuid('orden_id').notNull().references(() => ordenes.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
 // --- RELACIONES DRIZZLE (relations) ---
 
-export const sucursalesRelations = relations(sucursales, ({ many }) => ({
+export const empresasRelations = relations(empresas, ({ many }) => ({
+  sucursales: many(sucursales),
+  usuarios: many(usuarios),
+}));
+
+export const sucursalesRelations = relations(sucursales, ({ one, many }) => ({
+  empresa: one(empresas, { fields: [sucursales.empresaId], references: [empresas.id] }),
   usuarios: many(usuarios),
   clientes: many(clientes),
   categorias: many(categoriasServicio),
@@ -286,9 +379,11 @@ export const sucursalesRelations = relations(sucursales, ({ many }) => ({
   turnos: many(turnosCaja),
   ordenes: many(ordenes),
   inventarios: many(inventario),
+  cupones: many(cupones),
 }));
 
 export const usuariosRelations = relations(usuarios, ({ one, many }) => ({
+  empresa: one(empresas, { fields: [usuarios.empresaId], references: [empresas.id] }),
   sucursal: one(sucursales, { fields: [usuarios.sucursalId], references: [sucursales.id] }),
   sesiones: many(sesiones),
   cuentas: many(cuentas),
@@ -304,6 +399,7 @@ export const clientesRelations = relations(clientes, ({ one, many }) => ({
   sucursal: one(sucursales, { fields: [clientes.sucursalId], references: [sucursales.id] }),
   vehiculos: many(vehiculos),
   puntosFidelidad: many(puntosFidelidad),
+  cuponesUsos: many(cuponesUsos),
 }));
 
 export const vehiculosRelations = relations(vehiculos, ({ one, many }) => ({
@@ -321,6 +417,7 @@ export const serviciosRelations = relations(servicios, ({ one, many }) => ({
   categoria: one(categoriasServicio, { fields: [servicios.categoriaId], references: [categoriasServicio.id] }),
   paquetes: many(paqueteServicios),
   ordenes: many(ordenServicios),
+  cupones: many(cuponServicios),
 }));
 
 export const paquetesRelations = relations(paquetes, ({ one, many }) => ({
@@ -349,6 +446,7 @@ export const ordenesRelations = relations(ordenes, ({ one, many }) => ({
   servicios: many(ordenServicios),
   pagos: many(pagos),
   puntosFidelidad: many(puntosFidelidad),
+  cuponesUsos: many(cuponesUsos),
 }));
 
 export const ordenServiciosRelations = relations(ordenServicios, ({ one }) => ({
@@ -379,4 +477,21 @@ export const inventarioMovimientosRelations = relations(inventarioMovimientos, (
 
 export const notificacionesRelations = relations(notificaciones, ({ one }) => ({
   usuario: one(usuarios, { fields: [notificaciones.usuarioId], references: [usuarios.id] }),
+}));
+
+export const cuponesRelations = relations(cupones, ({ one, many }) => ({
+  sucursal: one(sucursales, { fields: [cupones.sucursalId], references: [sucursales.id] }),
+  servicios: many(cuponServicios),
+  usos: many(cuponesUsos),
+}));
+
+export const cuponServiciosRelations = relations(cuponServicios, ({ one }) => ({
+  cupon: one(cupones, { fields: [cuponServicios.cuponId], references: [cupones.id] }),
+  servicio: one(servicios, { fields: [cuponServicios.servicioId], references: [servicios.id] }),
+}));
+
+export const cuponesUsosRelations = relations(cuponesUsos, ({ one }) => ({
+  cupon: one(cupones, { fields: [cuponesUsos.cuponId], references: [cupones.id] }),
+  cliente: one(clientes, { fields: [cuponesUsos.clienteId], references: [clientes.id] }),
+  orden: one(ordenes, { fields: [cuponesUsos.ordenId], references: [ordenes.id] }),
 }));

@@ -44,87 +44,296 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Custom Stitch aliases */
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline-variant: var(--outline-variant);
+  --color-secondary-container: var(--secondary-container);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+  --color-surface-lowest: var(--surface-container-lowest);
+  --color-surface-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-high: var(--surface-container-high);
+  --color-surface-highest: var(--surface-container-highest);
+
+  /* Override standard colors to match Stitch using variables to allow dark mode swapping in Tailwind v4 */
+  --color-zinc-50: var(--zinc-50);
+  --color-zinc-100: var(--zinc-100);
+  --color-zinc-200: var(--zinc-200);
+  --color-zinc-250: var(--zinc-250);
+  --color-zinc-300: var(--zinc-300);
+  --color-zinc-350: var(--zinc-350);
+  --color-zinc-400: var(--zinc-400);
+  --color-zinc-450: var(--zinc-450);
+  --color-zinc-500: var(--zinc-500);
+  --color-zinc-550: var(--zinc-550);
+  --color-zinc-600: var(--zinc-600);
+  --color-zinc-650: var(--zinc-650);
+  --color-zinc-700: var(--zinc-700);
+  --color-zinc-750: var(--zinc-750);
+  --color-zinc-800: var(--zinc-800);
+  --color-zinc-900: var(--zinc-900);
+  --color-zinc-950: var(--zinc-950);
+
+  --color-blue-50: var(--blue-50);
+  --color-blue-100: var(--blue-100);
+  --color-blue-150: var(--blue-150);
+  --color-blue-200: var(--blue-200);
+  --color-blue-300: var(--blue-300);
+  --color-blue-400: var(--blue-400);
+  --color-blue-500: var(--blue-500);
+  --color-blue-600: var(--blue-600);
+  --color-blue-700: var(--blue-700);
+  --color-blue-800: var(--blue-800);
+  --color-blue-900: var(--blue-900);
+  --color-blue-950: var(--blue-950);
+
+  --color-rose-450: var(--rose-450);
+
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: light;
+  --background: #fcf8fa;
+  --foreground: #1b1b1d;
+  --card: #ffffff;
+  --card-foreground: #1b1b1d;
+  --popover: #ffffff;
+  --popover-foreground: #1b1b1d;
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #0284c7;
+  --secondary-foreground: #ffffff;
+  --muted: #f0edef;
+  --muted-foreground: #5e5f65;
+  --accent: #f0edef;
+  --accent-foreground: #1b1b1d;
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border: #d4d4db;
+  --input: #d4d4db;
+  --ring: #0ea5e9;
+  --radius: 0.5rem;
+
+  --sidebar: #0f172a;
+  --sidebar-foreground: #94a3b8;
+  --sidebar-primary: #0ea5e9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #0ea5e9;
+
+  --chart-1: #0ea5e9;
+  --chart-2: #0284c7;
+  --chart-3: #0369a1;
+  --chart-4: #075985;
+  --chart-5: #0c4a6e;
+
+  --chart-growth: #10b981;        /* esmeralda para el gráfico de crecimiento */
+  --chart-growth-light: #34d399;
+
+  /* Stitch Custom Tokens */
+  --on-surface-variant: #5e5f65;
+  --outline-variant: #c6c6cd;
+  --secondary-container: #e0f2fe;
+  --primary-container: #1e293b;
+  --on-primary-container: #94a3b8;
+  --on-primary-fixed-variant: #1e293b;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f6f3f5;
+  --surface-container: #f0edef;
+  --surface-container-high: #eae7e9;
+  --surface-container-highest: #e4e2e4;
+
+  /* Native CSS variable values for standard color shades */
+  --zinc-50: #fcf8fa;
+  --zinc-100: #f0edef;
+  --zinc-200: #d4d4db;
+  --zinc-250: #c6c6cd;
+  --zinc-300: #bbbcc2;
+  --zinc-350: #9f9fa6;
+  --zinc-400: #76777d;
+  --zinc-450: #5e5f65;
+  --zinc-500: #45464d;
+  --zinc-550: #3a3b40;
+  --zinc-600: #303236;
+  --zinc-650: #2a2b2e;
+  --zinc-700: #252527;
+  --zinc-750: #202022;
+  --zinc-800: #1b1b1d;
+  --zinc-900: #141416;
+  --zinc-950: #0e0e10;
+
+  --blue-50: rgba(14, 165, 233, 0.08);
+  --blue-100: #e0f2fe;
+  --blue-150: #c8e7fb;
+  --blue-200: #bae6fd;
+  --blue-300: #7dd3fc;
+  --blue-400: #38bdf8;
+  --blue-500: #0ea5e9;
+  --blue-600: #0284c7;
+  --blue-700: #0369a1;
+  --blue-800: #075985;
+  --blue-900: #0c4a6e;
+  --blue-950: #082f49;
+
+  --rose-450: #fb7185;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  color-scheme: dark;
+  --background: oklch(0.13 0.005 260);
+  --foreground: oklch(0.965 0.003 260);
+  --card: oklch(0.18 0.006 260);
+  --card-foreground: oklch(0.965 0.003 260);
+  --popover: oklch(0.18 0.006 260);
+  --popover-foreground: oklch(0.965 0.003 260);
+  --primary: oklch(0.965 0.003 260);
+  --primary-foreground: oklch(0.18 0.006 260);
+  --secondary: #0ea5e9;
+  --secondary-foreground: oklch(0.965 0.003 260);
+  --muted: oklch(0.22 0.006 260);
+  --muted-foreground: oklch(0.68 0.008 260);
+  --accent: oklch(0.22 0.006 260);
+  --accent-foreground: oklch(0.965 0.003 260);
+  --destructive: oklch(0.65 0.2 22);
+  --destructive-foreground: oklch(0.965 0.003 260);
+  --border: oklch(0.28 0.008 260);
+  --input: oklch(0.28 0.008 260);
+  --ring: #0ea5e9;
+
+  --sidebar: oklch(0.18 0.006 260);
+  --sidebar-foreground: oklch(0.68 0.008 260);
+  --sidebar-primary: #0ea5e9;
+  --sidebar-primary-foreground: oklch(0.965 0.003 260);
+  --sidebar-accent: oklch(0.22 0.006 260);
+  --sidebar-accent-foreground: oklch(0.965 0.003 260);
+  --sidebar-border: oklch(0.25 0.007 260);
+  --sidebar-ring: #0ea5e9;
+
+  --chart-1: #0ea5e9;
+  --chart-2: #38bdf8;
+  --chart-3: #7dd3fc;
+  --chart-4: #bae6fd;
+  --chart-5: #e0f2fe;
+   --chart-growth: #34d399;
+  --chart-growth-light: #6ee7b7;
+
+  /* Overrides for custom Stitch variables in dark mode */
+  --on-surface-variant: oklch(0.68 0.008 260);
+  --outline-variant: oklch(0.28 0.008 260);
+  --secondary-container: oklch(0.22 0.006 260);
+  --primary-container: oklch(0.18 0.006 260);
+  --on-primary-container: oklch(0.68 0.008 260);
+  --on-primary-fixed-variant: oklch(0.22 0.006 260);
+  --surface-container-lowest: oklch(0.12 0.005 260);
+  --surface-container-low: oklch(0.16 0.006 260);
+  --surface-container: oklch(0.18 0.006 260);
+  --surface-container-high: oklch(0.22 0.006 260);
+  --surface-container-highest: oklch(0.26 0.007 260);
+
+  /* Overrides for native CSS variables in dark mode */
+  --zinc-50: oklch(0.18 0.006 260);
+  --zinc-100: oklch(0.22 0.006 260);
+  --zinc-250: oklch(0.28 0.008 260);
+  --zinc-200: oklch(0.25 0.007 260);
+  --zinc-300: oklch(0.32 0.008 260);
+  --zinc-350: oklch(0.45 0.008 260);
+  --zinc-400: oklch(0.55 0.008 260);
+  --zinc-450: oklch(0.62 0.008 260);
+  --zinc-500: oklch(0.68 0.008 260);
+  --zinc-550: oklch(0.73 0.008 260);
+  --zinc-600: oklch(0.78 0.008 260);
+  --zinc-650: oklch(0.83 0.008 260);
+  --zinc-700: oklch(0.88 0.005 260);
+  --zinc-750: oklch(0.92 0.003 260);
+  --zinc-800: oklch(0.95 0.003 260);
+  --zinc-900: oklch(0.97 0.003 260);
+  --zinc-950: oklch(0.985 0.003 260);
+
+  --blue-50: rgba(14, 165, 233, 0.12);
+  --blue-100: rgba(14, 165, 233, 0.2);
+  --blue-150: rgba(14, 165, 233, 0.3);
+  --blue-200: #38bdf8;
+  --blue-300: #7dd3fc;
+  --blue-400: #38bdf8;
+  --blue-500: #0ea5e9;
+  --blue-600: #0284c7;
+  --blue-700: #0369a1;
+  --blue-800: #075985;
+  --blue-900: #0c4a6e;
+  --blue-950: #082f49;
+
+  --rose-450: #fb7185;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  *,
+  *::before,
+  *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.15s ease, box-shadow 0.25s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+    }
   }
   html {
     @apply font-sans;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background-color: oklch(0.75 0.13 230 / 0.35);
+    color: inherit;
+  }
+  .dark ::selection {
+    background-color: oklch(0.65 0.18 240 / 0.3);
+    color: inherit;
+  }
+
+  /* Remove arrows/spinners from input type number */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  /* Scrollbar webkit styles */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+
 }

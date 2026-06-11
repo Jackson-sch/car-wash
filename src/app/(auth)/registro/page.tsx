@@ -1,14 +1,20 @@
-import RegisterForm from "./register-form";
-import { getActiveSucursales } from "@/lib/actions/sucursales";
+import { redirect } from "next/navigation";
+import BootstrapForm from "./bootstrap-form";
+import { checkSystemStatus } from "@/lib/actions/bootstrap";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Registro - CarWash Pro",
-  description: "Crea una nueva cuenta de usuario en la plataforma CarWash Pro.",
+  title: "Inicializar Sistema - CarWash Pro",
+  description: "Asistente de inicialización de la plataforma CarWash Pro.",
 };
 
 export default async function RegisterPage() {
-  const branches = await getActiveSucursales();
-  return <RegisterForm branches={branches} />;
+  const status = await checkSystemStatus();
+  
+  if (status.hasUsers) {
+    redirect("/login");
+  }
+
+  return <BootstrapForm />;
 }

@@ -15,6 +15,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
   },
   socialProviders: {
     google: {
@@ -25,10 +26,6 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 días
     updateAge: 60 * 60 * 24,     // renovar cada 24h
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60,
-    },
   },
   user: {
     fields: {
@@ -39,6 +36,11 @@ export const auth = betterAuth({
         type: 'string',
         required: true,
         defaultValue: 'cajero',
+        input: true,
+      },
+      empresaId: {
+        type: 'string',
+        required: false,
         input: true,
       },
       sucursalId: {

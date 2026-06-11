@@ -16,21 +16,77 @@ import {
   Package,
   Settings,
   LogOut,
-  ChevronRight,
+  EllipsisVertical,
+  PlusCircle,
+  Tag,
+  BadgeDollarSign,
+  History,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-interface SidebarProps {
-  className?: string;
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+} from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+interface SidebarProps extends React.ComponentProps<typeof ShadcnSidebar> {
+  userRole?: string;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, userRole, ...props }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
-  const rol = session?.user?.rol || "cajero";
+  const serverRol = session?.user?.rol || userRole;
+  const rol = serverRol || "cajero";
 
-  const navItems = [
+  const superAdminNavItems = [
+    {
+      label: "Resumen Global",
+      href: "/superadmin",
+      icon: LayoutDashboard,
+      show: rol === "superadmin",
+    },
+    {
+      label: "Empresas SaaS",
+      href: "/superadmin/empresas",
+      icon: Layers,
+      show: rol === "superadmin",
+    },
+    {
+      label: "Planes",
+      href: "/superadmin/planes",
+      icon: BadgeDollarSign,
+      show: rol === "superadmin",
+    },
+    {
+      label: "Auditoría",
+      href: "/superadmin/logs",
+      icon: History,
+      show: rol === "superadmin",
+    },
+    {
+      label: "Configuración",
+      href: "/superadmin/configuracion",
+      icon: Settings,
+      show: rol === "superadmin",
+    },
+  ];
+
+  const mainNavItems = [
     {
       label: "Resumen",
       href: "/dashboard",
@@ -47,7 +103,7 @@ export function Sidebar({ className }: SidebarProps) {
       label: "Vehículos",
       href: "/vehiculos",
       icon: Car,
-      show: canDo(rol, "clientes", "ver"), // Si ve clientes, navega a vehículos
+      show: canDo(rol, "clientes", "ver"),
     },
     {
       label: "Servicios",
@@ -61,11 +117,26 @@ export function Sidebar({ className }: SidebarProps) {
       icon: ClipboardList,
       show: canDo(rol, "ordenes", "ver"),
     },
+  ];
+
+  const adminNavItems = [
     {
       label: "Caja y Turnos",
       href: "/caja",
       icon: Wallet,
       show: canDo(rol, "caja", "abrir"),
+    },
+    {
+      label: "Cupones",
+      href: "/cupones",
+      icon: Tag,
+      show: canDo(rol, "configuracion", "ver"),
+    },
+    {
+      label: "Paquetes",
+      href: "/paquetes",
+      icon: Package,
+      show: canDo(rol, "paquetes", "ver"),
     },
     {
       label: "Reportes",
@@ -104,78 +175,190 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   return (
-    <aside className="w-64 bg-zinc-900 border-r border-zinc-800 text-zinc-300 flex flex-col justify-between h-screen sticky top-0">
-      {/* Brand Logo */}
-      <div className="p-6 border-b border-zinc-800 flex items-center gap-3">
-        <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-teal-500/10">
-          <Car className="h-5 w-5 text-zinc-950 font-bold" />
-        </div>
-        <div>
-          <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-            CarWash
-          </span>
-          <span className="font-semibold text-lg text-zinc-100 tracking-tight"> Pro</span>
-        </div>
-      </div>
+    <ShadcnSidebar collapsible="icon" variant="inset" className={className} {...props}>
+      {/* Brand Header (Acme Inc. Style) */}
+      <SidebarHeader className="p-4 shrink-0">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="data-[slot=sidebar-menu-button]:p-1.5! hover:bg-transparent focus:bg-transparent active:bg-transparent"
+              render={<Link href="/dashboard" />}
+            >
+              <div className="size-5 rounded-full border-2 border-white/30 flex items-center justify-center shrink-0">
+                <Car className="size-3 text-white/70" />
+              </div>
+              <span className="text-base font-semibold text-white/90 truncate group-data-[collapsible=icon]:hidden">
+                WashMaster Pro
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-      {/* Navigation List */}
-      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
-        {navItems
-          .filter((item) => item.show)
-          .map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            const Icon = item.icon;
+      {/* Quick Create Button Row */}
+      {rol !== "superadmin" && (
+        <SidebarGroup className="py-0 shrink-0">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem className="px-1">
+                <SidebarMenuButton
+                  tooltip="Nueva Orden"
+                  render={<Link href="/ordenes/nueva" />}
+                  className="w-full bg-secondary text-secondary-foreground duration-200 ease-linear hover:bg-secondary/90 hover:text-secondary-foreground active:bg-secondary/90 active:text-secondary-foreground font-bold h-8 rounded-md shadow-md shadow-secondary/15"
+                >
+                  <PlusCircle className="size-4" />
+                  <span className="group-data-[collapsible=icon]:hidden text-sm">Nueva Orden</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      )}
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-all group ${
-                  isActive
-                    ? "bg-teal-500/10 text-teal-400 border-l-2 border-teal-500"
-                    : "hover:bg-zinc-800/50 hover:text-zinc-100"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon
-                    className={`h-4.5 w-4.5 transition-colors ${
-                      isActive ? "text-teal-400" : "text-zinc-500 group-hover:text-zinc-300"
-                    }`}
-                  />
-                  <span>{item.label}</span>
+      {/* Navigation Content */}
+      <SidebarContent className="px-2 py-3">
+        {/* Main Section */}
+        <SidebarGroup className="py-0">
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-0.5">
+              {(rol === "superadmin" ? superAdminNavItems : mainNavItems)
+                .filter((item) => item.show)
+                .map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  const Icon = item.icon;
+
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        tooltip={item.label}
+                        render={<Link href={item.href} />}
+                        className={`w-full group/btn transition-all duration-200 active:scale-[0.98] h-8.5 px-2.5 rounded-md ${
+                          isActive
+                            ? "bg-secondary/10 text-secondary! font-bold"
+                            : "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 w-full">
+                          <Icon
+                            className={`h-4 w-4 transition-colors duration-200 ${
+                              isActive ? "text-secondary!" : "text-sidebar-foreground group-hover/btn:text-white"
+                            }`}
+                          />
+                          <span className="group-data-[collapsible=icon]:hidden text-sm">{item.label}</span>
+                        </div>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Administration Section */}
+        {rol !== "superadmin" && (
+          <SidebarGroup className="mt-4 py-0">
+            <SidebarGroupLabel className="px-2.5 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider group-data-[collapsible=icon]:hidden mb-1.5">
+              Administración
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-0.5">
+                {adminNavItems
+                  .filter((item) => item.show)
+                  .map((item) => {
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                    const Icon = item.icon;
+
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          tooltip={item.label}
+                          render={<Link href={item.href} />}
+                          className={`w-full group/btn transition-all duration-200 active:scale-[0.98] h-8.5 px-2.5 rounded-md ${
+                            isActive
+                              ? "bg-secondary/10 text-secondary! font-bold"
+                              : "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 w-full">
+                            <Icon
+                              className={`h-4 w-4 transition-colors duration-200 ${
+                                isActive ? "text-secondary!" : "text-sidebar-foreground group-hover/btn:text-white"
+                              }`}
+                            />
+                            <span className="group-data-[collapsible=icon]:hidden text-sm">{item.label}</span>
+                          </div>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+      </SidebarContent>
+
+      {/* User Footer (Session Details) */}
+      <SidebarFooter className="border-t border-sidebar-border/50 p-3 bg-sidebar-accent/5 shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuButton
+                size="lg"
+                className="w-full flex items-center gap-3 px-2 py-2 hover:bg-sidebar-accent/50 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:border-sidebar-border/50 data-[state=open]:bg-sidebar-accent/50"
+              />
+            }
+          >
+            <div className="h-8.5 w-8.5 rounded-lg bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-xs border border-secondary/20 shrink-0 shadow-md shadow-secondary/15">
+              {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+            <div className="min-w-0 flex-1 text-left group-data-[collapsible=icon]:hidden">
+              <p className="text-xs font-bold text-white/90 truncate">{session?.user?.name || "Usuario"}</p>
+              <span className="inline-block text-[8px] text-white/70 font-extrabold uppercase tracking-widest mt-0.5 bg-white/10 px-1.5 py-0.5 rounded">
+                {rol}
+              </span>
+            </div>
+            <EllipsisVertical className="h-4 w-4 text-zinc-400 ml-auto shrink-0 group-data-[collapsible=icon]:hidden" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="right"
+            align="end"
+            sideOffset={12}
+            className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95 dark"
+          >
+            <DropdownMenuLabel className="px-2.5 py-2 font-normal">
+              <div className="flex items-center gap-2.5 text-left text-sm">
+                <div className="h-8.5 w-8.5 rounded-lg bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-xs border border-secondary/20 shrink-0 shadow-md">
+                  {session?.user?.name?.charAt(0).toUpperCase() || "U"}
                 </div>
-                <ChevronRight
-                  className={`h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                    isActive ? "text-teal-400" : "text-zinc-600"
-                  }`}
-                />
-              </Link>
-            );
-          })}
-      </nav>
-
-      {/* User Info / LogOut */}
-      <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-600 flex items-center justify-center font-bold text-white text-sm">
-            {session?.user?.name?.charAt(0).toUpperCase() || "U"}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-white truncate">{session?.user?.name || "Usuario"}</p>
-            <p className="text-[10px] text-teal-400 font-semibold uppercase tracking-wider mt-0.5">
-              {rol}
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          onClick={handleSignOut}
-          className="w-full text-zinc-500 hover:text-rose-400 hover:bg-rose-500/5 justify-start gap-3 h-9 px-3 rounded-lg font-semibold text-xs cursor-pointer"
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar Sesión
-        </Button>
-      </div>
-    </aside>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-bold text-foreground">{session?.user?.name || "Usuario"}</span>
+                  <span className="truncate text-[10px] text-muted-foreground font-medium">
+                    {session?.user?.email || "usuario@washmaster.com"}
+                  </span>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-border/40 my-1" />
+            <DropdownMenuItem
+              onClick={() => router.push("/configuracion")}
+              className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground"
+            >
+              <Settings className="h-4 w-4 text-muted-foreground" />
+              <span>Configuración</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-border/40 my-1" />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="focus:bg-rose-500/10 focus:text-rose-600 dark:focus:text-rose-450 cursor-pointer text-foreground py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4 text-rose-500/70" />
+              <span>Cerrar Sesión</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarFooter>
+    </ShadcnSidebar>
   );
 }

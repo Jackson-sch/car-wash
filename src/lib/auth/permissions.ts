@@ -13,10 +13,18 @@ export const PERMISSIONS = {
     cambiarEstado: ['admin', 'supervisor', 'cajero', 'lavador'],
     cancelar:      ['admin', 'supervisor'],
   },
+  servicios: {
+    ver:       ['admin', 'supervisor', 'cajero'],
+    gestionar: ['admin', 'supervisor'],
+  },
   caja: {
     abrir:  ['admin', 'supervisor', 'cajero'],
     cerrar: ['admin', 'supervisor', 'cajero'],
     ver:    ['admin', 'supervisor'],
+  },
+  inventario: {
+    ver:       ['admin', 'supervisor'],
+    gestionar: ['admin', 'supervisor'],
   },
   reportes: {
     ver:      ['admin', 'supervisor'],
@@ -25,6 +33,10 @@ export const PERMISSIONS = {
   empleados: {
     ver:       ['admin', 'supervisor'],
     gestionar: ['admin'],
+  },
+  paquetes: {
+    ver:       ['admin', 'supervisor', 'cajero'],
+    gestionar: ['admin', 'supervisor'],
   },
   configuracion: {
     ver:       ['admin'],
