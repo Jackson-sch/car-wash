@@ -2,7 +2,7 @@ import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import type { auth } from "./auth/config";
 
-// Omitir o definir dinámicamente la URL base para evitar que apunte a localhost:3000 en Vercel
+// Omitir o definir dinámicamente la URL base para evitar que apunte a localhost:3000 en Vercel.
 const getBaseURL = () => {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL;
