@@ -48,7 +48,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/bcryptjs": "^3.0.0",
     "@types/d3": "^7.4.3",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
