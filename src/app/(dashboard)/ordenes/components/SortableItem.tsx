@@ -10,6 +10,7 @@ interface SortableItemProps {
   lavadores: Lavador[];
   onStatusChange: (id: string, nuevoEstado: Orden["estado"]) => void;
   onAssignLavador: (id: string, empleadoId: string | null) => void;
+  onEdit?: (orden: Orden) => void;
 }
 
 export function SortableItem({
@@ -17,6 +18,7 @@ export function SortableItem({
   lavadores,
   onStatusChange,
   onAssignLavador,
+  onEdit,
 }: SortableItemProps) {
   const {
     attributes,
@@ -39,6 +41,7 @@ export function SortableItem({
         lavadores={lavadores} 
         onStatusChange={onStatusChange} 
         onAssignLavador={onAssignLavador} 
+        onEdit={onEdit}
         isDragging={isDragging}
       />
     </div>

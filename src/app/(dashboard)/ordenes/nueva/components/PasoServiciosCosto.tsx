@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { Clock, CheckCircle, Coins } from "lucide-react";
+import { Clock, CheckCircle, Coins, Search, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/formats";
 import { Separator } from "@/components/ui/separator";
+import { useQueryState } from "nuqs";
 
 interface Servicio {
   id: string;
@@ -52,7 +53,7 @@ export function PasoServiciosCosto({
   total,
   sucursalConfig,
 }: PasoServiciosCostoProps) {
-  
+
   const dbMultipliers = sucursalConfig.multipliers || {};
   const multiplier = useMemo(() => {
     return dbMultipliers[vehiculoTipo] ?? defaultMultipliers[vehiculoTipo] ?? 1.0;
@@ -63,70 +64,127 @@ export function PasoServiciosCosto({
     return (base * multiplier).toFixed(2);
   };
 
+  const [searchQuery, setSearchQuery] = useQueryState("ss", {
+    defaultValue: "",
+    shallow: true,
+    history: "replace",
+  });
+
+  const filteredServicios = useMemo(() => {
+    const term = (searchQuery || "").toLowerCase();
+    if (!term) return servicios;
+    return servicios.filter(
+      (s) =>
+        s.nombre.toLowerCase().includes(term) ||
+        (s.categoriaNombre || "").toLowerCase().includes(term)
+    );
+  }, [servicios, searchQuery]);
+
+  const groupedByCategory = useMemo(() => {
+    const groups: Record<string, Servicio[]> = {};
+    for (const s of filteredServicios) {
+      const cat = s.categoriaNombre || "General";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(s);
+    }
+    return groups;
+  }, [filteredServicios]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-300">
       {/* Services Grid Selection */}
       <div className="md:col-span-2 space-y-4">
-        <h2 className="text-xs font-bold uppercase tracking-wider">
-          Selecciona Servicios de Lavado
-        </h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider">
+            Selecciona Servicios de Lavado
+          </h2>
+          <div className="relative w-56">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Buscar servicio..."
+              value={searchQuery || ""}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 pr-8 h-8 text-xs"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
         {servicios.length === 0 ? (
-          <Card className="p-6 border-border bg-card text-center text-zinc-500 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+          <Card className="p-6 border-border bg-card text-center text-muted-foreground shadow-sm">
             No hay servicios registrados en la base de datos. Regístralos en el Catálogo.
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {servicios.map((serv) => {
-              const isSelected = serviciosSeleccionados.includes(serv.id);
-              const calculatedPrice = calculateServicePrice(serv.precio);
+          <div className="max-h-[420px] overflow-y-auto space-y-6 pr-1">
+            {Object.entries(groupedByCategory).map(([categoria, items]) => (
+              <div key={categoria} className="space-y-3">
+                <h3 className="text-[10px] font-bold uppercase tracking-wider sticky top-0 bg-background border border-border p-2 rounded-md z-10">
+                  {categoria}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {items.map((serv) => {
+                    const isSelected = serviciosSeleccionados.includes(serv.id);
+                    const calculatedPrice = calculateServicePrice(serv.precio);
 
-              return (
-                <button
-                  key={serv.id}
-                  type="button"
-                  onClick={() => onServiceToggle(serv.id)}
-                  className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between h-36 cursor-pointer ${
-                    isSelected
-                      ? "bg-secondary/5 border-secondary text-secondary"
-                      : "bg-card border-border/60 text-zinc-750 hover:border-zinc-400/60 dark:hover:border-zinc-650/60 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]"
-                  }`}
-                >
-                  <div>
-                    <span className="text-[9px] uppercase font-bold tracking-wider text-zinc-500 dark:text-zinc-400">
-                      {serv.categoriaNombre || "General"}
-                    </span>
-                    <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-105 mt-1 line-clamp-1">
-                      {serv.nombre}
-                    </h4>
-                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2 leading-relaxed font-semibold">
-                      {serv.descripcion || "Sin descripción"}
-                    </p>
-                  </div>
-                  <Separator className="w-full mt-2" />
-                  <div className="flex items-center justify-between w-full pt-2 mt-2">
-                    <span className={`text-[10px] font-extrabold ${isSelected ? "text-secondary" : "text-muted-foreground"}`}>
-                      {formatCurrency(parseFloat(calculatedPrice))}
-                    </span>
-                    <span className="text-[9px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1 font-bold">
-                      <Clock className="h-3 w-3" />
-                      {serv.duracionMin} min
-                    </span>
-                  </div>
-                  {isSelected && (
-                    <div className="absolute top-2 right-2 text-secondary">
-                      <CheckCircle className="size-4 fill-secondary/5" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+                    return (
+                      <button
+                        key={serv.id}
+                        type="button"
+                        onClick={() => onServiceToggle(serv.id)}
+                        className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between h-32 cursor-pointer ${
+                          isSelected
+                            ? "bg-secondary/5 border-secondary text-secondary"
+                            : "bg-card border-border/60 text-zinc-750 hover:border-zinc-400/60 dark:hover:border-zinc-650/60 shadow-sm"
+                        }`}
+                      >
+                        <div>
+                          <h4 className="text-xs font-bold text-foreground mt-1 line-clamp-1">
+                            {serv.nombre}
+                          </h4>
+                          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed font-semibold">
+                            {serv.descripcion || "Sin descripción"}
+                          </p>
+                        </div>
+                        <Separator className="w-full mt-2" />
+                        <div className="flex items-center justify-between w-full pt-2 mt-2">
+                          <span className={`text-[10px] font-extrabold ${isSelected ? "text-secondary" : "text-muted-foreground"}`}>
+                            {formatCurrency(parseFloat(calculatedPrice))}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold">
+                            <Clock className="h-3 w-3" />
+                            {serv.duracionMin} min
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 text-secondary">
+                            <CheckCircle className="size-4 fill-secondary/5" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            {filteredServicios.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Ningún servicio coincide con la búsqueda.
+              </p>
+            )}
           </div>
         )}
       </div>
 
       {/* Price Calculations Column */}
-      <Card className="p-6 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] h-fit space-y-4">
-        <h2 className="text-xs font-bold text-zinc-900 dark:text-zinc-105 uppercase tracking-wider flex items-center gap-1.5">
+      <Card className="p-6 border-border bg-card shadow-sm h-fit space-y-4">
+        <h2 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
           <Coins className="size-4 text-secondary" />
           Resumen de Costos
         </h2>
@@ -172,7 +230,7 @@ export function PasoServiciosCosto({
         <Separator />
 
         <div className="flex justify-between items-baseline pt-2">
-          <span className="text-xs font-bold text-zinc-900 dark:text-zinc-105 uppercase tracking-wider">
+          <span className="text-xs font-bold text-foreground uppercase tracking-wider">
             Total Estimado
           </span>
           <span className="text-2xl font-extrabold text-secondary">

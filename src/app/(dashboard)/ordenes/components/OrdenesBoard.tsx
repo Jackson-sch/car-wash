@@ -26,9 +26,10 @@ interface OrdenesBoardProps {
   lavadores: Lavador[];
   onStatusChange: (id: string, nuevoEstado: Orden["estado"]) => void;
   onAssignLavador: (id: string, empleadoId: string | null) => void;
+  onEdit?: (orden: Orden) => void;
 }
 
-export function OrdenesBoard({ ordenes, lavadores, onStatusChange, onAssignLavador }: OrdenesBoardProps) {
+export function OrdenesBoard({ ordenes, lavadores, onStatusChange, onAssignLavador, onEdit }: OrdenesBoardProps) {
   // Use a local state to allow instant UI updates on drag
   const [localOrdenes, setLocalOrdenes] = useState<Orden[]>(ordenes);
 
@@ -168,6 +169,7 @@ export function OrdenesBoard({ ordenes, lavadores, onStatusChange, onAssignLavad
                     lavadores={lavadores} 
                     onStatusChange={onStatusChange} 
                     onAssignLavador={onAssignLavador} 
+                    onEdit={onEdit}
                   />
                 ))}
                 
@@ -185,13 +187,14 @@ export function OrdenesBoard({ ordenes, lavadores, onStatusChange, onAssignLavad
       <DragOverlay>
         {activeOrden ? (
           <div className="w-[300px] sm:w-[350px]">
-             <OrderCard 
-              orden={activeOrden} 
-              lavadores={lavadores} 
-              onStatusChange={onStatusChange} 
-              onAssignLavador={onAssignLavador} 
-              isDragging={true}
-            />
+              <OrderCard 
+               orden={activeOrden} 
+               lavadores={lavadores} 
+               onStatusChange={onStatusChange} 
+               onAssignLavador={onAssignLavador} 
+               onEdit={onEdit}
+               isDragging={true}
+              />
           </div>
         ) : null}
       </DragOverlay>

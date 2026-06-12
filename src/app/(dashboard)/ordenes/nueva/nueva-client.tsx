@@ -107,9 +107,7 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
   };
 
   // Enviar formulario final
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     if (!placa.trim() || !clienteNombre.trim() || serviciosSeleccionados.length === 0) {
       toast.error("Por favor completa los datos obligatorios y selecciona al menos un servicio");
       return;
@@ -170,7 +168,7 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
       <StepperHeader step={step} />
 
       {/* Form Content */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6">
         {step === 1 && (
           <PasoVehiculoCliente
             placa={placa}
@@ -262,16 +260,18 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
               </Button>
             ) : (
               <Button
-                type="submit"
+                type="button"
+                onClick={handleSubmit}
                 disabled={isPending}
-                className="bg-black hover:bg-zinc-800 text-white font-bold text-xs h-9 rounded-lg gap-2 cursor-pointer px-6"
+                variant="secondary"
+                className="font-bold text-xs h-9 rounded-lg gap-2 cursor-pointer px-6"
               >
                 {isPending ? "Registrando..." : "Registrar Orden"}
               </Button>
             )}
           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

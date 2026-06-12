@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { turnosCaja, pagos, usuarios, ordenes, categoriasServicio, servicios, ordenServicios } from "@/lib/db/schema";
+import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos } from "@/lib/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { revalidatePath } from "next/cache";
@@ -257,6 +257,7 @@ export async function cobrarOrden(data: {
   metodo: "efectivo" | "tarjeta" | "yape" | "plin" | "transferencia" | "otro";
   monto: string;
   referencia?: string;
+  cuponId?: string;
 }) {
   try {
     const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
@@ -296,6 +297,23 @@ export async function cobrarOrden(data: {
         updatedAt: new Date(),
       })
       .where(and(eq(ordenes.id, data.ordenId), eq(ordenes.sucursalId, sucursalId)));
+
+    // 4. Registrar uso del cupón si aplica
+    if (data.cuponId) {
+      const [vehiculo] = await db
+        .select({ clienteId: vehiculos.clienteId })
+        .from(ordenes)
+        .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
+        .where(eq(ordenes.id, data.ordenId));
+
+      if (vehiculo?.clienteId) {
+        await db.insert(cuponesUsos).values({
+          cuponId: data.cuponId,
+          clienteId: vehiculo.clienteId,
+          ordenId: data.ordenId,
+        });
+      }
+    }
 
     revalidatePath("/caja");
     revalidatePath("/ordenes");

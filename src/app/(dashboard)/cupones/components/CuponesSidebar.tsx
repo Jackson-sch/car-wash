@@ -2,7 +2,7 @@
 
 import { useMemo, useTransition } from "react";
 import { format } from "date-fns";
-import { Search, X, Users, TrendingUp, Tag } from "lucide-react";
+import { Search, X, Users, TrendingUp, Tag, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { toggleCupon } from "@/lib/actions/cupones";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,10 @@ import { PaginationControls } from "@/components/shared/PaginationControls";
 
 interface CuponesSidebarProps {
   cupones: any[];
+  onEdit: (cupon: any) => void;
 }
 
-export function CuponesSidebar({ cupones }: CuponesSidebarProps) {
+export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useQueryState("q", {
     defaultValue: "",
@@ -117,6 +118,14 @@ export function CuponesSidebar({ cupones }: CuponesSidebarProps) {
                     <Badge variant={cupon.activo ? "default" : "secondary"} className="text-[10px] uppercase">
                       {cupon.activo ? "Activo" : "Inactivo"}
                     </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => onEdit(cupon)}
+                      title="Editar cupón"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                     <Switch
                       checked={cupon.activo}
                       onCheckedChange={() => handleToggleStatus(cupon.id, cupon.activo)}

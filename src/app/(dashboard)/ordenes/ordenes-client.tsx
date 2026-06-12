@@ -105,15 +105,16 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
   };
 
   // Confirmar cobro
-  const handleConfirmPay = async (metodo: PaymentMethod, referencia: string) => {
+  const handleConfirmPay = async (metodo: PaymentMethod, referencia: string, monto?: string, cuponId?: string) => {
     if (!payingOrden) return;
     
     startTransition(async () => {
       const res = await cobrarOrden({
         ordenId: payingOrden.id,
         metodo,
-        monto: payingOrden.total || "0",
+        monto: monto || payingOrden.total || "0",
         referencia,
+        cuponId,
       });
 
       if (res.success) {
@@ -244,6 +245,7 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
           lavadores={lavadores}
           onStatusChange={handleStatusChange}
           onAssignLavador={handleAssignLavador}
+          onEdit={(orden) => toast.info("Editar orden próximamente")}
         />
       ) : (
         <>

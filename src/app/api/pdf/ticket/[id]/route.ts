@@ -81,7 +81,7 @@ export async function GET(
     font-size: 9px;
     color: #111;
     width: 80mm;
-    padding: 8mm 4mm;
+    padding: 3mm 3mm;
     margin: 0 auto;
   }
   .center { text-align: center; }
@@ -94,9 +94,6 @@ export async function GET(
   .total { display: flex; justify-content: space-between; border-top: 1px solid #333; padding-top: 4px; margin-top: 4px; font-weight: bold; font-size: 10px; }
   .loyalty { border: 1px solid #999; padding: 4px 6px; margin: 6px 0; text-align: center; font-size: 7px; }
   .footer { text-align: center; margin-top: 12px; font-size: 7px; color: #666; }
-  @media print {
-    body { width: 100%; padding: 0; }
-  }
 </style>
 </head>
 <body>

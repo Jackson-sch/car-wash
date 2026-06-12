@@ -1,13 +1,17 @@
-import { User, Car } from "lucide-react";
+import { User, Car, Tag } from "lucide-react";
 import { formatCurrency } from "@/lib/formats";
 import { OrdenResumen } from "./CobrarModal";
 
 interface CobroResumenProps {
   orden: OrdenResumen;
   totalNum: number;
+  descuentoCoupon?: number;
 }
 
-export function CobroResumen({ orden, totalNum }: CobroResumenProps) {
+export function CobroResumen({ orden, totalNum, descuentoCoupon = 0 }: CobroResumenProps) {
+  const tieneDescuento = descuentoCoupon > 0;
+  const totalFinal = Math.max(0, totalNum - descuentoCoupon);
+
   return (
     <div className="p-4 bg-zinc-50/30 border border-zinc-100 rounded-2xl space-y-3 shadow-inner">
       <div className="flex justify-between items-start">
@@ -36,7 +40,6 @@ export function CobroResumen({ orden, totalNum }: CobroResumenProps) {
           </div>
         </div>
 
-        {/* Badge de Placa Peruana Realista con colores estables para evitar problemas en modo oscuro */}
         <div className="inline-flex flex-col items-center bg-amber-400 border border-amber-500 rounded px-2.5 py-0.5 shadow-sm">
           <span className="text-[7px] uppercase font-bold text-amber-900/80 tracking-widest leading-none">
             PERU
@@ -48,13 +51,34 @@ export function CobroResumen({ orden, totalNum }: CobroResumenProps) {
       </div>
 
       {/* Monto Total */}
-      <div className="pt-3 border-t border-zinc-200/50 flex justify-between items-center">
-        <span className="text-xs font-bold text-zinc-650">
-          Total a Pagar
-        </span>
-        <span className="text-2xl font-black text-secondary">
-          {formatCurrency(totalNum)}
-        </span>
+      <div className="pt-3 border-t border-zinc-200/50 space-y-1.5">
+        {tieneDescuento && (
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-bold text-zinc-500">Total original</span>
+            <span className="text-xs text-zinc-500 line-through">
+              {formatCurrency(totalNum)}
+            </span>
+          </div>
+        )}
+        {tieneDescuento && (
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+              <Tag className="h-3 w-3" />
+              Descuento cupón
+            </span>
+            <span className="text-xs font-bold text-emerald-600">
+              -{formatCurrency(descuentoCoupon)}
+            </span>
+          </div>
+        )}
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-bold text-zinc-650">
+            Total a Pagar
+          </span>
+          <span className={`font-black ${tieneDescuento ? "text-2xl text-emerald-600" : "text-2xl text-secondary"}`}>
+            {formatCurrency(totalFinal)}
+          </span>
+        </div>
       </div>
     </div>
   );

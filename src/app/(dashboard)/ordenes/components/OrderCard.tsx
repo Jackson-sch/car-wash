@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Car, CarFront, Truck, Bike, Sparkles } from "lucide-react";
+import { Car, CarFront, Truck, Bike, Sparkles, XCircle, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,7 @@ interface OrderCardProps {
   lavadores: Lavador[];
   onStatusChange: (id: string, nuevoEstado: Orden["estado"]) => void;
   onAssignLavador: (id: string, empleadoId: string | null) => void;
+  onEdit?: (orden: Orden) => void;
   isDragging?: boolean;
 }
 
@@ -32,6 +33,7 @@ export function OrderCard({
   lavadores,
   onStatusChange,
   onAssignLavador,
+  onEdit,
   isDragging = false,
 }: OrderCardProps) {
   const Icon = VEHICLE_ICONS[orden.vehiculoTipo || "otro"] || VEHICLE_ICONS["otro"];
@@ -108,20 +110,46 @@ export function OrderCard({
         <div className="font-black text-sm text-zinc-900 shrink-0">
           {formatCurrency(Number(orden.total) || 0)}
         </div>
-        
-        {/* Only show Payment button when completed, since moving forward is done via DND */}
-        {orden.estado === "completado" && (
-          <div className="w-full min-w-0" onPointerDown={(e) => e.stopPropagation()}>
-            <Button 
-              size="sm" 
+
+        <div className="flex items-center gap-1.5" onPointerDown={(e) => e.stopPropagation()}>
+          {/* Edit button for pending orders */}
+          {orden.estado === "pendiente" && onEdit && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onEdit(orden)}
+              className="h-7 w-7 p-0 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
+              title="Editar orden"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+          )}
+
+          {/* Cancel button (not for cobrado or cancelado) */}
+          {orden.estado !== "cobrado" && orden.estado !== "cancelado" && orden.estado !== "completado" && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onStatusChange(orden.id, "cancelado")}
+              className="h-7 w-7 p-0 text-zinc-400 hover:text-red-500 hover:bg-red-50"
+              title="Cancelar orden"
+            >
+              <XCircle className="h-3.5 w-3.5" />
+            </Button>
+          )}
+
+          {/* Payment button when completed */}
+          {orden.estado === "completado" && (
+            <Button
+              size="sm"
               variant="outline"
-              className="h-8 text-xs font-bold w-full rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border-border shadow-sm truncate"
+              className="h-8 text-xs font-bold rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border-border shadow-sm"
               onClick={() => onStatusChange(orden.id, "cobrado")}
             >
               Registrar Pago
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </Card>
   );

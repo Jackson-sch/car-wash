@@ -358,7 +358,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
             </SheetDescription>
           </SheetHeader>
 
-          <div className="space-y-5 py-6">
+          <div className="flex-1 space-y-5 px-6 py-6">
             <div className="space-y-2">
               <Label htmlFor="nombre">Nombre del Paquete *</Label>
               <Input
@@ -396,7 +396,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
             <div className="space-y-3">
               <Label>Servicios Incluidos</Label>
               <p className="text-xs text-muted-foreground">Selecciona los servicios que forman parte de este paquete.</p>
-              <div className="space-y-2 max-h-60 overflow-y-auto border border-border rounded-lg p-3">
+              <div className="space-y-2 max-h-80 overflow-y-auto border border-border rounded-lg p-3">
                 {servicios
                   .filter((s) => s.nombre)
                   .map((s) => (
@@ -430,7 +430,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+          <div className="mt-auto flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
             <SheetClose className="inline-flex items-center justify-center rounded-lg border border-border bg-background hover:bg-muted h-9 px-4 text-sm font-medium cursor-pointer">
               Cancelar
             </SheetClose>

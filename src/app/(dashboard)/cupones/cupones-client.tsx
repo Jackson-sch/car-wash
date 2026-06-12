@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Tag, Gift, TrendingUp } from "lucide-react";
 import { StatsCard } from "@/components/shared/StatsCard";
 import { CuponForm } from "./components/CuponForm";
@@ -20,12 +20,22 @@ export function CuponesClient({
   initialCupones: any[];
   servicios: ServicioType[];
 }) {
+  const [editingCupon, setEditingCupon] = useState<any | null>(null);
+
   const totalCupones = initialCupones.length;
   const activos = initialCupones.filter((c: any) => c.activo).length;
   const totalUsos = useMemo(
     () => initialCupones.reduce((acc: number, c: any) => acc + (c.usos?.length || 0), 0),
     [initialCupones]
   );
+
+  const handleEdit = (cupon: any) => {
+    setEditingCupon(cupon);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCupon(null);
+  };
 
   return (
     <div className="space-y-8">
@@ -68,12 +78,16 @@ export function CuponesClient({
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column: Form */}
         <div className="xl:col-span-2 space-y-6">
-          <CuponForm servicios={servicios} />
+          <CuponForm
+            servicios={servicios}
+            editingCupon={editingCupon}
+            onCancelEdit={handleCancelEdit}
+          />
         </div>
 
         {/* Right Column: Sidebar */}
         <div className="xl:col-span-1 space-y-6">
-          <CuponesSidebar cupones={initialCupones} />
+          <CuponesSidebar cupones={initialCupones} onEdit={handleEdit} />
         </div>
       </div>
     </div>

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   RefreshCw,
   Calendar as CalendarIcon,
   Save,
   Scissors,
   CheckCircle2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { createCupon, CuponData } from "@/lib/actions/cupones";
+import { createCupon, updateCupon, CuponData } from "@/lib/actions/cupones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,12 +32,13 @@ interface ServicioType {
 
 interface CuponFormProps {
   servicios: ServicioType[];
+  editingCupon?: any | null;
+  onCancelEdit?: () => void;
 }
 
-export function CuponForm({ servicios }: CuponFormProps) {
+export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormProps) {
   const [isPending, startTransition] = useTransition();
 
-  // Form state
   const [codigo, setCodigo] = useState("");
   const [tipoDescuento, setTipoDescuento] = useState<"porcentaje" | "fijo">("porcentaje");
   const [valorDescuento, setValorDescuento] = useState("");
@@ -45,6 +48,34 @@ export function CuponForm({ servicios }: CuponFormProps) {
   const [limiteTotal, setLimiteTotal] = useState("");
   const [limitePorCliente, setLimitePorCliente] = useState("1");
   const [serviciosSeleccionados, setServiciosSeleccionados] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (editingCupon) {
+      setCodigo(editingCupon.codigo || "");
+      setTipoDescuento(editingCupon.tipoDescuento || "porcentaje");
+      setValorDescuento(editingCupon.valorDescuento?.toString() || "");
+      setCompraMinima(editingCupon.compraMinima?.toString() || "");
+      setFechaInicio(editingCupon.fechaInicio ? new Date(editingCupon.fechaInicio) : undefined);
+      setFechaFin(editingCupon.fechaFin ? new Date(editingCupon.fechaFin) : undefined);
+      setLimiteTotal(editingCupon.limiteTotal?.toString() || "");
+      setLimitePorCliente(editingCupon.limitePorCliente?.toString() || "1");
+      setServiciosSeleccionados(
+        editingCupon.servicios?.map((s: any) => s.servicioId || s.servicio?.id).filter(Boolean) || []
+      );
+    }
+  }, [editingCupon]);
+
+  const resetForm = () => {
+    setCodigo("");
+    setTipoDescuento("porcentaje");
+    setValorDescuento("");
+    setCompraMinima("");
+    setFechaInicio(undefined);
+    setFechaFin(undefined);
+    setLimiteTotal("");
+    setLimitePorCliente("1");
+    setServiciosSeleccionados([]);
+  };
 
   const generateRandomCode = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -59,6 +90,11 @@ export function CuponForm({ servicios }: CuponFormProps) {
     setServiciosSeleccionados((prev) =>
       prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
     );
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancelEdit?.();
   };
 
   const handleSubmit = async () => {
@@ -80,26 +116,36 @@ export function CuponForm({ servicios }: CuponFormProps) {
     };
 
     startTransition(async () => {
-      const res = await createCupon(data);
+      const res = editingCupon
+        ? await updateCupon(editingCupon.id, data)
+        : await createCupon(data);
+
       if (res.success) {
-        toast.success("Cupón creado exitosamente");
-        // Reiniciar formulario
-        setCodigo("");
-        setValorDescuento("");
-        setCompraMinima("");
-        setFechaInicio(undefined);
-        setFechaFin(undefined);
-        setLimiteTotal("");
-        setLimitePorCliente("1");
-        setServiciosSeleccionados([]);
+        toast.success(editingCupon ? "Cupón actualizado exitosamente" : "Cupón creado exitosamente");
+        resetForm();
+        onCancelEdit?.();
       } else {
-        toast.error(res.error || "Error al crear cupón");
+        toast.error(res.error || "Error al guardar cupón");
       }
     });
   };
 
+  const isEditing = !!editingCupon;
+
   return (
     <div className="space-y-6">
+      {isEditing && (
+        <div className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-4 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium text-foreground">Editando cupón:</span>
+            <Badge variant="outline" className="font-mono">{editingCupon.codigo}</Badge>
+          </div>
+          <Button variant="ghost" size="icon-sm" onClick={handleCancel}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       <Card className="shadow-sm">
         <CardHeader className="border-b border-border/50 pb-4">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -192,13 +238,14 @@ export function CuponForm({ servicios }: CuponFormProps) {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {fechaInicio ? format(fechaInicio, "PPP") : <span>Seleccionar fecha</span>}
+                  {fechaInicio ? format(fechaInicio, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={fechaInicio}
                     onSelect={setFechaInicio}
+                    locale={es}
                   />
                 </PopoverContent>
               </Popover>
@@ -213,13 +260,14 @@ export function CuponForm({ servicios }: CuponFormProps) {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {fechaFin ? format(fechaFin, "PPP") : <span>Seleccionar fecha</span>}
+                  {fechaFin ? format(fechaFin, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={fechaFin}
                     onSelect={setFechaFin}
+                    locale={es}
                   />
                 </PopoverContent>
               </Popover>
@@ -287,12 +335,14 @@ export function CuponForm({ servicios }: CuponFormProps) {
       </Card>
 
       <div className="flex justify-end gap-3 pt-2">
-        <Button variant="outline" type="button">
-          Cancelar
-        </Button>
+        {isEditing && (
+          <Button variant="outline" type="button" onClick={handleCancel}>
+            Cancelar
+          </Button>
+        )}
         <Button onClick={handleSubmit} disabled={isPending} className="gap-2">
           <Save className="h-4 w-4" />
-          Guardar y Activar
+          {isPending ? "Guardando..." : isEditing ? "Actualizar Cupón" : "Guardar y Activar"}
         </Button>
       </div>
     </div>
