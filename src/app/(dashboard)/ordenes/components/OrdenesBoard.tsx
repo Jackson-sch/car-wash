@@ -12,6 +12,7 @@ import {
   useSensors,
   DragStartEvent,
   DragEndEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -20,6 +21,20 @@ import {
 } from "@dnd-kit/sortable";
 import { OrderCard } from "./OrderCard";
 import { SortableItem } from "./SortableItem";
+
+interface DroppableColumnBodyProps {
+  id: string;
+  children: React.ReactNode;
+}
+
+function DroppableColumnBody({ id, children }: DroppableColumnBodyProps) {
+  const { setNodeRef } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className="flex flex-col gap-3 min-h-[250px] w-full min-w-0 pb-4">
+      {children}
+    </div>
+  );
+}
 
 interface OrdenesBoardProps {
   ordenes: Orden[];
@@ -161,7 +176,7 @@ export function OrdenesBoard({ ordenes, lavadores, onStatusChange, onAssignLavad
               items={col.items.map(i => i.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="flex flex-col gap-3 min-h-[250px] w-full min-w-0 pb-4">
+              <DroppableColumnBody id={col.id}>
                 {col.items.map((orden) => (
                   <SortableItem 
                     key={orden.id} 
@@ -178,7 +193,7 @@ export function OrdenesBoard({ ordenes, lavadores, onStatusChange, onAssignLavad
                     Soltar tarjeta aquí
                   </div>
                 )}
-              </div>
+              </DroppableColumnBody>
             </SortableContext>
           </div>
         ))}

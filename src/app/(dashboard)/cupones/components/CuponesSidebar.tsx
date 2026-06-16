@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useTransition } from "react";
-import { format } from "date-fns";
+import { formatDate, formatCurrency } from "@/lib/formats";
 import { Search, X, Users, TrendingUp, Tag, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { toggleCupon } from "@/lib/actions/cupones";
@@ -134,7 +134,7 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  {cupon.tipoDescuento === "porcentaje" ? `${cupon.valorDescuento}% off` : `S/ ${cupon.valorDescuento} off`}
+                  {cupon.tipoDescuento === "porcentaje" ? `${cupon.valorDescuento}% off` : `${formatCurrency(cupon.valorDescuento)} off`}
                   {cupon.servicios?.length > 0 ? ` en ${cupon.servicios.length} servicios` : " en todo"}
                 </p>
                 <div className="flex justify-between items-center text-[11px] text-muted-foreground">
@@ -142,7 +142,7 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
                     <Users className="h-3 w-3" /> {cupon.usos?.length || 0} Usos
                   </span>
                   <span>
-                    {cupon.fechaFin ? `Hasta ${format(new Date(cupon.fechaFin), "dd MMM")}` : "Sin caducidad"}
+                    {cupon.fechaFin ? `Hasta ${formatDate(cupon.fechaFin)}` : "Sin caducidad"}
                   </span>
                 </div>
               </div>

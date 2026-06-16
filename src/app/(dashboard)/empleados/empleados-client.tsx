@@ -8,6 +8,7 @@ import { StatsCard } from "@/components/shared/StatsCard";
 import { toast } from "sonner";
 import { EmpleadosGrid } from "./components/EmpleadosGrid";
 import { CrearEmpleadoModal } from "./components/CrearEmpleadoModal";
+import { formatCurrency } from "@/lib/formats";
 
 interface Empleado {
   id: string;
@@ -66,7 +67,10 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
   // KPIs
   const totalPersonal = empleados.length;
   const totalLavadores = empleados.filter((e) => e.rol === "lavador").length;
-  const totalComisiones = empleados.reduce((acc, curr) => acc + curr.comisionAcumulada, 0);
+  const totalComisiones = empleados.reduce(
+    (acc, curr) => acc + curr.comisionAcumulada,
+    0,
+  );
 
   return (
     <div className="space-y-8 text-foreground">
@@ -78,7 +82,8 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             Gestión de Empleados
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Administración del personal, comisiones devengadas por servicios de lavado completados.
+            Administración del personal, comisiones devengadas por servicios de
+            lavado completados.
           </p>
         </div>
         <div>
@@ -107,7 +112,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
         />
         <StatsCard
           label="Comisiones por Pagar (30%)"
-          value={`S/ ${totalComisiones.toFixed(2)}`}
+          value={`${formatCurrency(totalComisiones)}`}
           icon={<Coins className="h-5 w-5" />}
           iconBg="bg-emerald-500/10"
           iconColor="text-emerald-600 dark:text-emerald-400"

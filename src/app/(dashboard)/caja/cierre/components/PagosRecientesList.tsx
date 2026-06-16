@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { formatCurrency, formatTime } from "@/lib/formats";
 import type { PagoReciente } from "../types";
 
 interface PagosRecientesListProps {
@@ -20,14 +21,21 @@ export function PagosRecientesList({ pagos }: PagosRecientesListProps) {
           </p>
         ) : (
           pagos.map((p) => (
-            <div key={p.id} className="p-3 hover:bg-zinc-50/50 transition-colors flex justify-between items-center text-xs">
+            <div
+              key={p.id}
+              className="p-3 hover:bg-zinc-50/50 transition-colors flex justify-between items-center text-xs"
+            >
               <div>
-                <p className="font-bold text-zinc-800">Ticket: {p.nroTicket || "N/A"}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5 capitalize" suppressHydrationWarning>
-                  {p.metodo} • {new Date(p.createdAt).toLocaleTimeString("es-PE", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                <p className="font-bold text-zinc-800">
+                  Ticket: {p.nroTicket || "N/A"}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">
+                  {p.metodo} • {formatTime(p.createdAt)}
                 </p>
               </div>
-              <span className="font-extrabold text-zinc-900">S/ {p.monto.toFixed(2)}</span>
+              <span className="font-extrabold text-zinc-900">
+                {formatCurrency(p.monto)}
+              </span>
             </div>
           ))
         )}

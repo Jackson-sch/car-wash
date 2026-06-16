@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Settings, Building, Car, Gift } from "lucide-react";
+import Link from "next/link";
 import { updateSucursalInfo, updateSucursalConfigJSON } from "@/lib/actions/configuracion";
 import { toast } from "sonner";
 import { GeneralPanel } from "./components/GeneralPanel";
@@ -88,9 +89,31 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
   };
 
   const tabs = [
-    { id: "general" as const, label: "General Sucursal", icon: Building },
-    { id: "precios" as const, label: "Precios por Vehículo", icon: Car },
-    { id: "lealtad" as const, label: "Programa de Lealtad", icon: Gift },
+    {
+      id: "general" as const,
+      label: "General Sucursal",
+      description: "Datos de la sucursal y contacto",
+      icon: Building,
+    },
+    {
+      id: "precios" as const,
+      label: "Precios por Vehículo",
+      description: "Multiplicadores por vehículo",
+      icon: Car,
+    },
+    {
+      id: "lealtad" as const,
+      label: "Programa de Lealtad",
+      description: "Reglas de puntos y canjes",
+      icon: Gift,
+    },
+    {
+      id: "sucursales" as const,
+      label: "Gestión de Sucursales",
+      description: "Locales y límites de plan",
+      icon: Building,
+      href: "/configuracion/sucursales",
+    },
   ];
 
   return (
@@ -98,7 +121,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-          <Settings className="h-7 w-7 text-secondary" />
+          <Settings className="h-7 w-7 text-secondary animate-spin-slow" />
           Configuración del Sistema
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -106,50 +129,91 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
         </p>
       </div>
 
-      {/* Premium Tabs */}
-      <div className="flex gap-1 p-1 rounded-xl bg-muted/50 border border-border w-fit">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg transition-all cursor-pointer ${
-                isActive
-                  ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+        {/* Sidebar Navigation */}
+        <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-1.5 bg-card/30 p-2.5 rounded-2xl border border-border/60">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const hasHref = "href" in tab;
+            const isActive = !hasHref && activeTab === tab.id;
+            
+            const btnClassName = `flex items-center gap-3 w-full text-left px-3.5 py-3 text-sm font-semibold rounded-xl transition-all cursor-pointer border ${
+              isActive
+                ? "bg-secondary/10 dark:bg-secondary/20 text-secondary border-secondary/20 shadow-xs"
+                : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40 border-transparent"
+            }`;
 
-      {/* Tab Contents */}
-      <div>
-        {activeTab === "general" && (
-          <GeneralPanel sucursal={sucursal} isPending={isPending} onSave={handleSaveInfo} />
-        )}
+            const innerContent = (
+              <>
+                <div
+                  className={`p-2 rounded-lg transition-colors shrink-0 ${
+                    isActive
+                      ? "bg-secondary text-white"
+                      : "bg-muted/65 dark:bg-muted/30 text-muted-foreground"
+                  }`}
+                >
+                  <Icon className="h-4.5 w-4.5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-extrabold text-foreground leading-none text-xs sm:text-sm">
+                    {tab.label}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground/85 font-semibold mt-1 truncate">
+                    {tab.description}
+                  </div>
+                </div>
+              </>
+            );
 
-        {activeTab === "precios" && (
-          <PreciosPanel
-            initialMultipliers={config.multipliers || {}}
-            isPending={isPending}
-            onSave={handleSaveMultipliers}
-          />
-        )}
+            if (hasHref && tab.href) {
+              return (
+                <Link
+                  key={tab.id}
+                  href={tab.href}
+                  className={btnClassName}
+                >
+                  {innerContent}
+                </Link>
+              );
+            }
 
-        {activeTab === "lealtad" && (
-          <LealtadPanel
-            initialPuntosPorSol={config.loyalty?.puntosPorSol?.toString() || "1"}
-            initialSolesPorPunto={config.loyalty?.solesPorPunto?.toString() || "0.05"}
-            isPending={isPending}
-            onSave={handleSaveLoyaltyRules}
-          />
-        )}
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as "general" | "precios" | "lealtad")}
+                className={btnClassName}
+              >
+                {innerContent}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab Contents */}
+        <div className="md:col-span-8 lg:col-span-9">
+          <div className="animate-in fade-in slide-in-from-right-3 duration-300">
+            {activeTab === "general" && (
+              <GeneralPanel sucursal={sucursal} isPending={isPending} onSave={handleSaveInfo} />
+            )}
+
+            {activeTab === "precios" && (
+              <PreciosPanel
+                initialMultipliers={config.multipliers || {}}
+                isPending={isPending}
+                onSave={handleSaveMultipliers}
+              />
+            )}
+
+            {activeTab === "lealtad" && (
+              <LealtadPanel
+                initialPuntosPorSol={config.loyalty?.puntosPorSol?.toString() || "1"}
+                initialSolesPorPunto={config.loyalty?.solesPorPunto?.toString() || "0.05"}
+                isPending={isPending}
+                onSave={handleSaveLoyaltyRules}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

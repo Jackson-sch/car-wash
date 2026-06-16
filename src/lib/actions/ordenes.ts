@@ -31,6 +31,7 @@ export async function getOrdenes() {
         total: ordenes.total,
         notas: ordenes.notas,
         createdAt: ordenes.createdAt,
+        updatedAt: ordenes.updatedAt,
         placa: vehiculos.placa,
         vehiculoMarca: vehiculos.marca,
         vehiculoModelo: vehiculos.modelo,
@@ -39,6 +40,9 @@ export async function getOrdenes() {
         clienteApellido: clientes.apellido,
         lavadorNombre: usuarios.nombre,
         lavadorApellido: usuarios.apellido,
+        comprobanteTipo: ordenes.comprobanteTipo,
+        comprobanteSerie: ordenes.comprobanteSerie,
+        comprobanteNumero: ordenes.comprobanteNumero,
       })
       .from(ordenes)
       .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
@@ -85,8 +89,9 @@ export async function getOrdenById(id: string) {
   try {
     const session = await getSessionOrThrow({ modulo: "ordenes", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
+    const isSuperAdmin = session.user.rol === "superadmin";
 
-    const [ordenDetail] = await db
+    const query = db
       .select({
         id: ordenes.id,
         nroTicket: ordenes.nroTicket,
@@ -110,12 +115,23 @@ export async function getOrdenById(id: string) {
         lavadorId: usuarios.id,
         lavadorNombre: usuarios.nombre,
         lavadorApellido: usuarios.apellido,
+        comprobanteTipo: ordenes.comprobanteTipo,
+        comprobanteSerie: ordenes.comprobanteSerie,
+        comprobanteNumero: ordenes.comprobanteNumero,
+        facturadoAt: ordenes.facturadoAt,
       })
       .from(ordenes)
       .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
       .innerJoin(clientes, eq(vehiculos.clienteId, clientes.id))
-      .leftJoin(usuarios, eq(ordenes.empleadoId, usuarios.id))
-      .where(and(eq(ordenes.id, id), eq(ordenes.sucursalId, sucursalId)));
+      .leftJoin(usuarios, eq(ordenes.empleadoId, usuarios.id));
+
+    if (isSuperAdmin) {
+      query.where(eq(ordenes.id, id));
+    } else {
+      query.where(and(eq(ordenes.id, id), eq(ordenes.sucursalId, sucursalId)));
+    }
+
+    const [ordenDetail] = await query;
 
     if (!ordenDetail) return null;
 
@@ -408,5 +424,87 @@ export async function asignarLavadorAOrden(id: string, empleadoId: string | null
   } catch (error: unknown) {
     console.error("Error al asignar lavador:", error);
     return { success: false, error: getErrorMessage(error, "Error al asignar") };
+  }
+}
+
+// Registrar comprobante SUNAT emitido manualmente
+export async function registrarComprobanteSunat(data: {
+  ordenId: string;
+  tipo: "boleta" | "factura" | null;
+  serie?: string;
+  numero?: string;
+}) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "editar" });
+    const sucursalId = session.user.sucursalId!;
+    const isSuperAdmin = session.user.rol === "superadmin";
+
+    let updatedRows = [];
+
+    if (data.tipo) {
+      if (!data.serie || !data.numero) {
+        throw new Error("Serie y número son obligatorios para registrar un comprobante");
+      }
+
+      const serieClean = data.serie.trim().toUpperCase();
+      const numeroClean = data.numero.trim();
+
+      // Validar serie (ej: B001 o F001, 4 caracteres)
+      if (!/^[BF][A-Z0-9]{3}$/.test(serieClean)) {
+        throw new Error("La serie debe iniciar con B o F y tener exactamente 4 caracteres (Ej: B001, F001)");
+      }
+
+      // Validar número (hasta 8 dígitos)
+      if (!/^\d{1,8}$/.test(numeroClean)) {
+        throw new Error("El número debe ser únicamente dígitos (hasta 8 dígitos)");
+      }
+
+      // Rellenar con ceros a la izquierda hasta 8 dígitos
+      const numeroPadded = numeroClean.padStart(8, "0");
+
+      const query = db
+        .update(ordenes)
+        .set({
+          comprobanteTipo: data.tipo,
+          comprobanteSerie: serieClean,
+          comprobanteNumero: numeroPadded,
+          facturadoAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+      if (isSuperAdmin) {
+        updatedRows = await query.where(eq(ordenes.id, data.ordenId)).returning();
+      } else {
+        updatedRows = await query.where(and(eq(ordenes.id, data.ordenId), eq(ordenes.sucursalId, sucursalId))).returning();
+      }
+    } else {
+      // Limpiar comprobante (revertir a nota de venta)
+      const query = db
+        .update(ordenes)
+        .set({
+          comprobanteTipo: null,
+          comprobanteSerie: null,
+          comprobanteNumero: null,
+          facturadoAt: null,
+          updatedAt: new Date(),
+        });
+
+      if (isSuperAdmin) {
+        updatedRows = await query.where(eq(ordenes.id, data.ordenId)).returning();
+      } else {
+        updatedRows = await query.where(and(eq(ordenes.id, data.ordenId), eq(ordenes.sucursalId, sucursalId))).returning();
+      }
+    }
+
+    if (updatedRows.length === 0) {
+      throw new Error("No se pudo actualizar la orden. Verifique si pertenece a la sucursal activa o sus permisos.");
+    }
+
+    revalidatePath("/ordenes");
+    revalidatePath(`/ordenes/${data.ordenId}/ticket`);
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error al registrar comprobante SUNAT:", error);
+    return { success: false, error: getErrorMessage(error, "Error al registrar comprobante") };
   }
 }

@@ -1,6 +1,7 @@
 import { Coins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { formatCurrency } from "@/lib/formats";
 
 export const BILLETES = [
   { id: "b200", label: "Billete S/ 200.00", val: 200 },
@@ -58,7 +59,7 @@ export function ArqueoEfectivo({ cantidades, onCantidadesChange, totalEfectivoCo
                     className="w-16 h-8 text-center text-xs p-1 font-bold border-zinc-300 focus:border-secondary focus:ring-0 text-zinc-900"
                   />
                   <span className="w-16 text-right font-extrabold text-zinc-650">
-                    S/ {((parseInt(cantidades[b.id] || "0") || 0) * b.val).toFixed(2)}
+                    {formatCurrency((parseInt(cantidades[b.id] || "0") || 0) * b.val)}
                   </span>
                 </div>
               </div>
@@ -85,7 +86,7 @@ export function ArqueoEfectivo({ cantidades, onCantidadesChange, totalEfectivoCo
                     className="w-16 h-8 text-center text-xs p-1 font-bold border-zinc-300 focus:border-secondary focus:ring-0 text-zinc-900"
                   />
                   <span className="w-16 text-right font-extrabold text-zinc-650">
-                    S/ {((parseInt(cantidades[m.id] || "0") || 0) * m.val).toFixed(2)}
+                    {formatCurrency((parseInt(cantidades[m.id] || "0") || 0) * m.val)}
                   </span>
                 </div>
               </div>
@@ -96,7 +97,7 @@ export function ArqueoEfectivo({ cantidades, onCantidadesChange, totalEfectivoCo
 
       <div className="p-4 border-t border-border bg-zinc-50/30 flex justify-between items-baseline">
         <span className="text-xs font-bold text-zinc-800">Total Desglose de Efectivo</span>
-        <span className="text-base font-black text-secondary">S/ {totalEfectivoContado.toFixed(2)}</span>
+        <span className="text-base font-black text-secondary">{formatCurrency(totalEfectivoContado)}</span>
       </div>
     </Card>
   );

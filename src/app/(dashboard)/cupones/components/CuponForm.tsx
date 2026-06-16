@@ -210,6 +210,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
               <Label className="text-xs font-semibold uppercase text-muted-foreground">Valor del Descuento</Label>
               <Input
                 type="number"
+                className="h-11!"
                 placeholder={tipoDescuento === "porcentaje" ? "15" : "10.00"}
                 value={valorDescuento}
                 onChange={(e) => setValorDescuento(e.target.value)}

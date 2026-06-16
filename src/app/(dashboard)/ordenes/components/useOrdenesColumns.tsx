@@ -14,6 +14,7 @@ import {
   CarFront,
   Truck,
   Bike,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,9 +80,21 @@ export function useOrdenesColumns({
                 </span>
               )}
             </div>
+            
+            {/* Indicador de Comprobante SUNAT */}
+            {ord.comprobanteTipo ? (
+              <span className="self-start inline-flex items-center gap-0.5 text-[8.5px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/20 px-1.5 py-0.2 rounded mt-0.5 select-none">
+                {ord.comprobanteTipo === "boleta" ? "Bol" : "Fac"}: {ord.comprobanteSerie}-{ord.comprobanteNumero}
+              </span>
+            ) : ord.estado === "cobrado" ? (
+              <span className="self-start inline-flex items-center gap-0.5 text-[8.5px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 px-1.5 py-0.2 rounded mt-0.5 select-none">
+                Nota de Venta
+              </span>
+            ) : null}
+
             {ord.createdAt && (
               <span 
-                className="text-[9px] text-muted-foreground font-medium flex items-center gap-1"
+                className="text-[9px] text-muted-foreground font-medium flex items-center gap-1 mt-0.5"
                 suppressHydrationWarning
               >
                 <Clock className="h-2.5 w-2.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
@@ -381,10 +394,28 @@ export function useOrdenesColumns({
         const ord = row.original;
         return (
           <div className="flex justify-end gap-1.5">
+            {/* Botón de Comprobante SUNAT (si está cobrado o completado) */}
+            {(ord.estado === "cobrado" || ord.estado === "completado") && (
+              <Link href={`/ordenes/${ord.id}/ticket`} passHref>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  title={ord.comprobanteTipo ? "Ver Comprobante SUNAT registrado" : "Registrar Comprobante SUNAT"}
+                  className={`h-7 w-7 cursor-pointer shadow-xs rounded-lg transition-all border ${
+                    ord.comprobanteTipo
+                      ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-emerald-500/5 hover:bg-emerald-500/15 border-emerald-500/30 hover:border-emerald-500/50"
+                      : "text-amber-500 dark:text-amber-400 hover:text-amber-600 bg-amber-500/5 hover:bg-amber-500/15 border-amber-500/30 hover:border-amber-500/50 animate-pulse"
+                  }`}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            )}
             <Link href={`/ordenes/${ord.id}/ticket`} passHref>
               <Button
                 variant="outline"
                 size="icon"
+                title="Imprimir ticket"
                 className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-all"
               >
                 <Printer className="h-3.5 w-3.5" />

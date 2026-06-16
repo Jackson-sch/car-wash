@@ -224,6 +224,10 @@ export const ordenes = pgTable('ordenes', {
   total: numeric('total', { precision: 10, scale: 2 }).default('0'),
   notas: text('notas'),
   nroTicket: text('nro_ticket').unique(),
+  comprobanteTipo: text('comprobante_tipo'),
+  comprobanteSerie: text('comprobante_serie'),
+  comprobanteNumero: text('comprobante_numero'),
+  facturadoAt: timestamp('facturado_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (t) => ({

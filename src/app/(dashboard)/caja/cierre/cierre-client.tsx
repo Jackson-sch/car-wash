@@ -28,25 +28,32 @@ interface CierreCajaClientProps {
   pagosRecientes: PagoReciente[];
 }
 
-export function CierreCajaClient({ turno, resumen, pagosRecientes }: CierreCajaClientProps) {
+export function CierreCajaClient({
+  turno,
+  resumen,
+  pagosRecientes,
+}: CierreCajaClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Estado del arqueo de denominaciones
   const [cantidades, setCantidades] = useState<Record<string, string>>({});
-  
+
   // Estado para observaciones / justificación
   const [obsCierre, setObsCierre] = useState("");
 
   // Estadísticas esperadas por sistema
   const systemStats = useMemo(() => {
     const openingCash = parseFloat(turno.montoInicial) || 0;
-    const efectivoVentas = turno.pagos.find((p) => p.metodo === "efectivo")?.total || 0;
-    const tarjetaVentas = turno.pagos.find((p) => p.metodo === "tarjeta")?.total || 0;
+    const efectivoVentas =
+      turno.pagos.find((p) => p.metodo === "efectivo")?.total || 0;
+    const tarjetaVentas =
+      turno.pagos.find((p) => p.metodo === "tarjeta")?.total || 0;
     const yapeVentas = turno.pagos.find((p) => p.metodo === "yape")?.total || 0;
     const plinVentas = turno.pagos.find((p) => p.metodo === "plin")?.total || 0;
     const yapePlinVentas = yapeVentas + plinVentas;
-    const transferenciasVentas = turno.pagos.find((p) => p.metodo === "transferencia")?.total || 0;
+    const transferenciasVentas =
+      turno.pagos.find((p) => p.metodo === "transferencia")?.total || 0;
 
     const expectedEfectivo = openingCash + efectivoVentas;
 
@@ -105,16 +112,22 @@ export function CierreCajaClient({ turno, resumen, pagosRecientes }: CierreCajaC
 
   const totalDiferencia = actualTotals - expectedTotals;
   const cashDiferencia = totalEfectivoContado - systemStats.expectedEfectivo;
-  const tarjetaDiferencia = (parseFloat(actualCount.tarjeta) || 0) - systemStats.tarjetaVentas;
-  const yapePlinDiferencia = (parseFloat(actualCount.yapePlin) || 0) - systemStats.yapePlinVentas;
-  const transferDiferencia = (parseFloat(actualCount.transferencia) || 0) - systemStats.transferenciasVentas;
+  const tarjetaDiferencia =
+    (parseFloat(actualCount.tarjeta) || 0) - systemStats.tarjetaVentas;
+  const yapePlinDiferencia =
+    (parseFloat(actualCount.yapePlin) || 0) - systemStats.yapePlinVentas;
+  const transferDiferencia =
+    (parseFloat(actualCount.transferencia) || 0) -
+    systemStats.transferenciasVentas;
 
   const tieneDescuadre = Math.abs(totalDiferencia) > 0.01;
 
   // Enviar el cierre
   const handleFinalize = () => {
     if (tieneDescuadre && !obsCierre.trim()) {
-      toast.error("Por favor ingresa una observación justificando el descuadre de caja.");
+      toast.error(
+        "Por favor ingresa una observación justificando el descuadre de caja.",
+      );
       return;
     }
 
@@ -130,7 +143,9 @@ export function CierreCajaClient({ turno, resumen, pagosRecientes }: CierreCajaC
 [DESGLOSE DE EFECTIVO]
 ${DENOMINACIONES.map((d) => {
   const cant = parseInt(cantidades[d.id] || "0") || 0;
-  return cant > 0 ? "  * " + d.label + ": " + cant + " u. = S/ " + (cant * d.val).toFixed(2) : null;
+  return cant > 0
+    ? "  * " + d.label + ": " + cant + " u. = S/ " + (cant * d.val).toFixed(2)
+    : null;
 })
   .filter(Boolean)
   .join("\n")}
@@ -160,8 +175,8 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}
 
   return (
     <div className="space-y-6 pb-12 print:p-0 print:space-y-4">
-      <CierreHeader 
-        turno={turno} 
+      <CierreHeader
+        turno={turno}
         systemStats={systemStats}
         isPending={isPending}
         onFinalize={handleFinalize}
@@ -187,10 +202,10 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}
             totalDiferencia={totalDiferencia}
           />
 
-          <ArqueoEfectivo 
-            cantidades={cantidades} 
-            onCantidadesChange={handleCantidadesChange} 
-            totalEfectivoContado={totalEfectivoContado} 
+          <ArqueoEfectivo
+            cantidades={cantidades}
+            onCantidadesChange={handleCantidadesChange}
+            totalEfectivoContado={totalEfectivoContado}
           />
         </div>
 
@@ -198,7 +213,7 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}
         <div className="lg:col-span-4 space-y-6">
           <TurnoResumenCard resumen={resumen} />
           <PagosRecientesList pagos={pagosRecientes} />
-          
+
           <CierreAlerts
             tieneDescuadre={tieneDescuadre}
             totalDiferencia={totalDiferencia}

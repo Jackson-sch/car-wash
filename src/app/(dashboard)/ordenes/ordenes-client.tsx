@@ -11,8 +11,9 @@ import { updateOrdenEstado, asignarLavadorAOrden } from "@/lib/actions/ordenes";
 import { cobrarOrden } from "@/lib/actions/caja";
 import { toast } from "sonner";
 import { PaginationControls } from "@/components/shared/PaginationControls";
-import { OrdenesStatusCards } from "./components/OrdenesStatusCards";
-import { OrdenesDistribucionChart } from "./components/OrdenesDistribucionChart";
+import { OrdenesKpiCards } from "./components/OrdenesKpiCards";
+import { StaffAvailabilityCard } from "./components/StaffAvailabilityCard";
+import { OperationalFlowChart } from "./components/OperationalFlowChart";
 import { OrdenesTable, Orden, Lavador } from "./components/OrdenesTable";
 import { OrdenesBoard } from "./components/OrdenesBoard";
 import { CobrarModal, PaymentMethod } from "./components/CobrarModal";
@@ -205,36 +206,43 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
         </div>
       </div>
 
-      {/* KPI Stats overview + Recharts */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-        <div className="xl:col-span-3">
-          <OrdenesStatusCards
-            ordenes={ordenes}
-            activeFilter={activeFilter}
-            onFilterChange={(id) => {
-              setActiveFilter(id);
-              setPage(null);
-            }}
-          />
-        </div>
-        <div className="xl:col-span-1">
-          <OrdenesDistribucionChart ordenes={ordenes} />
-        </div>
-      </div>
+      {/* KPI Stats Bento Grid (Stitch design) */}
+      <OrdenesKpiCards ordenes={ordenes} />
 
       {/* Controls Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por placa, ticket o cliente..."
-            value={searchQuery || ""}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(null);
-            }}
-            className="pl-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
-          />
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por placa, ticket o cliente..."
+              value={searchQuery || ""}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(null);
+              }}
+              className="pl-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
+            />
+          </div>
+
+          {/* Status Dropdown Selector - from Stitch design */}
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-card/45 border border-border hover:border-zinc-400 dark:hover:border-zinc-700 rounded-lg text-xs font-bold shadow-xs h-9">
+            <span className="text-muted-foreground">Estado:</span>
+            <select
+              value={activeFilter || "todos"}
+              onChange={(e) => {
+                setActiveFilter(e.target.value);
+                setPage(null);
+              }}
+              className="bg-transparent border-none focus:ring-0 font-bold text-foreground py-0 pl-1 pr-6 cursor-pointer focus:outline-none"
+            >
+              <option value="todos" className="bg-card text-foreground font-bold">Todos</option>
+              <option value="pendiente" className="bg-card text-foreground font-bold">En Espera</option>
+              <option value="en_proceso" className="bg-card text-foreground font-bold">En Proceso</option>
+              <option value="completado" className="bg-card text-foreground font-bold">Completados</option>
+              <option value="cobrado" className="bg-card text-foreground font-bold">Cobrados</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -262,6 +270,16 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
           />
         </>
       )}
+
+      {/* Bottom Insights Section (Stitch gadgets) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <div className="lg:col-span-1">
+          <StaffAvailabilityCard lavadores={lavadores} ordenes={ordenes} />
+        </div>
+        <div className="lg:col-span-2">
+          <OperationalFlowChart ordenes={ordenes} />
+        </div>
+      </div>
 
       {/* Pay Modal Extracted Component */}
       {payingOrden && (

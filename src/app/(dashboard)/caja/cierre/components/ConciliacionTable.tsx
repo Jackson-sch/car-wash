@@ -2,6 +2,7 @@ import { CreditCard, Wallet, Coins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { SystemStats } from "../types";
+import { formatCurrency } from "@/lib/formats";
 
 interface ConciliacionTableProps {
   systemStats: SystemStats;
@@ -58,7 +59,7 @@ export function ConciliacionTable({
                 <span className="p-1 rounded bg-emerald-50 text-emerald-600"><Wallet className="h-3.5 w-3.5" /></span>
                 Efectivo (Caja)
               </td>
-              <td className="p-3 text-right font-medium text-zinc-650">S/ {systemStats.expectedEfectivo.toFixed(2)}</td>
+              <td className="p-3 text-right font-medium text-zinc-650">{formatCurrency(systemStats.expectedEfectivo)}</td>
               <td className="p-3 text-right w-44">
                 <div className="relative flex items-center">
                   <span className="absolute left-2.5 text-muted-foreground font-semibold">S/</span>
@@ -71,7 +72,7 @@ export function ConciliacionTable({
                 </div>
               </td>
               <td className={`p-3 text-right font-bold ${cashDiferencia === 0 ? "text-emerald-600" : cashDiferencia < 0 ? "text-rose-600" : "text-amber-600"}`}>
-                {cashDiferencia === 0 ? "S/ 0.00" : `${cashDiferencia > 0 ? "+" : ""} S/ ${cashDiferencia.toFixed(2)}`}
+                {cashDiferencia === 0 ? formatCurrency(0) : `${cashDiferencia > 0 ? "+" : ""}${formatCurrency(cashDiferencia)}`}
               </td>
             </tr>
 
@@ -81,7 +82,7 @@ export function ConciliacionTable({
                 <span className="p-1 rounded bg-indigo-50 text-indigo-600"><CreditCard className="h-3.5 w-3.5" /></span>
                 Tarjeta / POS
               </td>
-              <td className="p-3 text-right font-medium text-zinc-650">S/ {systemStats.tarjetaVentas.toFixed(2)}</td>
+              <td className="p-3 text-right font-medium text-zinc-650">{formatCurrency(systemStats.tarjetaVentas)}</td>
               <td className="p-3 text-right w-44">
                 <div className="relative flex items-center">
                   <span className="absolute left-2.5 text-muted-foreground font-semibold">S/</span>
@@ -96,7 +97,7 @@ export function ConciliacionTable({
                 </div>
               </td>
               <td className={`p-3 text-right font-bold ${tarjetaDiferencia === 0 ? "text-emerald-600" : tarjetaDiferencia < 0 ? "text-rose-600" : "text-amber-600"}`}>
-                {tarjetaDiferencia === 0 ? "S/ 0.00" : `${tarjetaDiferencia > 0 ? "+" : ""} S/ ${tarjetaDiferencia.toFixed(2)}`}
+                {tarjetaDiferencia === 0 ? formatCurrency(0) : `${tarjetaDiferencia > 0 ? "+" : ""}${formatCurrency(tarjetaDiferencia)}`}
               </td>
             </tr>
 
@@ -106,7 +107,7 @@ export function ConciliacionTable({
                 <span className="p-1 rounded bg-purple-50 text-purple-600"><Wallet className="h-3.5 w-3.5" /></span>
                 Yape / Plin
               </td>
-              <td className="p-3 text-right font-medium text-zinc-650">S/ {systemStats.yapePlinVentas.toFixed(2)}</td>
+              <td className="p-3 text-right font-medium text-zinc-650">{formatCurrency(systemStats.yapePlinVentas)}</td>
               <td className="p-3 text-right w-44">
                 <div className="relative flex items-center">
                   <span className="absolute left-2.5 text-muted-foreground font-semibold">S/</span>
@@ -121,7 +122,7 @@ export function ConciliacionTable({
                 </div>
               </td>
               <td className={`p-3 text-right font-bold ${yapePlinDiferencia === 0 ? "text-emerald-600" : yapePlinDiferencia < 0 ? "text-rose-600" : "text-amber-600"}`}>
-                {yapePlinDiferencia === 0 ? "S/ 0.00" : `${yapePlinDiferencia > 0 ? "+" : ""} S/ ${yapePlinDiferencia.toFixed(2)}`}
+                {yapePlinDiferencia === 0 ? formatCurrency(0) : `${yapePlinDiferencia > 0 ? "+" : ""}${formatCurrency(yapePlinDiferencia)}`}
               </td>
             </tr>
 
@@ -131,7 +132,7 @@ export function ConciliacionTable({
                 <span className="p-1 rounded bg-blue-50 text-blue-600"><Coins className="h-3.5 w-3.5" /></span>
                 Transferencia
               </td>
-              <td className="p-3 text-right font-medium text-zinc-650">S/ {systemStats.transferenciasVentas.toFixed(2)}</td>
+              <td className="p-3 text-right font-medium text-zinc-650">{formatCurrency(systemStats.transferenciasVentas)}</td>
               <td className="p-3 text-right w-44">
                 <div className="relative flex items-center">
                   <span className="absolute left-2.5 text-muted-foreground font-semibold">S/</span>
@@ -146,17 +147,17 @@ export function ConciliacionTable({
                 </div>
               </td>
               <td className={`p-3 text-right font-bold ${transferDiferencia === 0 ? "text-emerald-600" : transferDiferencia < 0 ? "text-rose-600" : "text-amber-600"}`}>
-                {transferDiferencia === 0 ? "S/ 0.00" : `${transferDiferencia > 0 ? "+" : ""} S/ ${transferDiferencia.toFixed(2)}`}
+                {transferDiferencia === 0 ? formatCurrency(0) : `${transferDiferencia > 0 ? "+" : ""}${formatCurrency(transferDiferencia)}`}
               </td>
             </tr>
           </tbody>
           <tfoot className="bg-zinc-50 border-t-2 border-border font-bold">
             <tr>
               <td className="p-3 uppercase text-zinc-700 tracking-wider">Totales Consolidados</td>
-              <td className="p-3 text-right text-zinc-800">S/ {expectedTotals.toFixed(2)}</td>
-              <td className="p-3 text-right text-zinc-900 pr-5">S/ {actualTotals.toFixed(2)}</td>
+              <td className="p-3 text-right text-zinc-800">{formatCurrency(expectedTotals)}</td>
+              <td className="p-3 text-right text-zinc-900 pr-5">{formatCurrency(actualTotals)}</td>
               <td className={`p-3 text-right text-sm ${totalDiferencia === 0 ? "text-emerald-600" : totalDiferencia < 0 ? "text-rose-600" : "text-amber-600"}`}>
-                {totalDiferencia === 0 ? "S/ 0.00 (Cuadrado)" : `${totalDiferencia > 0 ? "+" : ""} S/ ${totalDiferencia.toFixed(2)}`}
+                {totalDiferencia === 0 ? `${formatCurrency(0)} (Cuadrado)` : `${totalDiferencia > 0 ? "+" : ""}${formatCurrency(totalDiferencia)}`}
               </td>
             </tr>
           </tfoot>

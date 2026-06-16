@@ -38,6 +38,10 @@ export async function GET(
         sucursalEmail: sucursales.email,
         sucursalRuc: sucursales.ruc,
         sucursalLogo: sucursales.logoUrl,
+        comprobanteTipo: ordenes.comprobanteTipo,
+        comprobanteSerie: ordenes.comprobanteSerie,
+        comprobanteNumero: ordenes.comprobanteNumero,
+        facturadoAt: ordenes.facturadoAt,
       })
       .from(ordenes)
       .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
@@ -107,8 +111,13 @@ export async function GET(
   <div class="divider"></div>
 
   <div class="center">
-    <div style="font-size: 13px; font-weight: bold;">${orden.nroTicket || "TICKET"}</div>
-    <div style="font-size: 8px; color: #666;">Fecha: ${fecha}</div>
+    ${orden.comprobanteTipo 
+      ? `<div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">${orden.comprobanteTipo === 'boleta' ? 'BOLETA DE VENTA ELECTRÓNICA' : 'FACTURA ELECTRÓNICA'}</div>
+         <div style="font-size: 13px; font-weight: bold; margin-top: 2px;">${orden.comprobanteSerie} - ${orden.comprobanteNumero}</div>
+         <div style="font-size: 7px; color: #666; margin-top: 2px;">ASOCIADO A TICKET: ${orden.nroTicket || "—"}</div>`
+      : `<div style="font-size: 13px; font-weight: bold;">TICKET: ${orden.nroTicket || "—"}</div>`
+    }
+    <div style="font-size: 8px; color: #666; margin-top: 2px;">Fecha: ${fecha}</div>
   </div>
 
   <div class="divider"></div>
@@ -151,7 +160,12 @@ export async function GET(
 
   <div class="footer">
     <div class="bold" style="margin-bottom: 2px;">¡MUCHAS GRACIAS POR SU PREFERENCIA!</div>
-    <div>Conserve este ticket para retirar su vehículo.</div>
+    <div style="margin-bottom: 4px;">Conserve este ticket para retirar su vehículo.</div>
+    ${orden.comprobanteTipo
+      ? `<div style="font-size: 7px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px;">COMPROBANTE EMITIDO EN EL PORTAL DE SUNAT</div>`
+      : `<div style="font-size: 7.5px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px; text-transform: uppercase;">NOTA DE VENTA - SIN VALIDEZ TRIBUTARIA</div>
+         <div style="font-size: 7px; color: #666;">Solicite su Boleta o Factura en caja</div>`
+    }
   </div>
 
   <script>

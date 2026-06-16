@@ -1,7 +1,9 @@
-import { AlertTriangle, CheckCircle2, FileText, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { AlertTriangle, CheckCircle2, FileText, Lock } from "lucide-react";
+import { formatCurrency } from "@/lib/formats";
+
 
 interface CierreAlertsProps {
   tieneDescuadre: boolean;
@@ -32,7 +34,7 @@ export function CierreAlerts({
             <AlertTriangle className="h-3.5 w-3.5" /> Descuadre Detectado
           </div>
           <p>
-            Hay una diferencia total de <strong>S/ {totalDiferencia.toFixed(2)}</strong>. 
+            Hay una diferencia total de <strong>{formatCurrency(totalDiferencia)}</strong>. 
             Debes ingresar una explicación obligatoria en las observaciones antes de cerrar.
           </p>
         </div>
@@ -68,7 +70,8 @@ export function CierreAlerts({
       <Button
         onClick={onFinalize}
         disabled={isPending}
-        className="w-full h-10 text-xs font-bold gap-2 rounded-lg bg-black hover:bg-zinc-800 text-white cursor-pointer shadow-sm mt-2"
+        className="w-full h-10 text-xs font-bold gap-2 rounded-lg cursor-pointer shadow-sm mt-2"
+        variant='secondary'
       >
         <Lock className="h-4 w-4" />
         {isPending ? "Confirmando Cierre..." : "Confirmar Cierre y Entregar Caja"}

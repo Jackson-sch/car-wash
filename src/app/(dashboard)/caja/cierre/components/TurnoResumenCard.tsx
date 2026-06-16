@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/formats";
 
 interface TurnoResumenCardProps {
   resumen: {
@@ -23,15 +24,15 @@ export function TurnoResumenCard({ resumen }: TurnoResumenCardProps) {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground font-medium">Ventas Brutas</span>
-          <span className="font-bold text-zinc-800">S/ {resumen.ventasBrutas.toFixed(2)}</span>
+          <span className="font-bold text-zinc-800">{formatCurrency(resumen.ventasBrutas)}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground font-medium">Descuentos Aplicados</span>
-          <span className="font-bold text-rose-600">- S/ {resumen.descuentos.toFixed(2)}</span>
+          <span className="font-bold text-rose-600">{formatCurrency(resumen.descuentos)}</span>
         </div>
         <div className="border-t border-border pt-2.5 flex justify-between items-baseline font-bold">
           <span className="text-zinc-900">Ingresos Netos del Turno</span>
-          <span className="text-secondary text-sm font-extrabold">S/ {resumen.ingresosNetos.toFixed(2)}</span>
+          <span className="text-secondary text-sm font-extrabold">{formatCurrency(resumen.ingresosNetos)}</span>
         </div>
       </div>
     </Card>

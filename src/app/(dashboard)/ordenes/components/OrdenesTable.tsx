@@ -29,6 +29,7 @@ export interface Orden {
   notes?: string | null;
   notas?: string | null;
   createdAt: Date | null;
+  updatedAt: Date | null;
   placa: string;
   vehiculoMarca: string | null;
   vehiculoModelo: string | null;
@@ -37,6 +38,9 @@ export interface Orden {
   clienteApellido: string | null;
   lavadorNombre: string | null;
   lavadorApellido: string | null;
+  comprobanteTipo?: string | null;
+  comprobanteSerie?: string | null;
+  comprobanteNumero?: string | null;
 }
 
 export interface Lavador {
