@@ -186,7 +186,13 @@ export function ServicioModal({
               onValueChange={(val: string | null) => setCategoriaId(!val || val === "unassigned" ? "" : val)}
             >
               <SelectTrigger id="categoria" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-9 px-3">
-                <SelectValue placeholder="Selecciona una categoría" />
+                <SelectValue placeholder="Selecciona una categoría">
+                  {(val) => {
+                    if (!val || val === "unassigned") return "Selecciona una categoría";
+                    const cat = categorias.find((c) => c.id === val);
+                    return cat ? cat.nombre : val;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="w-full bg-card text-card-foreground border border-border">
                 <SelectItem value="unassigned">Selecciona una categoría</SelectItem>
@@ -249,7 +255,7 @@ export function ServicioModal({
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-black hover:bg-zinc-800 text-white font-bold text-xs h-9 rounded-lg px-5 shadow-sm cursor-pointer"
+              className="font-bold text-xs h-9 rounded-lg px-5 shadow-sm cursor-pointer"
             >
               {isPending ? "Guardando..." : "Guardar Servicio"}
             </Button>

@@ -3,6 +3,7 @@
 import { Clock, Coins, Layers, Sparkles, Car, Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/formats";
 
 export interface Categoria {
   id: string;
@@ -124,7 +125,7 @@ export function ServiciosGrid({
               </div>
               <div className="text-right">
                 <div className="text-base font-extrabold text-zinc-900">
-                  S/ {parseFloat(serv.precio).toFixed(2)}
+                  {formatCurrency(parseFloat(serv.precio))}
                 </div>
                 <div className="text-[10px] text-zinc-500 flex items-center gap-1 justify-end mt-0.5 font-bold">
                   <Clock className="h-3 w-3" />

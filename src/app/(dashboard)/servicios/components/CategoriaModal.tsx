@@ -69,7 +69,7 @@ export function CategoriaModal({
             <Button
               type="submit"
               disabled={isPending || !nuevaCatNombre}
-              className="bg-black hover:bg-zinc-800 text-white font-bold text-xs h-8 rounded-lg px-4 cursor-pointer"
+              className="font-bold text-xs h-8 rounded-lg px-4 cursor-pointer"
             >
               {isPending ? "Creando..." : "Crear"}
             </Button>

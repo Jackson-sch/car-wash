@@ -19,6 +19,7 @@ import { ServiciosCategoryTabs } from "./components/ServiciosCategoryTabs";
 import { ServiciosGrid, Servicio, Categoria } from "./components/ServiciosGrid";
 import { ServicioModal } from "./components/ServicioModal";
 import { CategoriaModal } from "./components/CategoriaModal";
+import { formatCurrency } from "@/lib/formats";
 
 interface ServiciosClientProps {
   initialServicios: Servicio[];
@@ -200,7 +201,7 @@ export function ServiciosClient({
         <div className="flex items-center gap-3">
           <Button
             onClick={handleOpenCreate}
-            className="bg-black hover:bg-zinc-800 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
+            className="font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
           >
             <Plus className="h-4.5 w-4.5" />
             Agregar Servicio
@@ -217,7 +218,7 @@ export function ServiciosClient({
         />
         <StatsCard
           label="Precio Promedio"
-          value={`S/ ${precioPromedio.toFixed(2)}`}
+          value={formatCurrency(precioPromedio)}
           icon={<Coins className="h-5 w-5" />}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-600"
