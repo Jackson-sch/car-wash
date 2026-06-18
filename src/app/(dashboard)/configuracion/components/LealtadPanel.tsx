@@ -99,7 +99,7 @@ export function LealtadPanel({
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-gradient-to-r from-secondary/5 to-secondary/10 border border-secondary/20 flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-linear-to-r from-secondary/5 to-secondary/10 border border-secondary/20 flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
             <Gift className="h-5 w-5" />
           </div>

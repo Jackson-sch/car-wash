@@ -10,12 +10,25 @@ import {
   Save,
   Eye,
   EyeOff,
+  Database,
+  Lock,
+  ShieldCheck,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { updateConfigGlobal } from "@/lib/actions/config-global";
+import { solicitarTokenBackup } from "@/lib/actions/backups";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 interface ConfigData {
@@ -47,6 +60,36 @@ export function ConfigForm({ config }: { config: ConfigData }) {
   });
   const [showPass, setShowPass] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const [backupModalOpen, setBackupModalOpen] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [verifyingBackup, setVerifyingBackup] = useState(false);
+
+  const handleGenerateBackup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmPassword.trim()) {
+      toast.error("Por favor, ingrese su contraseña.");
+      return;
+    }
+
+    try {
+      setVerifyingBackup(true);
+      const res = await solicitarTokenBackup(confirmPassword);
+      if (res.success && res.token) {
+        toast.success("Verificación exitosa. Iniciando descarga...");
+        setBackupModalOpen(false);
+        setConfirmPassword("");
+        window.location.href = `/api/superadmin/backup?token=${res.token}`;
+      } else {
+        toast.error(res.error || "Contraseña incorrecta o error al generar el backup.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Ocurrió un error inesperado al procesar la copia de seguridad.");
+    } finally {
+      setVerifyingBackup(false);
+    }
+  };
 
   const handleSaveSection = async (section: string) => {
     try {
@@ -267,13 +310,101 @@ export function ConfigForm({ config }: { config: ConfigData }) {
           <Button
             onClick={() => handleSaveSection("smtp")}
             disabled={saving}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold gap-2 cursor-pointer rounded-xl text-xs py-2 h-auto"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-bold gap-2 cursor-pointer rounded-xl text-xs py-2 h-auto mt-4"
           >
             <Save className="size-3.5" />
             {saving ? "Guardando..." : "Guardar Configuración SMTP"}
           </Button>
         </div>
       </section>
+
+      {/* Copias de Seguridad */}
+      <section className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-border bg-muted/20 flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+            <Database className="size-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-foreground">Copias de Seguridad (Respaldos)</h2>
+            <p className="text-[10px] text-muted-foreground">Exporta los datos de toda la aplicación para resguardo o migración.</p>
+          </div>
+        </div>
+        <div className="p-6 space-y-4">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Genera una copia de seguridad en formato JSON estructurado que incluye la configuración global,
+            empresas, planes de suscripción, sucursales, usuarios, clientes, vehículos, servicios y las órdenes de servicio con sus respectivos pagos y comisiones.
+          </p>
+          <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+            <ShieldCheck className="size-4.5 text-emerald-500 shrink-0" />
+            <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 leading-relaxed">
+              <strong>Protección y Seguridad:</strong> Para poder descargar este archivo, deberás re-autenticarte
+              confirmando tu contraseña de administrador. La descarga directa expira después de 60 segundos
+              y está sujeta a límites de frecuencia (máximo 1 descarga por hora).
+            </p>
+          </div>
+          <Button
+            onClick={() => setBackupModalOpen(true)}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2 cursor-pointer rounded-xl text-xs py-2 h-auto"
+          >
+            <Download className="size-3.5" />
+            Generar Copia de Seguridad
+          </Button>
+        </div>
+      </section>
+
+      {/* Modal de Re-autenticación */}
+      <Dialog open={backupModalOpen} onOpenChange={(open) => {
+        setBackupModalOpen(open);
+        if (!open) setConfirmPassword("");
+      }}>
+        <DialogContent className="bg-card border border-border rounded-2xl max-w-sm">
+          <form onSubmit={handleGenerateBackup} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle className="text-foreground text-sm font-bold flex items-center gap-2">
+                <Lock className="size-4 text-emerald-500" />
+                Confirmar Contraseña
+              </DialogTitle>
+              <DialogDescription className="text-[11px] text-muted-foreground leading-relaxed">
+                Por seguridad, es obligatorio confirmar tu contraseña de administrador para poder descargar el respaldo completo de la base de datos.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="backupPass" className="text-xs font-semibold text-foreground">
+                Tu contraseña de Superadmin
+              </Label>
+              <Input
+                id="backupPass"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ingresa tu contraseña"
+                className="bg-muted/30 border-border focus-visible:ring-ring/50 text-foreground text-xs py-4.5 rounded-xl"
+              />
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setBackupModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground border border-border rounded-xl text-xs py-2 h-auto"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={verifyingBackup}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs py-2 h-auto"
+              >
+                {verifyingBackup ? "Verificando..." : "Confirmar y Descargar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+

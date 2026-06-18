@@ -15,8 +15,8 @@ export function ServiciosCategoryTabs({ categorias, activeTab, onTabChange }: Se
         onClick={() => onTabChange("todos")}
         className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
           activeTab === "todos"
-            ? "bg-card text-foreground shadow-sm border border-zinc-200"
-            : "text-zinc-500 hover:text-zinc-855 dark:hover:text-zinc-100"
+            ? "bg-background/25 text-foreground shadow-sm border border-zinc-200"
+            : "hover:bg-background/25 text-zinc-500 hover:text-zinc-855 dark:hover:text-white"
         }`}
       >
         Todos
@@ -27,8 +27,8 @@ export function ServiciosCategoryTabs({ categorias, activeTab, onTabChange }: Se
           onClick={() => onTabChange(cat.id)}
           className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
             activeTab === cat.id
-              ? "bg-card text-foreground shadow-sm border border-zinc-200"
-              : "text-zinc-500 hover:text-zinc-855 dark:hover:text-zinc-100"
+              ? "bg-background/25 text-foreground shadow-sm border border-zinc-200"
+              : "hover:bg-background/25 text-zinc-500 hover:text-zinc-855 dark:hover:text-white"
           }`}
         >
           {cat.nombre}

@@ -207,7 +207,7 @@ export function CrearClienteModal({
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-black hover:bg-zinc-800 text-white font-bold text-xs h-9 rounded-lg px-5 shadow-sm cursor-pointer"
+              className="font-bold text-xs h-9 rounded-lg px-5 shadow-sm cursor-pointer"
             >
               {isPending ? "Registrando..." : "Registrar"}
             </Button>

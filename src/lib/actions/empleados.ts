@@ -15,7 +15,7 @@ export async function getEmpleadosComisiones() {
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
 
-    // 1. Obtener todos los empleados de la sucursal
+    // 1. Obtener todos los empleados de la sucursal (tanto activos como inactivos)
     const empleadosList = await db
       .select({
         id: usuarios.id,
@@ -27,7 +27,7 @@ export async function getEmpleadosComisiones() {
         activo: usuarios.activo,
       })
       .from(usuarios)
-      .where(and(eq(usuarios.sucursalId, sucursalId), eq(usuarios.activo, true)))
+      .where(eq(usuarios.sucursalId, sucursalId))
       .orderBy(usuarios.nombre);
 
     // 2. Para cada empleado, si es lavador, calcular comisiones
@@ -121,5 +121,108 @@ export async function registrarEmpleado(data: {
   } catch (error: unknown) {
     console.error("Error al registrar empleado:", error);
     return { success: false, error: getErrorMessage(error, "Error al registrar el personal") };
+  }
+}
+
+// Actualizar un empleado existente con salvaguardas
+export async function actualizarEmpleado(
+  id: string,
+  data: {
+    nombre: string;
+    apellido?: string | null;
+    telefono?: string | null;
+    rol: "admin" | "supervisor" | "cajero" | "lavador";
+  }
+) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "empleados", accion: "gestionar" });
+    const sucursalId = session.user.sucursalId!;
+    const requesterId = session.user.id;
+
+    // 1. Obtener datos actuales del usuario a modificar
+    const [emp] = await db
+      .select()
+      .from(usuarios)
+      .where(and(eq(usuarios.id, id), eq(usuarios.sucursalId, sucursalId)))
+      .limit(1);
+
+    if (!emp) {
+      throw new Error("Empleado no encontrado o no pertenece a tu sucursal.");
+    }
+
+    // 2. Salvaguarda: No permitir modificar un superadmin
+    if (emp.rol === "superadmin") {
+      throw new Error("No tienes permisos para modificar a un Super Administrador.");
+    }
+
+    // 3. Salvaguarda: No permitir que un usuario modifique su propio rol (evitar pérdida de permisos)
+    if (id === requesterId && data.rol !== emp.rol) {
+      throw new Error("No puedes cambiar tu propio rol para evitar pérdida de accesos.");
+    }
+
+    // 4. Actualizar base de datos
+    const [updated] = await db
+      .update(usuarios)
+      .set({
+        nombre: data.nombre.trim(),
+        apellido: data.apellido || null,
+        telefono: data.telefono || null,
+        rol: data.rol,
+        updatedAt: new Date(),
+      })
+      .where(eq(usuarios.id, id))
+      .returning();
+
+    revalidatePath("/empleados");
+    return { success: true, data: updated };
+  } catch (error: unknown) {
+    console.error("Error al actualizar empleado:", error);
+    return { success: false, error: getErrorMessage(error, "Error al actualizar el empleado") };
+  }
+}
+
+// Cambiar estado activo/inactivo (Dar de baja / reactivar) de un empleado
+export async function cambiarEstadoEmpleado(id: string, activo: boolean) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "empleados", accion: "gestionar" });
+    const sucursalId = session.user.sucursalId!;
+    const requesterId = session.user.id;
+
+    // 1. Obtener datos actuales del usuario a modificar
+    const [emp] = await db
+      .select()
+      .from(usuarios)
+      .where(and(eq(usuarios.id, id), eq(usuarios.sucursalId, sucursalId)))
+      .limit(1);
+
+    if (!emp) {
+      throw new Error("Empleado no encontrado o no pertenece a tu sucursal.");
+    }
+
+    // 2. Salvaguarda: No permitir desactivar a un superadmin
+    if (emp.rol === "superadmin" && !activo) {
+      throw new Error("No se puede desactivar al Super Administrador.");
+    }
+
+    // 3. Salvaguarda: No permitir desactivarse a sí mismo
+    if (id === requesterId && !activo) {
+      throw new Error("No puedes dar de baja a tu propia cuenta en sesión.");
+    }
+
+    // 4. Actualizar el estado en la base de datos
+    const [updated] = await db
+      .update(usuarios)
+      .set({
+        activo,
+        updatedAt: new Date(),
+      })
+      .where(eq(usuarios.id, id))
+      .returning();
+
+    revalidatePath("/empleados");
+    return { success: true, data: updated };
+  } catch (error: unknown) {
+    console.error("Error al cambiar estado del empleado:", error);
+    return { success: false, error: getErrorMessage(error, "Error al cambiar estado del empleado") };
   }
 }

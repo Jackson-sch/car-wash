@@ -129,7 +129,7 @@ export function AjustarPuntosModal({
             <Button
               type="submit"
               disabled={isPending || !ajustePuntos}
-              className="bg-black hover:bg-zinc-800 text-white font-bold text-[10px] h-8 rounded-lg px-4 shadow-sm flex items-center gap-1 cursor-pointer"
+              className="font-bold text-[10px] h-8 rounded-lg px-4 shadow-sm flex items-center gap-1 cursor-pointer"
             >
               <Save className="h-3 w-3" />
               {isPending ? "Guardando..." : "Guardar"}

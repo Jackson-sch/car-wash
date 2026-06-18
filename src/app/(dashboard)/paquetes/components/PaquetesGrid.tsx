@@ -45,7 +45,7 @@ export function PaquetesGrid({
           key={p.id}
           className={`group relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 ${
             p.activo
-              ? "bg-gradient-to-br from-card via-card to-secondary/3 hover:border-zinc-400/50 dark:hover:border-zinc-700/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] border-border/80"
+              ? "bg-linear-to-br from-card via-card to-secondary/3 hover:border-zinc-400/50 dark:hover:border-zinc-700/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] border-border/80"
               : "bg-muted/30 border-dashed border-border/60 opacity-80"
           }`}
         >
@@ -148,7 +148,7 @@ export function PaquetesGrid({
                 variant="ghost"
                 size="icon"
                 onClick={() => onDelete(p.id)}
-                className="h-8 w-8 rounded-lg hover:bg-card hover:text-destructive hover:bg-destructive/10 transition-all"
+                className="h-8 w-8 rounded-lg  hover:text-destructive hover:bg-destructive/10 transition-all"
                 title="Eliminar"
               >
                 <Trash2 className="h-4 w-4 text-destructive" />

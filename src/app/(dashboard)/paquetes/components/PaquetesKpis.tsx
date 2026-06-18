@@ -56,7 +56,7 @@ export function PaquetesKpis({ paquetes }: PaquetesKpisProps) {
       </div>
 
       {/* Valor Total */}
-      <div className="p-5 rounded-2xl border-l-4 border-l-secondary flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Valor de Combos

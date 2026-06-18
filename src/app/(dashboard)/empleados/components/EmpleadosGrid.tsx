@@ -1,12 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
-import { Search, X, UserCog } from "lucide-react";
+import { Search, X, UserCog, MoreVertical, Edit, UserMinus, UserCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { formatCurrency } from "@/lib/formats";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Empleado {
   id: string;
@@ -23,9 +29,14 @@ interface Empleado {
 
 interface EmpleadosGridProps {
   empleados: Empleado[];
+  currentUserId: string | undefined;
+  onEditClick: (empleado: Empleado) => void;
+  onToggleStatus: (id: string, active: boolean) => void;
 }
 
 const ROL_BADGE: Record<string, string> = {
+  superadmin:
+    "border-indigo-200 text-indigo-800 bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300 dark:bg-indigo-950/30",
   admin:
     "border-rose-200 text-rose-800 bg-rose-50 dark:border-rose-800 dark:text-rose-300 dark:bg-rose-950/30",
   supervisor:
@@ -36,7 +47,12 @@ const ROL_BADGE: Record<string, string> = {
     "border-emerald-200 text-emerald-800 bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 dark:bg-emerald-950/30",
 };
 
-export function EmpleadosGrid({ empleados }: EmpleadosGridProps) {
+export function EmpleadosGrid({
+  empleados,
+  currentUserId,
+  onEditClick,
+  onToggleStatus,
+}: EmpleadosGridProps) {
   const [searchQuery, setSearchQuery] = useQueryState("search", {
     defaultValue: "",
     shallow: true,
@@ -115,27 +131,84 @@ export function EmpleadosGrid({ empleados }: EmpleadosGridProps) {
             {paginatedData.map((emp) => (
               <Card
                 key={emp.id}
-                className="p-6 border-border bg-card hover:border-zinc-350 hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+                className={`p-6 border-border bg-card hover:border-zinc-350 hover:shadow-md transition-all duration-300 flex flex-col justify-between ${
+                  !emp.activo ? "opacity-75 dark:opacity-65" : ""
+                }`}
               >
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-muted text-foreground font-extrabold flex items-center justify-center text-sm uppercase border border-border">
-                      {emp.nombre.charAt(0)}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-full bg-muted text-foreground font-extrabold flex items-center justify-center text-sm uppercase border border-border shrink-0">
+                        {emp.nombre.charAt(0)}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-foreground leading-tight truncate">
+                          {emp.nombre} {emp.apellido || ""}
+                        </h3>
+                        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                          <span
+                            className={`inline-block text-[9px] font-bold rounded px-1.5 py-0.5 border uppercase ${ROL_BADGE[emp.rol] || ""}`}
+                          >
+                            {emp.rol === "superadmin" ? "Super Admin" : emp.rol}
+                          </span>
+                          <span
+                            className={`inline-block text-[9px] font-bold rounded px-1.5 py-0.5 border uppercase ${
+                              emp.activo
+                                ? "border-emerald-200 text-emerald-800 bg-emerald-50 dark:border-emerald-800/40 dark:text-emerald-300 dark:bg-emerald-950/20"
+                                : "border-zinc-300 text-zinc-500 bg-zinc-50 dark:border-zinc-700/40 dark:text-zinc-400 dark:bg-zinc-800/20"
+                            }`}
+                          >
+                            {emp.activo ? "Activo" : "De Baja"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground leading-tight">
-                        {emp.nombre} {emp.apellido || ""}
-                      </h3>
-                      <span
-                        className={`inline-block text-[9px] font-bold rounded px-2 py-0.5 mt-1 border uppercase ${ROL_BADGE[emp.rol] || ""}`}
+
+                    {/* Actions Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <button className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center cursor-pointer shrink-0 transition-colors">
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                        }
+                      />
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-44 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95"
                       >
-                        {emp.rol}
-                      </span>
-                    </div>
+                        <DropdownMenuItem
+                          onClick={() => onEditClick(emp)}
+                          className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground"
+                        >
+                          <Edit className="h-4 w-4 text-muted-foreground" />
+                          <span>Modificar</span>
+                        </DropdownMenuItem>
+                        {emp.activo ? (
+                          <DropdownMenuItem
+                            onClick={() => onToggleStatus(emp.id, false)}
+                            disabled={emp.id === currentUserId || emp.rol === "superadmin"}
+                            className="focus:bg-rose-500/10 focus:text-rose-600 dark:focus:text-rose-450 cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <UserMinus className="h-4 w-4 text-rose-500/70" />
+                            <span>Dar de baja</span>
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => onToggleStatus(emp.id, true)}
+                            disabled={emp.rol === "superadmin"}
+                            className="focus:bg-emerald-500/10 focus:text-emerald-600 cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <UserCheck className="h-4 w-4 text-emerald-500/70" />
+                            <span>Dar de alta</span>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
                   <div className="text-[10px] text-muted-foreground space-y-0.5 font-medium">
-                    <div>{emp.email}</div>
+                    <div className="truncate">{emp.email}</div>
                     {emp.telefono && <div>Telf: {emp.telefono}</div>}
                   </div>
 
