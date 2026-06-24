@@ -66,12 +66,12 @@ export async function getClientes() {
         totalVehiculos: sql<number>`(
           SELECT COALESCE(COUNT(*), 0)::int
           FROM ${vehiculos}
-          WHERE ${vehiculos.clienteId} = ${clientes.id}
+          WHERE ${vehiculos.clienteId} = clientes.id
         )`,
         totalPuntos: sql<number>`(
           SELECT COALESCE(SUM(${puntosFidelidad.puntos}), 0)::int
           FROM ${puntosFidelidad}
-          WHERE ${puntosFidelidad.clienteId} = ${clientes.id}
+          WHERE ${puntosFidelidad.clienteId} = clientes.id
         )`,
       })
       .from(clientes)
@@ -227,5 +227,35 @@ export async function ajustarPuntosCliente(data: {
   } catch (error: unknown) {
     console.error("Error al ajustar puntos:", error);
     return { success: false, error: getErrorMessage(error, "Error al ajustar puntos") };
+  }
+}
+
+// Obtener los puntos de lealtad de un cliente asociado a una orden
+export async function getClientePuntosByOrdenId(ordenId: string) {
+  try {
+    const session = await getSessionOrThrow();
+    const sucursalId = session.user.sucursalId!;
+
+    const [row] = await db
+      .select({
+        clienteId: clientes.id,
+        nombre: clientes.nombre,
+        apellido: clientes.apellido,
+        totalPuntos: sql<number>`coalesce((
+          select sum(${puntosFidelidad.puntos})::int
+          from ${puntosFidelidad}
+          where ${puntosFidelidad.clienteId} = clientes.id
+        ), 0)`,
+      })
+      .from(ordenes)
+      .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
+      .innerJoin(clientes, eq(vehiculos.clienteId, clientes.id))
+      .where(and(eq(ordenes.id, ordenId), eq(clientes.sucursalId, sucursalId)))
+      .limit(1);
+
+    return row || null;
+  } catch (error) {
+    console.error("Error al obtener puntos del cliente por orden:", error);
+    return null;
   }
 }

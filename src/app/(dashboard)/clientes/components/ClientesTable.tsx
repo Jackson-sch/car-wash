@@ -19,6 +19,7 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 
 export interface Cliente {
   id: string;
@@ -38,12 +39,22 @@ interface ClientesTableProps {
   clientes: Cliente[];
   onViewDetails: (cliente: Cliente) => void;
   onOpenAjuste: (cliente: Cliente) => void;
+  activePage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
 export function ClientesTable({
   clientes,
   onViewDetails,
   onOpenAjuste,
+  activePage,
+  totalPages,
+  onPageChange,
+  totalItems,
+  itemsPerPage,
 }: ClientesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -55,7 +66,7 @@ export function ClientesTable({
           type="button"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="hover:bg-zinc-100 font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-zinc-700"
+          className="hover:bg-muted font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
         >
           Nombres
           <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -65,10 +76,10 @@ export function ClientesTable({
         const cli = row.original;
         return (
           <div>
-            <div className="font-extrabold text-zinc-900">
+            <div className="font-extrabold text-foreground">
               {cli.nombre} {cli.apellido || ""}
             </div>
-            <div className="text-[10px] text-zinc-500 lowercase font-bold mt-0.5">
+            <div className="text-[10px] text-muted-foreground lowercase font-bold mt-0.5">
               {cli.email || "sin correo"}
             </div>
           </div>
@@ -79,7 +90,7 @@ export function ClientesTable({
       accessorKey: "telefono",
       header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Celular</span>,
       cell: ({ row }: any) => (
-        <span className="text-zinc-550 font-bold">{row.getValue("telefono") || "-"}</span>
+        <span className="text-muted-foreground font-bold">{row.getValue("telefono") || "-"}</span>
       ),
     },
     {
@@ -88,7 +99,7 @@ export function ClientesTable({
       cell: ({ row }: any) => {
         const cli = row.original;
         return (
-          <span className="text-zinc-550 font-bold">
+          <span className="text-muted-foreground font-bold">
             {cli.tipoDoc && cli.nroDoc ? `${cli.tipoDoc}: ${cli.nroDoc}` : "-"}
           </span>
         );
@@ -102,7 +113,7 @@ export function ClientesTable({
             type="button"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-zinc-100 font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-zinc-700 mx-auto"
+            className="hover:bg-muted font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground mx-auto"
           >
             Autos
             <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -110,7 +121,7 @@ export function ClientesTable({
         </div>
       ),
       cell: ({ row }: any) => (
-        <div className="text-center text-zinc-800 font-bold">
+        <div className="text-center text-foreground/80 font-bold">
           {row.getValue("totalVehiculos")}
         </div>
       ),
@@ -123,7 +134,7 @@ export function ClientesTable({
             type="button"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-zinc-100 font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-zinc-700 mx-auto"
+            className="hover:bg-muted font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground mx-auto"
           >
             Puntos Acumulados
             <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -132,7 +143,7 @@ export function ClientesTable({
       ),
       cell: ({ row }: any) => (
         <div className="flex justify-center">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20">
             <Gift className="h-3.5 w-3.5" />
             {row.getValue("totalPuntos")} pts
           </span>
@@ -150,7 +161,7 @@ export function ClientesTable({
               type="button"
               variant="outline"
               onClick={() => onViewDetails(cli)}
-              className="border-zinc-300 hover:bg-zinc-50 text-zinc-700 text-[10px] font-bold h-7.5 px-2.5"
+              className="border-border hover:bg-muted text-foreground/80 text-[10px] font-bold h-7.5 px-2.5"
             >
               Ver Ficha
             </Button>
@@ -158,7 +169,7 @@ export function ClientesTable({
               type="button"
               variant="ghost"
               onClick={() => onOpenAjuste(cli)}
-              className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 rounded-lg cursor-pointer"
+              className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 rounded-lg cursor-pointer"
             >
               <Coins className="h-4 w-4" />
             </Button>
@@ -182,11 +193,11 @@ export function ClientesTable({
   if (clientes.length === 0) {
     return (
       <Card className="p-12 border border-border bg-card text-center flex flex-col items-center justify-center space-y-3 max-w-md mx-auto shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
-        <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center text-muted-foreground">
+        <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground">
           <Users className="h-5 w-5" />
         </div>
-        <h4 className="text-sm font-bold text-zinc-900">Directorio vacío</h4>
-        <p className="text-xs text-zinc-500 leading-relaxed">
+        <h4 className="text-sm font-bold text-foreground">Directorio vacío</h4>
+        <p className="text-xs text-muted-foreground leading-relaxed">
           No se encontraron clientes que coincidan con los filtros de búsqueda. ¡Crea un cliente nuevo para comenzar a acumular puntos!
         </p>
       </Card>
@@ -194,11 +205,11 @@ export function ClientesTable({
   }
 
   return (
-    <Card className="border border-border bg-card overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+    <Card className="border border-border bg-card p-0 overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
       <Table className="min-w-[800px]">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="bg-zinc-50 border-b border-zinc-200">
+            <TableRow key={headerGroup.id} className="bg-muted/30 border-b border-border">
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id} className="py-4">
                   {header.isPlaceholder
@@ -212,11 +223,11 @@ export function ClientesTable({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className="divide-y divide-zinc-100 text-xs text-zinc-700">
+        <TableBody className="divide-y divide-border/40 text-xs text-foreground/80">
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
-              className="hover:bg-zinc-50 transition-colors"
+              className="hover:bg-muted/40 transition-colors"
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id} className="py-4">
@@ -230,6 +241,18 @@ export function ClientesTable({
           ))}
         </TableBody>
       </Table>
+      {totalItems > 0 && (
+        <div className="p-4 border-t border-border bg-transparent">
+          <PaginationControls
+            activePage={activePage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            showInfo
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
+      )}
     </Card>
   );
 }

@@ -20,9 +20,16 @@ export interface ServicioTop {
   total: number;
 }
 
+export interface HoraPico {
+  hora: string;
+  cantidad: number;
+  prediccion: number;
+}
+
 export interface ReportData {
   kpis: KPIStats;
   ventasDiarias: VentaDiaria[];
   pagosMetodo: PagoMetodo[];
   serviciosTop: ServicioTop[];
+  horasPico: HoraPico[];
 }

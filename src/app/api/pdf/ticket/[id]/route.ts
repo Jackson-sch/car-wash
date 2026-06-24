@@ -10,6 +10,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const { searchParams } = new URL(_request.url);
+    const mode = searchParams.get("mode");
+    const isWorkMode = mode === "work";
 
     const [orden] = await db
       .select({
@@ -131,27 +134,39 @@ export async function GET(
 
   <div class="divider"></div>
 
-  <div class="table-h"><span>Servicio</span><span>Importe</span></div>
-  ${servicios.map((s) => `<div class="table-r"><span>${s.nombreServicio} (x${s.cantidad || 1})</span><span>S/ ${parseFloat(s.subtotal).toFixed(2)}</span></div>`).join("")}
+  <div class="table-h"><span>Servicio</span>${isWorkMode ? "" : "<span>Importe</span>"}</div>
+  ${servicios.map((s) => `<div class="table-r"><span>${s.nombreServicio} (x${s.cantidad || 1})</span>${isWorkMode ? "" : `<span>S/ ${parseFloat(s.subtotal).toFixed(2)}</span>`}</div>`).join("")}
 
+  ${isWorkMode ? "" : `
   <div class="divider"></div>
 
   <div class="row"><span class="bold">SUBTOTAL:</span><span>S/ ${parseFloat(orden.subtotal || "0").toFixed(2)}</span></div>
   ${parseFloat(orden.descuento || "0") > 0 ? `<div class="row"><span class="bold">DESCUENTO:</span><span>- S/ ${parseFloat(orden.descuento || "0").toFixed(2)}</span></div>` : ""}
   <div class="total"><span>TOTAL:</span><span>S/ ${parseFloat(orden.total || "0").toFixed(2)}</span></div>
+  `}
 
   <div class="divider"></div>
 
   <div class="row"><span class="bold">LAVADOR:</span><span>${orden.lavadorNombre ? `${orden.lavadorNombre} ${orden.lavadorApellido || ""}` : "SIN ASIGNAR"}</span></div>
   <div class="row"><span class="bold">ESTADO:</span><span class="bold">${orden.estado.toUpperCase()}</span></div>
 
+  ${orden.notas ? `
+  <div class="divider"></div>
+  <div style="text-align: left; font-size: 8px; line-height: 1.2;">
+    <span class="bold">RECOMENDACIONES / NOTAS:</span>
+    <div style="margin-top: 2px; font-style: italic; white-space: pre-wrap;">${orden.notas}</div>
+  </div>
+  ` : ""}
+
   <div class="divider"></div>
 
+  ${isWorkMode ? "" : `
   <div class="loyalty">
     <div class="bold">PROGRAMA DE LEALTAD</div>
     <div style="margin-top: 2px;">Puntos ganados hoy: ${puntosGanados}</div>
     <div style="margin-top: 1px; color: #888;">Acumula puntos y canjea lavados gratis</div>
   </div>
+  `}
 
   <div style="text-align: center; margin: 8px 0;">
     <img src="${qrDataUrl}" alt="QR" style="width:72px;height:72px;display:inline-block;" />
@@ -161,10 +176,12 @@ export async function GET(
   <div class="footer">
     <div class="bold" style="margin-bottom: 2px;">¡MUCHAS GRACIAS POR SU PREFERENCIA!</div>
     <div style="margin-bottom: 4px;">Conserve este ticket para retirar su vehículo.</div>
-    ${orden.comprobanteTipo
-      ? `<div style="font-size: 7px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px;">COMPROBANTE EMITIDO EN EL PORTAL DE SUNAT</div>`
-      : `<div style="font-size: 7.5px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px; text-transform: uppercase;">NOTA DE VENTA - SIN VALIDEZ TRIBUTARIA</div>
-         <div style="font-size: 7px; color: #666;">Solicite su Boleta o Factura en caja</div>`
+    ${isWorkMode
+      ? `<div style="font-size: 7.5px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px; text-transform: uppercase;">TICKET DE TRABAJO - CONTROL INTERNO</div>`
+      : orden.comprobanteTipo
+        ? `<div style="font-size: 7px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px;">COMPROBANTE EMITIDO EN EL PORTAL DE SUNAT</div>`
+        : `<div style="font-size: 7.5px; color: #555; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 4px; text-transform: uppercase;">NOTA DE VENTA - SIN VALIDEZ TRIBUTARIA</div>
+           <div style="font-size: 7px; color: #666;">Solicite su Boleta o Factura en caja</div>`
     }
   </div>
 

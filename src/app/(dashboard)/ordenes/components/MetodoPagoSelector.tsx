@@ -20,6 +20,7 @@ interface MetodoPagoSelectorProps {
   setPaymentReference: (val: string) => void;
   cashReceivedNum: number;
   change: number;
+  disabled?: boolean;
 }
 
 // Métodos de pago con su respectivo diseño temático
@@ -91,6 +92,7 @@ export function MetodoPagoSelector({
   setPaymentReference,
   cashReceivedNum,
   change,
+  disabled = false,
 }: MetodoPagoSelectorProps) {
   return (
     <>
@@ -106,10 +108,11 @@ export function MetodoPagoSelector({
               <button
                 key={method.id}
                 type="button"
-                onClick={() => setPaymentMethod(method.id)}
+                onClick={() => !disabled && setPaymentMethod(method.id)}
+                disabled={disabled}
                 className={`p-3 border rounded-xl flex flex-col items-center justify-center gap-1.5 relative transition-all duration-200 cursor-pointer ${
                   isSelected ? method.activeClass : method.colorClass
-                }`}
+                } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <Icon className="size-5 animate-none" />
                 <span className="text-[10px] font-bold">
@@ -144,11 +147,12 @@ export function MetodoPagoSelector({
                     key={opt}
                     type="button"
                     onClick={() => setCashReceived(opt.toFixed(2))}
+                    disabled={disabled}
                     className={`text-[9px] font-bold px-2 py-0.5 rounded border transition-all cursor-pointer ${
                       cashReceivedNum === opt
                         ? "bg-emerald-600 border-emerald-600 text-white"
                         : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100"
-                    }`}
+                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {opt === totalNum ? "Exacto" : `S/ ${opt}`}
                   </button>
@@ -168,6 +172,7 @@ export function MetodoPagoSelector({
                   placeholder="0.00"
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
+                  disabled={disabled}
                 />
                 <InputGroupAddon align="inline-end">
                   <InputGroupText>PEN</InputGroupText>
@@ -213,6 +218,7 @@ export function MetodoPagoSelector({
               placeholder="Ej. 123456"
               value={paymentReference}
               onChange={(e) => setPaymentReference(e.target.value)}
+              disabled={disabled}
               className={`bg-card border-zinc-200 text-xs h-9 rounded-lg transition-all focus-visible:ring-1 ${
                 paymentMethod === "yape"
                   ? "focus-visible:border-purple-500 focus-visible:ring-purple-500/20"

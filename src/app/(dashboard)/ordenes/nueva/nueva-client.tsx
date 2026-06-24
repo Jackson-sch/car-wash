@@ -2,14 +2,22 @@
 
 import { useState, useTransition, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ClipboardList, ArrowRight, ArrowLeft } from "lucide-react";
+import { ClipboardList, ArrowRight, ArrowLeft, CheckCircle2, Printer, PlusCircle, List, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createOrden } from "@/lib/actions/ordenes";
 import { toast } from "sonner";
+import Link from "next/link";
 import { StepperHeader } from "./components/StepperHeader";
 import { PasoVehiculoCliente } from "./components/PasoVehiculoCliente";
 import { PasoServiciosCosto } from "./components/PasoServiciosCosto";
 import { PasoOperacionNotas } from "./components/PasoOperacionNotas";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 type VehiculoTipo = "sedan" | "suv" | "pickup" | "moto" | "camion" | "furgon" | "otro";
 
@@ -34,6 +42,7 @@ interface NuevaOrdenClientProps {
   servicios: Servicio[];
   lavadores: Lavador[];
   sucursalConfig?: Record<string, any>;
+  cajaAbierta: boolean;
 }
 
 const defaultMultipliers: Record<string, number> = {
@@ -46,10 +55,13 @@ const defaultMultipliers: Record<string, number> = {
   otro: 1.0,
 };
 
-export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: NuevaOrdenClientProps) {
+export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {}, cajaAbierta }: NuevaOrdenClientProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isPending, startTransition] = useTransition();
+
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // Form Step 1: Cliente & Vehículo
   const [placa, setPlaca] = useState("");
@@ -108,6 +120,10 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
 
   // Enviar formulario final
   const handleSubmit = async () => {
+    if (!cajaAbierta) {
+      toast.error("No es posible registrar la orden: la caja se encuentra cerrada.");
+      return;
+    }
     if (!placa.trim() || !clienteNombre.trim() || serviciosSeleccionados.length === 0) {
       toast.error("Por favor completa los datos obligatorios y selecciona al menos un servicio");
       return;
@@ -143,7 +159,8 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
 
       if (res.success && res.data) {
         toast.success("Orden de servicio registrada exitosamente");
-        router.push("/ordenes");
+        setCreatedOrderId(res.data.id);
+        setShowSuccessDialog(true);
         router.refresh();
       } else {
         toast.error(res.error || "Ocurrió un error al registrar la orden");
@@ -163,6 +180,28 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
           Completa los datos secuenciales para dar de alta una orden en el sistema.
         </p>
       </div>
+
+      {/* Alerta de Caja Cerrada */}
+      {!cajaAbierta && (
+        <div className="flex items-start gap-3.5 p-4.5 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-2xl text-red-700 dark:text-red-400">
+          <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-red-500 animate-pulse" />
+          <div className="text-xs space-y-1.5">
+            <h4 className="font-black text-sm leading-none flex items-center gap-1.5">
+              Control de Caja Requerido
+            </h4>
+            <p className="font-semibold text-zinc-600 dark:text-zinc-400 leading-normal">
+              No es posible registrar nuevas órdenes de servicio en este momento porque el turno de caja de la sucursal se encuentra cerrado. Para habilitar el registro, debe realizar la apertura correspondiente.
+            </p>
+            <div className="pt-1">
+              <Link href="/caja" passHref>
+                <Button size="sm" variant="destructive" className="font-bold text-[10px] uppercase tracking-wider h-7 px-3.5 rounded-lg cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-xs border-0">
+                  Ir a Apertura de Caja
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stepper Progress */}
       <StepperHeader step={step} />
@@ -241,6 +280,10 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
               <Button
                 type="button"
                 onClick={() => {
+                  if (!cajaAbierta) {
+                    toast.error("No es posible avanzar: la caja se encuentra cerrada.");
+                    return;
+                  }
                   // Validaciones
                   if (step === 1 && (!placa.trim() || !clienteNombre.trim())) {
                     toast.error("Por favor completa los campos requeridos (Placa y Nombre)");
@@ -252,6 +295,7 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
                   }
                   setStep(step + 1);
                 }}
+                disabled={!cajaAbierta}
                 variant="secondary"
                 className="text-white font-bold text-xs h-9 rounded-lg gap-1.5 cursor-pointer px-5"
               >
@@ -262,7 +306,7 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
               <Button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isPending}
+                disabled={isPending || !cajaAbierta}
                 variant="secondary"
                 className="font-bold text-xs h-9 rounded-lg gap-2 cursor-pointer px-6"
               >
@@ -272,6 +316,96 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {} }: 
           </div>
         </div>
       </div>
+
+      {/* Modal de Éxito e Impresión */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="bg-card border border-border rounded-2xl max-w-md p-6 text-center space-y-4">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-full">
+              <CheckCircle2 className="h-10 w-10 animate-bounce" />
+            </div>
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="text-xl font-bold text-foreground text-center">
+                ¡Orden Registrada!
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground text-center">
+                La orden de servicio se ha registrado con éxito en el sistema.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          {/* Resumen rápido */}
+          <div className="bg-muted/40 border border-border p-4 rounded-xl text-left text-xs space-y-2">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Placa:</span>
+              <span className="font-bold text-foreground uppercase">{placa}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Cliente:</span>
+              <span className="font-bold text-foreground">{clienteNombre} {clienteApellido}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Total:</span>
+              <span className="font-black text-secondary">S/ {total.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-2">
+            <Button
+              onClick={() => {
+                if (createdOrderId) {
+                  window.open(`/api/pdf/ticket/${createdOrderId}?mode=work`, "_blank");
+                }
+              }}
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold gap-2 py-5 rounded-xl cursor-pointer w-full text-xs h-auto shadow-sm"
+            >
+              <Printer className="size-4" />
+              Imprimir Ticket de Trabajo (Sin Precios)
+            </Button>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Limpiar formulario y resetear stepper
+                  setPlaca("");
+                  setVehiculoTipo("sedan");
+                  setVehiculoMarca("");
+                  setVehiculoModelo("");
+                  setVehiculoColor("");
+                  setClienteNombre("");
+                  setClienteApellido("");
+                  setClienteTelefono("");
+                  setClienteEmail("");
+                  setServiciosSeleccionados([]);
+                  setDescuento("0");
+                  setEmpleadoId("");
+                  setNotas("");
+                  setPrioridad(0);
+                  setStep(1);
+                  setShowSuccessDialog(false);
+                  setCreatedOrderId(null);
+                }}
+                className="text-muted-foreground hover:text-foreground border border-border rounded-xl text-xs py-3.5 h-auto font-semibold gap-1.5 cursor-pointer"
+              >
+                <PlusCircle className="size-3.5" />
+                Nueva Orden
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSuccessDialog(false);
+                  router.push("/ordenes");
+                }}
+                className="text-muted-foreground hover:text-foreground border border-border rounded-xl text-xs py-3.5 h-auto font-semibold gap-1.5 cursor-pointer"
+              >
+                <List className="size-3.5" />
+                Ver Órdenes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

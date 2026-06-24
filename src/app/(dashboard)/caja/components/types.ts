@@ -20,3 +20,38 @@ export interface TurnoActivo {
   ventasPorHora: { hora: string; total: number }[];
   transaccionesDetalladas: TransaccionDetallada[];
 }
+
+export interface TurnoHistorial {
+  id: string;
+  apertura: Date;
+  cierre: Date | null;
+  montoInicial: string;
+  montoFinal: string | null;
+  observaciones: string | null;
+  nombreEmpleado: string;
+  apellidoEmpleado: string | null;
+}
+
+export interface MetodoPagoConciliacion {
+  nombre: string;
+  esperado: number;
+  contado: number;
+  diferencia: number;
+}
+
+export interface DesgloseEfectivoItem {
+  denominacion: string;
+  cantidad: number;
+  total: number;
+}
+
+export interface ParsedCierreDetails {
+  legacy: boolean;
+  tipoCierre: string;
+  fondoInicial: string;
+  metodos: MetodoPagoConciliacion[];
+  desglose: DesgloseEfectivoItem[];
+  observaciones: string;
+  supervisor: string | null;
+}
+

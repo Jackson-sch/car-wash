@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Settings, Building, Car, Gift } from "lucide-react";
+import { Settings, Building, Car, Gift, Database } from "lucide-react";
 import Link from "next/link";
 import { updateSucursalInfo, updateSucursalConfigJSON } from "@/lib/actions/configuracion";
 import { toast } from "sonner";
 import { GeneralPanel } from "./components/GeneralPanel";
 import { PreciosPanel } from "./components/PreciosPanel";
 import { LealtadPanel } from "./components/LealtadPanel";
+import { BackupPanel } from "./components/BackupPanel";
 
 interface Sucursal {
   id: string;
@@ -26,7 +27,7 @@ interface ConfiguracionClientProps {
 
 export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProps) {
   const [sucursal, setSucursal] = useState<Sucursal>(initialSucursal);
-  const [activeTab, setActiveTab] = useState<"general" | "precios" | "lealtad">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "precios" | "lealtad" | "backup">("general");
   const [isPending, startTransition] = useTransition();
 
   const config = (sucursal.config as Record<string, any>) || {};
@@ -108,6 +109,12 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
       icon: Gift,
     },
     {
+      id: "backup" as const,
+      label: "Exportar Datos",
+      description: "Copia de seguridad local",
+      icon: Database,
+    },
+    {
       id: "sucursales" as const,
       label: "Gestión de Sucursales",
       description: "Locales y límites de plan",
@@ -180,7 +187,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as "general" | "precios" | "lealtad")}
+                onClick={() => setActiveTab(tab.id as "general" | "precios" | "lealtad" | "backup")}
                 className={btnClassName}
               >
                 {innerContent}
@@ -211,6 +218,10 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
                 isPending={isPending}
                 onSave={handleSaveLoyaltyRules}
               />
+            )}
+
+            {activeTab === "backup" && (
+              <BackupPanel sucursal={sucursal} />
             )}
           </div>
         </div>

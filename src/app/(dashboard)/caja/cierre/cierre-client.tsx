@@ -3,7 +3,18 @@
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { cerrarTurnoCaja } from "@/lib/actions/caja";
+import { cerrarTurnoCaja, verificarAutorizacionSupervisor } from "@/lib/actions/caja";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { KeyRound } from "lucide-react";
 
 // Import Types
 import type { TurnoActivo, PagoReciente } from "./types";
@@ -36,6 +47,18 @@ export function CierreCajaClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  // Estado de conciliación ciega
+  const [reconciliado, setReconciliado] = useState(false);
+
+  // Aprobación de supervisor
+  const [supervisorAprobado, setSupervisorAprobado] = useState<{ nombre: string; email: string } | null>(null);
+  const [showSupervisorModal, setShowSupervisorModal] = useState(false);
+
+  // Credenciales de supervisor para el modal
+  const [supEmail, setSupEmail] = useState("");
+  const [supPassword, setSupPassword] = useState("");
+  const [verifyingSup, setVerifyingSup] = useState(false);
+
   // Estado del arqueo de denominaciones
   const [cantidades, setCantidades] = useState<Record<string, string>>({});
 
@@ -67,18 +90,27 @@ export function CierreCajaClient({
     };
   }, [turno]);
 
-  // Contadores reales para métodos que no son efectivo (Tarjetas, billeteras)
+  // Contadores reales ingresados por el cajero (inicializados en vacío para el arqueo a ciegas)
   const [actualCount, setActualCount] = useState<Record<string, string>>({
-    tarjeta: systemStats.tarjetaVentas.toString(),
-    yapePlin: systemStats.yapePlinVentas.toString(),
-    transferencia: systemStats.transferenciasVentas.toString(),
+    tarjeta: "",
+    yapePlin: "",
+    transferencia: "",
   });
 
   const handleActualCountChange = (id: string, value: string) => {
+    // Si ya reconcilió, forzamos volver a conciliar si edita montos para mantener la integridad
+    if (reconciliado) {
+      setReconciliado(false);
+      setSupervisorAprobado(null);
+    }
     setActualCount((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleCantidadesChange = (id: string, value: string) => {
+    if (reconciliado) {
+      setReconciliado(false);
+      setSupervisorAprobado(null);
+    }
     setCantidades((prev) => ({ ...prev, [id]: value }));
   };
 
@@ -122,18 +154,74 @@ export function CierreCajaClient({
 
   const tieneDescuadre = Math.abs(totalDiferencia) > 0.01;
 
-  // Enviar el cierre
+  // Realizar la conciliación (revelar los totales de sistema y calcular diferencias)
+  const handleReconciliar = () => {
+    // Validar que se hayan completado los campos
+    if (!actualCount.tarjeta.trim() || !actualCount.yapePlin.trim() || !actualCount.transferencia.trim()) {
+      toast.error("Por favor complete los montos contados de Tarjeta, Yape/Plin y Transferencia (coloque 0 si no hubo movimientos).");
+      return;
+    }
+    setReconciliado(true);
+    toast.success("Saldos calculados y conciliados contra el sistema.");
+  };
+
+  // Solicitar el modal de supervisor
+  const handleSolicitarAprobacion = () => {
+    setShowSupervisorModal(true);
+  };
+
+  // Validar credenciales de supervisor en el servidor
+  const handleVerifySupervisor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supEmail.trim() || !supPassword.trim()) {
+      toast.error("Por favor complete los campos de email y contraseña.");
+      return;
+    }
+
+    setVerifyingSup(true);
+    try {
+      const res = await verificarAutorizacionSupervisor(supEmail, supPassword);
+      if (res.success && res.supervisor) {
+        setSupervisorAprobado(res.supervisor);
+        setShowSupervisorModal(false);
+        toast.success(`Cierre descuadrado autorizado por: ${res.supervisor.nombre}`);
+        setSupEmail("");
+        setSupPassword("");
+      } else {
+        toast.error(res.error || "No se pudo verificar la autorización.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al validar autorización del supervisor.");
+    } finally {
+      setVerifyingSup(false);
+    }
+  };
+
+  // Enviar el cierre de caja
   const handleFinalize = () => {
+    if (!reconciliado) {
+      toast.error("Por favor verifique y concilie los saldos primero.");
+      return;
+    }
+
+    if (tieneDescuadre && !supervisorAprobado) {
+      toast.error("Cierre bloqueado por descuadre. Requiere autorización de un Supervisor.");
+      return;
+    }
+
     if (tieneDescuadre && !obsCierre.trim()) {
-      toast.error(
-        "Por favor ingresa una observación justificando el descuadre de caja.",
-      );
+      toast.error("Por favor ingresa una observación justificando el descuadre de caja.");
       return;
     }
 
     startTransition(async () => {
+      const supervisorInfoStr = supervisorAprobado
+        ? `\n\n[AUTORIZADO POR SUPERVISOR: ${supervisorAprobado.nombre} (${supervisorAprobado.email})]`
+        : "";
+
       const finalObservaciones = `
-[CORTE DE CAJA DETALLADO]
+[CORTE DE CAJA DETALLADO - ARQUEO A CIEGAS]
 - Fondo Inicial: S/ ${systemStats.openingCash.toFixed(2)}
 - Efectivo Esperado: S/ ${systemStats.expectedEfectivo.toFixed(2)} | Contado: S/ ${totalEfectivoContado.toFixed(2)} (Dif: S/ ${cashDiferencia.toFixed(2)})
 - Tarjeta Esperado: S/ ${systemStats.tarjetaVentas.toFixed(2)} | Contado: S/ ${(parseFloat(actualCount.tarjeta) || 0).toFixed(2)} (Dif: S/ ${tarjetaDiferencia.toFixed(2)})
@@ -151,7 +239,7 @@ ${DENOMINACIONES.map((d) => {
   .join("\n")}
 
 [OBSERVACIONES GENERALES]
-${obsCierre.trim() || "Sin observaciones adicionales."}
+${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
 `.trim();
 
       const res = await cerrarTurnoCaja({
@@ -200,6 +288,7 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}
             expectedTotals={expectedTotals}
             actualTotals={actualTotals}
             totalDiferencia={totalDiferencia}
+            reconciliado={reconciliado}
           />
 
           <ArqueoEfectivo
@@ -215,15 +304,92 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}
           <PagosRecientesList pagos={pagosRecientes} />
 
           <CierreAlerts
+            reconciliado={reconciliado}
+            onReconciliar={handleReconciliar}
             tieneDescuadre={tieneDescuadre}
             totalDiferencia={totalDiferencia}
             obsCierre={obsCierre}
             isPending={isPending}
             onObsChange={setObsCierre}
             onFinalize={handleFinalize}
+            supervisorAprobado={supervisorAprobado}
+            onSolicitarAprobacion={handleSolicitarAprobacion}
           />
         </div>
       </div>
+
+      {/* Modal de Autorización de Supervisor */}
+      <Dialog open={showSupervisorModal} onOpenChange={setShowSupervisorModal}>
+        <DialogContent className="bg-card border border-border rounded-2xl max-w-sm p-6 space-y-4">
+          <div className="flex flex-col items-center text-center space-y-2">
+            <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+              <KeyRound className="h-5 w-5" />
+            </div>
+            <DialogHeader className="space-y-1">
+              <DialogTitle className="text-md font-extrabold text-foreground text-center">
+                Autorización de Supervisor Requerida
+              </DialogTitle>
+              <DialogDescription className="text-[11px] text-muted-foreground text-center">
+                Ingrese las credenciales de un supervisor o administrador para autorizar el cierre de caja con descuadre.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <form onSubmit={handleVerifySupervisor} className="space-y-3.5">
+            <div className="space-y-1">
+              <Label htmlFor="sup-email" className="text-[10px] font-bold text-zinc-650">
+                Correo Electrónico
+              </Label>
+              <Input
+                id="sup-email"
+                type="email"
+                placeholder="supervisor@carwash.com"
+                value={supEmail}
+                onChange={(e) => setSupEmail(e.target.value)}
+                className="h-9 text-xs rounded-xl font-medium"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="sup-pass" className="text-[10px] font-bold text-zinc-650">
+                Contraseña
+              </Label>
+              <Input
+                id="sup-pass"
+                type="password"
+                placeholder="••••••••"
+                value={supPassword}
+                onChange={(e) => setSupPassword(e.target.value)}
+                className="h-9 text-xs rounded-xl font-medium"
+                required
+              />
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setShowSupervisorModal(false);
+                  setSupEmail("");
+                  setSupPassword("");
+                }}
+                className="flex-1 text-xs font-semibold h-9 rounded-xl border border-zinc-200"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={verifyingSup}
+                className="flex-1 text-xs font-bold h-9 rounded-xl bg-amber-500 hover:bg-amber-600 text-white cursor-pointer"
+              >
+                {verifyingSup ? "Validando..." : "Autorizar Cierre"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

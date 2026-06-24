@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -81,6 +83,7 @@ interface TicketClientProps {
 
 export function TicketClient({ orden, sucursal }: TicketClientProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [hidePrices, setHidePrices] = useState(false);
 
   // Estados para el formulario de SUNAT
   const [tipo, setTipo] = useState<"boleta" | "factura" | "ninguno">(
@@ -148,8 +151,10 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
       .catch(() => {});
   }, [qrUrl]);
 
-  const handlePrint = () =>
-    window.open(`/api/pdf/ticket/${orden.id}`, "_blank");
+  const handlePrint = () => {
+    const query = hidePrices ? "?mode=work" : "";
+    window.open(`/api/pdf/ticket/${orden.id}${query}`, "_blank");
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#print") {
@@ -296,8 +301,19 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mr-2 bg-muted/45 border border-border px-3.5 py-1.5 rounded-xl h-10 select-none">
+            <Switch
+              id="hide-prices-toggle"
+              checked={hidePrices}
+              onCheckedChange={setHidePrices}
+              className="data-[state=checked]:bg-secondary focus-visible:ring-ring/40"
+            />
+            <Label htmlFor="hide-prices-toggle" className="text-xs font-bold text-foreground cursor-pointer select-none">
+              Ocultar precios (Personal)
+            </Label>
+          </div>
           <Button
-            onClick={() => window.open(`/api/pdf/ticket/${orden.id}`, "_blank")}
+            onClick={() => window.open(`/api/pdf/ticket/${orden.id}${hidePrices ? "?mode=work" : ""}`, "_blank")}
             variant="outline"
             className="border-zinc-300 hover:bg-zinc-50 text-zinc-700 h-10 rounded-lg gap-2 cursor-pointer px-4"
           >
@@ -309,7 +325,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
             className="font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm px-5"
           >
             <Printer className="h-4 w-4" />
-            Imprimir Ticket
+            {hidePrices ? "Imprimir Trabajo" : "Imprimir Ticket"}
           </Button>
         </div>
       </div>
@@ -467,7 +483,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
                 style={{ borderBottom: "1px solid #dddddd", color: "#111111" }}
               >
                 <span>Servicio</span>
-                <span>Importe</span>
+                {!hidePrices && <span>Importe</span>}
               </div>
               {orden.servicios.map((s) => (
                 <div
@@ -478,7 +494,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
                   <span className="max-w-[180px]">
                     {s.nombreServicio} (x{s.cantidad || 1})
                   </span>
-                  <span>S/ {parseFloat(s.subtotal).toFixed(2)}</span>
+                  {!hidePrices && <span>S/ {parseFloat(s.subtotal).toFixed(2)}</span>}
                 </div>
               ))}
             </div>
@@ -487,38 +503,42 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
               --------------------------------
             </p>
 
-            {/* Totales */}
-            <div className="text-left space-y-1 text-[10px]">
-              <div
-                className="flex justify-between"
-                style={{ color: "#444444" }}
-              >
-                <span>SUBTOTAL:</span>
-                <span>S/ {parseFloat(orden.subtotal || "0").toFixed(2)}</span>
-              </div>
-              {parseFloat(orden.descuento || "0") > 0 && (
-                <div
-                  className="flex justify-between font-bold"
-                  style={{ color: "#222222" }}
-                >
-                  <span>DESCUENTO:</span>
-                  <span>
-                    - S/ {parseFloat(orden.descuento || "0").toFixed(2)}
-                  </span>
-                </div>
-              )}
-              <div
-                className="flex justify-between text-xs font-black pt-1"
-                style={{ borderTop: "1px solid #dddddd", color: "#111111" }}
-              >
-                <span>TOTAL:</span>
-                <span>S/ {parseFloat(orden.total || "0").toFixed(2)}</span>
-              </div>
-            </div>
+            {!hidePrices && (
+              <>
+                <p className="text-[10px]" style={{ color: "#aaaaaa" }}>
+                  --------------------------------
+                </p>
 
-            <p className="text-[10px]" style={{ color: "#aaaaaa" }}>
-              --------------------------------
-            </p>
+                {/* Totales */}
+                <div className="text-left space-y-1 text-[10px]">
+                  <div
+                    className="flex justify-between"
+                    style={{ color: "#444444" }}
+                  >
+                    <span>SUBTOTAL:</span>
+                    <span>S/ {parseFloat(orden.subtotal || "0").toFixed(2)}</span>
+                  </div>
+                  {parseFloat(orden.descuento || "0") > 0 && (
+                    <div
+                      className="flex justify-between font-bold"
+                      style={{ color: "#222222" }}
+                    >
+                      <span>DESCUENTO:</span>
+                      <span>
+                        - S/ {parseFloat(orden.descuento || "0").toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  <div
+                    className="flex justify-between text-xs font-black pt-1"
+                    style={{ borderTop: "1px solid #dddddd", color: "#111111" }}
+                  >
+                    <span>TOTAL:</span>
+                    <span>S/ {parseFloat(orden.total || "0").toFixed(2)}</span>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Operación */}
             <div className="text-left text-[10px] space-y-1">
@@ -541,45 +561,68 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
               </div>
             </div>
 
-            <p className="text-[10px]" style={{ color: "#aaaaaa" }}>
-              --------------------------------
-            </p>
+            {orden.notas && (
+              <>
+                <p className="text-[10px]" style={{ color: "#aaaaaa" }}>
+                  --------------------------------
+                </p>
+                <div className="text-left text-[10px] space-y-1">
+                  <span className="font-bold" style={{ color: "#111111" }}>
+                    RECOMENDACIONES / NOTAS:
+                  </span>
+                  <div
+                    className="italic leading-tight whitespace-pre-wrap mt-0.5"
+                    style={{ color: "#333333" }}
+                  >
+                    {orden.notas}
+                  </div>
+                </div>
+              </>
+            )}
 
-            {/* Loyalty */}
-            <div
-              className="ticket-loyalty p-2 rounded space-y-1 text-[9px]"
-              style={{
-                background: "#111111",
-                border: "1px solid #111111",
-                color: "#ffffff",
-              }}
-            >
-              <div
-                className="flex items-center justify-center gap-1 font-bold"
-                style={{ color: "#ffffff" }}
-              >
-                <ShieldCheck
-                  className="h-3.5 w-3.5"
-                  style={{ color: "#ffffff" }}
-                />
-                <span>PROGRAMA DE LEALTAD</span>
-              </div>
-              <p
-                className="text-center leading-tight"
-                style={{ color: "#cccccc" }}
-              >
-                Puntos ganados hoy:{" "}
-                <span className="font-bold" style={{ color: "#ffffff" }}>
-                  {puntosGanados}
-                </span>
-              </p>
-              <p
-                className="text-center text-[8px] mt-0.5"
-                style={{ color: "#999999" }}
-              >
-                ¡Acumula puntos y canjea lavados gratis!
-              </p>
-            </div>
+            {!hidePrices && (
+              <>
+                <p className="text-[10px]" style={{ color: "#aaaaaa" }}>
+                  --------------------------------
+                </p>
+
+                {/* Loyalty */}
+                <div
+                  className="ticket-loyalty p-2 rounded space-y-1 text-[9px]"
+                  style={{
+                    background: "#111111",
+                    border: "1px solid #111111",
+                    color: "#ffffff",
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-center gap-1 font-bold"
+                    style={{ color: "#ffffff" }}
+                  >
+                    <ShieldCheck
+                      className="h-3.5 w-3.5"
+                      style={{ color: "#ffffff" }}
+                    />
+                    <span>PROGRAMA DE LEALTAD</span>
+                  </div>
+                  <p
+                    className="text-center leading-tight"
+                    style={{ color: "#cccccc" }}
+                  >
+                    Puntos ganados hoy:{" "}
+                    <span className="font-bold" style={{ color: "#ffffff" }}>
+                      {puntosGanados}
+                    </span>
+                  </p>
+                  <p
+                    className="text-center text-[8px] mt-0.5"
+                    style={{ color: "#999999" }}
+                  >
+                    ¡Acumula puntos y canjea lavados gratis!
+                  </p>
+                </div>
+              </>
+            )}
 
             {/* QR Code */}
             <div className="flex flex-col items-center pt-2 space-y-1">

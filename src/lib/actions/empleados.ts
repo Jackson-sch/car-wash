@@ -1,9 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { usuarios, ordenes } from "@/lib/db/schema";
-import { eq, and, sql, count } from "drizzle-orm";
+import { usuarios, ordenes, turnosCaja, vehiculos, clientes } from "@/lib/db/schema";
+import { eq, and, sql, count, desc } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
+import { canDo } from "@/lib/auth/permissions";
 import { revalidatePath } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 import { auth } from "@/lib/auth/config";
@@ -224,5 +225,143 @@ export async function cambiarEstadoEmpleado(id: string, activo: boolean) {
   } catch (error: unknown) {
     console.error("Error al cambiar estado del empleado:", error);
     return { success: false, error: getErrorMessage(error, "Error al cambiar estado del empleado") };
+  }
+}
+
+// Obtener detalles de rendimiento de un empleado específico
+export async function getEmpleadoRendimiento(id: string) {
+  try {
+    const session = await getSessionOrThrow();
+    const isOwner = session.user.id === id;
+    const hasPermission = canDo(session.user.rol, "empleados", "ver");
+
+    if (!isOwner && !hasPermission) {
+      throw new Error("No autorizado para ver el rendimiento de este empleado.");
+    }
+
+    const sucursalId = session.user.sucursalId!;
+
+    // 1. Obtener información básica del empleado
+    const [emp] = await db
+      .select({
+        id: usuarios.id,
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        email: usuarios.email,
+        telefono: usuarios.telefono,
+        rol: usuarios.rol,
+        activo: usuarios.activo,
+        createdAt: usuarios.createdAt,
+      })
+      .from(usuarios)
+      .where(and(eq(usuarios.id, id), eq(usuarios.sucursalId, sucursalId)))
+      .limit(1);
+
+    if (!emp) {
+      return null;
+    }
+
+    // 2. Obtener KPIs (lavador vs cajero)
+    const orderColumn = emp.rol === "lavador" ? ordenes.empleadoId : ordenes.cajeroId;
+
+    const [stats] = await db
+      .select({
+        totalServicios: count(ordenes.id),
+        montoTotal: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
+        ticketPromedio: sql<string>`coalesce(avg(${ordenes.total}), 0)`,
+      })
+      .from(ordenes)
+      .where(
+        and(
+          eq(orderColumn, id),
+          eq(ordenes.sucursalId, sucursalId),
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+        )
+      );
+
+    const totalServicios = stats?.totalServicios || 0;
+    const montoTotal = parseFloat(stats?.montoTotal || "0");
+    const ticketPromedio = parseFloat(stats?.ticketPromedio || "0");
+    
+    // Comisión del 30% sólo para lavadores
+    const comisionAcumulada = emp.rol === "lavador" ? montoTotal * 0.30 : 0;
+
+    // Si es cajero, obtener total de turnos de caja
+    let turnosTotales = 0;
+    if (emp.rol === "cajero" || emp.rol === "admin" || emp.rol === "supervisor") {
+      const [turnosCount] = await db
+        .select({ val: count(turnosCaja.id) })
+        .from(turnosCaja)
+        .where(eq(turnosCaja.empleadoId, id));
+      turnosTotales = turnosCount?.val || 0;
+    }
+
+    // 3. Obtener productividad diaria (últimos 30 días)
+    const productividadDiariaRaw = await db
+      .select({
+        fecha: sql<string>`to_char(${ordenes.createdAt}, 'DD/MM')`,
+        cantidad: count(ordenes.id),
+        total: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
+      })
+      .from(ordenes)
+      .where(
+        and(
+          eq(orderColumn, id),
+          eq(ordenes.sucursalId, sucursalId),
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`,
+          sql`${ordenes.createdAt} >= now() - interval '30 days'`
+        )
+      )
+      .groupBy(sql`date_trunc('day', ${ordenes.createdAt})`, sql`to_char(${ordenes.createdAt}, 'DD/MM')`)
+      .orderBy(sql`date_trunc('day', ${ordenes.createdAt})`);
+
+    const productividadDiaria = productividadDiariaRaw.map((d) => ({
+      fecha: d.fecha,
+      cantidad: d.cantidad,
+      total: parseFloat(d.total),
+    }));
+
+    // 4. Obtener últimas 10 órdenes procesadas por el empleado
+    const ordenesRecientes = await db
+      .select({
+        id: ordenes.id,
+        nroTicket: ordenes.nroTicket,
+        estado: ordenes.estado,
+        total: ordenes.total,
+        createdAt: ordenes.createdAt,
+        placa: vehiculos.placa,
+        vehiculoMarca: vehiculos.marca,
+        vehiculoModelo: vehiculos.modelo,
+        vehiculoTipo: vehiculos.tipo,
+        clienteNombre: clientes.nombre,
+        clienteApellido: clientes.apellido,
+      })
+      .from(ordenes)
+      .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
+      .innerJoin(clientes, eq(vehiculos.clienteId, clientes.id))
+      .where(
+        and(
+          eq(orderColumn, id),
+          eq(ordenes.sucursalId, sucursalId)
+        )
+      )
+      .orderBy(desc(ordenes.createdAt))
+      .limit(10);
+
+    return {
+      empleado: emp,
+      kpis: {
+        totalServicios,
+        montoTotal,
+        comisionAcumulada,
+        ticketPromedio,
+        turnosTotales,
+      },
+      productividadDiaria,
+      ordenesRecientes,
+    };
+  } catch (error) {
+    console.error("Error al obtener rendimiento del empleado:", error);
+    return null;
   }
 }

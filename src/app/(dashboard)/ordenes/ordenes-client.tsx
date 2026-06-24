@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ClipboardList, Search, Plus, LayoutGrid, List } from "lucide-react";
@@ -10,7 +10,6 @@ import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { updateOrdenEstado, asignarLavadorAOrden } from "@/lib/actions/ordenes";
 import { cobrarOrden } from "@/lib/actions/caja";
 import { toast } from "sonner";
-import { PaginationControls } from "@/components/shared/PaginationControls";
 import { OrdenesKpiCards } from "./components/OrdenesKpiCards";
 import { StaffAvailabilityCard } from "./components/StaffAvailabilityCard";
 import { OperationalFlowChart } from "./components/OperationalFlowChart";
@@ -21,11 +20,17 @@ import { CobrarModal, PaymentMethod } from "./components/CobrarModal";
 interface OrdenesClientProps {
   initialOrdenes: Orden[];
   lavadores: Lavador[];
+  cajaAbierta: boolean;
 }
 
-export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps) {
+export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: OrdenesClientProps) {
   const router = useRouter();
   const [ordenes, setOrdenes] = useState<Orden[]>(initialOrdenes);
+  const [cajaAbiertaLocal, setCajaAbiertaLocal] = useState(cajaAbierta);
+
+  useEffect(() => {
+    setCajaAbiertaLocal(cajaAbierta);
+  }, [cajaAbierta]);
   
   // nuqs States
   const [searchQuery, setSearchQuery] = useQueryState("search", {
@@ -64,49 +69,83 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
       return;
     }
 
+    const estadoAnterior = ordenes.find((o) => o.id === id)?.estado;
+
+    // Actualización optimista instantánea
+    setOrdenes((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, estado: nuevoEstado } : o))
+    );
+
     startTransition(async () => {
       const res = await updateOrdenEstado(id, nuevoEstado);
       if (res.success && res.data) {
         toast.success(`Estado de orden actualizado a ${nuevoEstado}`);
-        setOrdenes((prev) =>
-          prev.map((o) => (o.id === id ? { ...o, estado: nuevoEstado } : o))
-        );
       } else {
         toast.error(res.error || "Error al actualizar estado");
+        // Revertir en caso de fallo
+        if (estadoAnterior) {
+          setOrdenes((prev) =>
+            prev.map((o) => (o.id === id ? { ...o, estado: estadoAnterior } : o))
+          );
+        }
       }
     });
   };
 
   // Asignar lavador
   const handleAssignLavador = async (id: string, empleadoId: string | null) => {
+    const ordenAnterior = ordenes.find((o) => o.id === id);
+    const lavador = lavadores.find((l) => l.id === empleadoId);
+
+    // Actualización optimista instantánea
+    setOrdenes((prev) =>
+      prev.map((o) =>
+        o.id === id
+          ? {
+              ...o,
+              lavadorNombre: lavador?.nombre || null,
+              lavadorApellido: lavador?.apellido || null,
+            }
+          : o
+      )
+    );
+
     startTransition(async () => {
       const res = await asignarLavadorAOrden(id, empleadoId);
       if (res.success) {
-        const lavador = lavadores.find((l) => l.id === empleadoId);
         toast.success(
           lavador
             ? `Lavador asignado: ${lavador.nombre}`
             : "Se removió la asignación del lavador"
         );
-        setOrdenes((prev) =>
-          prev.map((o) =>
-            o.id === id
-              ? {
-                  ...o,
-                  lavadorNombre: lavador?.nombre || null,
-                  lavadorApellido: lavador?.apellido || null,
-                }
-              : o
-          )
-        );
       } else {
         toast.error(res.error || "Error al asignar lavador");
+        // Revertir en caso de fallo
+        if (ordenAnterior) {
+          setOrdenes((prev) =>
+            prev.map((o) =>
+              o.id === id
+                ? {
+                    ...o,
+                    lavadorNombre: ordenAnterior.lavadorNombre,
+                    lavadorApellido: ordenAnterior.lavadorApellido,
+                  }
+                : o
+            )
+          );
+        }
       }
     });
   };
 
   // Confirmar cobro
-  const handleConfirmPay = async (metodo: PaymentMethod, referencia: string, monto?: string, cuponId?: string) => {
+  const handleConfirmPay = async (
+    metodo: PaymentMethod,
+    referencia: string,
+    monto?: string,
+    cuponId?: string,
+    puntosACanjear?: number
+  ) => {
     if (!payingOrden) return;
     
     startTransition(async () => {
@@ -116,6 +155,7 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
         monto: monto || payingOrden.total || "0",
         referencia,
         cuponId,
+        puntosACanjear,
       });
 
       if (res.success) {
@@ -126,6 +166,8 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
           )
         );
         setIsPayModalOpen(false);
+        // Dispatch event to trigger navbar status refetch
+        window.dispatchEvent(new Event("caja-status-changed"));
         // Redirigir directamente al ticket con el hash #print para abrir el diálogo de impresión
         router.push(`/ordenes/${payingOrden.id}/ticket#print`);
       } else {
@@ -256,19 +298,17 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
           onEdit={(orden) => toast.info("Editar orden próximamente")}
         />
       ) : (
-        <>
-          <OrdenesTable
-            ordenes={paginatedOrdenes}
-            lavadores={lavadores}
-            onStatusChange={handleStatusChange}
-            onAssignLavador={handleAssignLavador}
-          />
-          <PaginationControls
-            activePage={activePage}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        </>
+        <OrdenesTable
+          ordenes={paginatedOrdenes}
+          lavadores={lavadores}
+          onStatusChange={handleStatusChange}
+          onAssignLavador={handleAssignLavador}
+          activePage={activePage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          totalItems={filteredOrdenes.length}
+          itemsPerPage={itemsPerPage}
+        />
       )}
 
       {/* Bottom Insights Section (Stitch gadgets) */}
@@ -289,6 +329,8 @@ export function OrdenesClient({ initialOrdenes, lavadores }: OrdenesClientProps)
           orden={payingOrden}
           isPending={isPending}
           onConfirm={handleConfirmPay}
+          cajaAbierta={cajaAbiertaLocal}
+          onOpenCajaSuccess={() => setCajaAbiertaLocal(true)}
         />
       )}
     </div>

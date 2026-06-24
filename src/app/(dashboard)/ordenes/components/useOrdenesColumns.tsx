@@ -15,6 +15,8 @@ import {
   Truck,
   Bike,
   ShieldCheck,
+  Eye,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Orden, Lavador } from "./OrdenesTable";
 
 interface UseOrdenesColumnsProps {
@@ -415,12 +423,43 @@ export function useOrdenesColumns({
               <Button
                 variant="outline"
                 size="icon"
-                title="Imprimir ticket"
+                title="Ver detalle / Emitir Comprobante"
                 className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-all"
               >
-                <Printer className="h-3.5 w-3.5" />
+                <Eye className="h-3.5 w-3.5" />
               </Button>
             </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    title="Imprimir ticket..."
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-all"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end" className="bg-card text-card-foreground border border-border shadow-md">
+                <DropdownMenuItem
+                  onClick={() => window.open(`/api/pdf/ticket/${ord.id}?mode=work`, "_blank")}
+                  className="cursor-pointer text-[10.5px] font-bold flex items-center gap-1.5"
+                >
+                  <FileText className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                  <span>Ticket Trabajo (Sin Precios)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => window.open(`/api/pdf/ticket/${ord.id}`, "_blank")}
+                  className="cursor-pointer text-[10.5px] font-bold flex items-center gap-1.5"
+                >
+                  <Printer className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <span>Ticket Cliente (Con Precios)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },

@@ -1,10 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
-import { Car, CarFront, Truck, Bike, Sparkles, XCircle, Pencil } from "lucide-react";
+import { Car, CarFront, Truck, Bike, Sparkles, XCircle, Pencil, Eye, Printer, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Orden, Lavador } from "./OrdenesTable";
 import { TimeElapsed } from "./TimeElapsed";
 import { formatCurrency } from "@/lib/formats";
@@ -112,6 +119,50 @@ export function OrderCard({
         </div>
 
         <div className="flex items-center gap-1.5" onPointerDown={(e) => e.stopPropagation()}>
+          {/* View Details / Ticket preview */}
+          <Link href={`/ordenes/${orden.id}/ticket`} passHref>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 cursor-pointer rounded-lg"
+              title="Ver detalle / Emitir Comprobante"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+
+          {/* Quick Print Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 cursor-pointer rounded-lg"
+                  title="Imprimir ticket..."
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end" className="bg-card text-card-foreground border border-border shadow-md">
+              <DropdownMenuItem
+                onClick={() => window.open(`/api/pdf/ticket/${orden.id}?mode=work`, "_blank")}
+                className="cursor-pointer text-[10.5px] font-bold flex items-center gap-1.5"
+              >
+                <FileText className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                <span>Ticket Trabajo (Sin Precios)</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open(`/api/pdf/ticket/${orden.id}`, "_blank")}
+                className="cursor-pointer text-[10.5px] font-bold flex items-center gap-1.5"
+              >
+                <Printer className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                <span>Ticket Cliente (Con Precios)</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Edit button for pending orders */}
           {orden.estado === "pendiente" && onEdit && (
             <Button

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Search, X, UserCog, MoreVertical, Edit, UserMinus, UserCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { PaginationControls } from "@/components/shared/PaginationControls";
@@ -53,6 +54,7 @@ export function EmpleadosGrid({
   onEditClick,
   onToggleStatus,
 }: EmpleadosGridProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useQueryState("search", {
     defaultValue: "",
     shallow: true,
@@ -177,6 +179,13 @@ export function EmpleadosGrid({
                         align="end"
                         className="w-44 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95"
                       >
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/empleados/${emp.id}`)}
+                          className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground"
+                        >
+                          <UserCog className="h-4 w-4 text-muted-foreground" />
+                          <span>Ver Detalle</span>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onEditClick(emp)}
                           className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground"

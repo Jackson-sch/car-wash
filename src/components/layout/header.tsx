@@ -19,6 +19,7 @@ import {
   getEmpresaSucursales,
   switchActiveBranch,
 } from "@/lib/actions/branch-switcher";
+import { getTurnoActivo } from "@/lib/actions/caja";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -46,6 +47,27 @@ export function Header() {
     nombre: string;
   } | null>(null);
 
+  const [turnoActivo, setTurnoActivo] = useState<any>(null);
+  const [loadingCaja, setLoadingCaja] = useState(true);
+
+  const fetchCajaStatus = async () => {
+    if (session?.user && session.user.rol !== "superadmin") {
+      try {
+        console.log("Fetching caja status, session user is:", session.user);
+        const turno = await getTurnoActivo();
+        console.log("Turno fetched successfully:", turno);
+        setTurnoActivo(turno);
+      } catch (err) {
+        console.error("Error checking caja status:", err);
+      } finally {
+        setLoadingCaja(false);
+      }
+    } else {
+      console.log("Skipping caja status fetch, session:", session);
+      setLoadingCaja(false);
+    }
+  };
+
   useEffect(() => {
     if (session?.user && session.user.rol !== "superadmin") {
       getEmpresaSucursales().then((data) => {
@@ -58,6 +80,21 @@ export function Header() {
         }
       });
     }
+  }, [session]);
+
+  useEffect(() => {
+    fetchCajaStatus();
+  }, [session, pathname]);
+
+  useEffect(() => {
+    const handleCajaChange = () => {
+      fetchCajaStatus();
+    };
+
+    window.addEventListener("caja-status-changed", handleCajaChange);
+    return () => {
+      window.removeEventListener("caja-status-changed", handleCajaChange);
+    };
   }, [session]);
 
   const handleBranchChange = async (sucursalId: string) => {
@@ -194,6 +231,38 @@ export function Header() {
               </span>
             </div>
           ))}
+
+        {/* Caja Quick Access Badge */}
+        {session?.user?.rol !== "superadmin" && !loadingCaja && (
+          turnoActivo ? (
+            <Link href="/caja" passHref>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer shadow-xs transition-all duration-300"
+                title="Caja Abierta - Gestionar o Cerrar Turno"
+              >
+                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="whitespace-nowrap">Caja: S/ {(() => {
+                  const efectivoPago = turnoActivo.pagos?.find((p: any) => p.metodo === "efectivo")?.total || 0;
+                  return (parseFloat(turnoActivo.montoInicial || "0") + efectivoPago).toFixed(2);
+                })()}</span>
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/caja" passHref>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/25 hover:bg-red-500/15 text-xs font-bold text-red-600 dark:text-red-400 cursor-pointer shadow-xs transition-all duration-300"
+                title="Caja Cerrada - Abrir Turno"
+              >
+                <div className="h-2.5 w-2.5 rounded-full bg-red-500 shrink-0" />
+                <span className="whitespace-nowrap">Abrir Caja</span>
+              </Button>
+            </Link>
+          )
+        )}
 
         {/* Theme Toggle Button */}
         <AnimatedThemeToggler

@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos } from "@/lib/db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad } from "@/lib/db/schema";
+import { eq, and, desc, sql, or } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { revalidatePath } from "next/cache";
 import { getErrorMessage } from "./action-utils";
@@ -258,6 +258,7 @@ export async function cobrarOrden(data: {
   monto: string;
   referencia?: string;
   cuponId?: string;
+  puntosACanjear?: number;
 }) {
   try {
     const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
@@ -275,49 +276,115 @@ export async function cobrarOrden(data: {
       throw new Error("No hay un turno de caja abierto en esta sucursal. Abre caja antes de procesar cobros.");
     }
 
-    // 2. Insertar registro en la tabla de pagos
+    // Obtener detalles de la orden para validación y cálculos
+    const [orden] = await db
+      .select({
+        total: ordenes.total,
+        descuento: ordenes.descuento,
+        nroTicket: ordenes.nroTicket,
+        vehiculoId: ordenes.vehiculoId,
+      })
+      .from(ordenes)
+      .where(eq(ordenes.id, data.ordenId))
+      .limit(1);
+
+    if (!orden) {
+      throw new Error("Orden no encontrada.");
+    }
+
+    // Buscar cliente asociado al vehículo de la orden
+    const [vehiculo] = await db
+      .select({ clienteId: vehiculos.clienteId })
+      .from(vehiculos)
+      .where(eq(vehiculos.id, orden.vehiculoId))
+      .limit(1);
+
+    const clienteId = vehiculo?.clienteId;
+    let totalActualizado = parseFloat(orden.total || "0");
+    let descuentoActualizado = parseFloat(orden.descuento || "0");
+
+    // 2. Procesar Canje de Puntos de Fidelidad
+    if (data.puntosACanjear && data.puntosACanjear > 0 && clienteId) {
+      const [puntosRow] = await db
+        .select({
+          totalPuntos: sql<number>`coalesce(sum(${puntosFidelidad.puntos})::int, 0)`,
+        })
+        .from(puntosFidelidad)
+        .where(eq(puntosFidelidad.clienteId, clienteId));
+
+      const totalPuntos = puntosRow?.totalPuntos || 0;
+      if (totalPuntos < data.puntosACanjear) {
+        throw new Error(`El cliente no cuenta con saldo de puntos suficiente (disponible: ${totalPuntos}, requerido: ${data.puntosACanjear}).`);
+      }
+
+      // Calcular descuento (S/ 0.20 por punto)
+      const descuentoPuntos = data.puntosACanjear * 0.20;
+
+      // Registrar débito de puntos
+      await db.insert(puntosFidelidad).values({
+        clienteId,
+        ordenId: data.ordenId,
+        puntos: -data.puntosACanjear,
+        tipo: "canjeado",
+        descripcion: `Canje de ${data.puntosACanjear} puntos por descuento de S/ ${descuentoPuntos.toFixed(2)} en orden ${orden.nroTicket || ""}`,
+      });
+
+      descuentoActualizado += descuentoPuntos;
+      totalActualizado = Math.max(0, totalActualizado - descuentoPuntos);
+    }
+
+    // 3. Registrar Puntos Ganados por consumo (S/ 10 = 1 punto)
+    if (clienteId && totalActualizado > 0) {
+      const puntosGanados = Math.floor(totalActualizado / 10);
+      if (puntosGanados > 0) {
+        await db.insert(puntosFidelidad).values({
+          clienteId,
+          ordenId: data.ordenId,
+          puntos: puntosGanados,
+          tipo: "ganado",
+          descripcion: `Puntos ganados por consumo en orden ${orden.nroTicket || ""}`,
+        });
+      }
+    }
+
+    // 4. Insertar registro en la tabla de pagos con el monto neto final
     const [newPago] = await db
       .insert(pagos)
       .values({
         ordenId: data.ordenId,
         turnoId: activeTurno.id,
         metodo: data.metodo,
-        monto: data.monto,
+        monto: totalActualizado.toFixed(2),
         referencia: data.referencia || null,
         cajeroId,
       })
       .returning();
 
-    // 3. Actualizar la orden a 'cobrado' y asociar el turnoId
+    // 5. Actualizar la orden a 'cobrado', su descuento y su total neto
     await db
       .update(ordenes)
       .set({
         estado: "cobrado",
         turnoId: activeTurno.id,
+        descuento: descuentoActualizado.toFixed(2),
+        total: totalActualizado.toFixed(2),
         updatedAt: new Date(),
       })
       .where(and(eq(ordenes.id, data.ordenId), eq(ordenes.sucursalId, sucursalId)));
 
-    // 4. Registrar uso del cupón si aplica
-    if (data.cuponId) {
-      const [vehiculo] = await db
-        .select({ clienteId: vehiculos.clienteId })
-        .from(ordenes)
-        .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
-        .where(eq(ordenes.id, data.ordenId));
-
-      if (vehiculo?.clienteId) {
-        await db.insert(cuponesUsos).values({
-          cuponId: data.cuponId,
-          clienteId: vehiculo.clienteId,
-          ordenId: data.ordenId,
-        });
-      }
+    // 6. Registrar uso del cupón si aplica
+    if (data.cuponId && clienteId) {
+      await db.insert(cuponesUsos).values({
+        cuponId: data.cuponId,
+        clienteId,
+        ordenId: data.ordenId,
+      });
     }
 
     revalidatePath("/caja");
     revalidatePath("/ordenes");
     revalidatePath("/dashboard");
+    revalidatePath("/clientes");
 
     return { success: true, data: newPago };
   } catch (error: unknown) {
@@ -388,5 +455,85 @@ export async function getTurnosHistorial() {
   } catch (error) {
     console.error("Error al obtener historial de caja:", error);
     return [];
+  }
+}
+
+// Verificar autorización de supervisor para cierres descuadrados
+export async function verificarAutorizacionSupervisor(email: string, contrasena: string) {
+  try {
+    // 1. Buscar al usuario por email
+    const [user] = await db
+      .select({
+        id: usuarios.id,
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        rol: usuarios.rol,
+        activo: usuarios.activo,
+      })
+      .from(usuarios)
+      .where(eq(usuarios.email, email))
+      .limit(1);
+
+    if (!user) {
+      return { success: false, error: "Usuario no encontrado." };
+    }
+
+    if (!user.activo) {
+      return { success: false, error: "La cuenta del supervisor está desactivada." };
+    }
+
+    // 2. Verificar que tenga rol de supervisor o superior
+    const rolesAutorizados = ["supervisor", "admin", "superadmin"];
+    if (!rolesAutorizados.includes(user.rol)) {
+      return { success: false, error: "El usuario no tiene privilegios de supervisor." };
+    }
+
+    // 3. Obtener el hash de la contraseña de la tabla cuentas
+    const [account] = await db
+      .select({
+        password: cuentas.password,
+      })
+      .from(cuentas)
+      .where(
+        and(
+          eq(cuentas.userId, user.id),
+          or(
+            eq(cuentas.providerId, "email"),
+            eq(cuentas.providerId, "credential")
+          )
+        )
+      )
+      .limit(1);
+
+    if (!account || !account.password) {
+      return { success: false, error: "El usuario no cuenta con una contraseña local registrada." };
+    }
+
+    // 4. Importar verifyPassword de forma dinámica para evitar problemas en SSR
+    const { verifyPassword } = await import("better-auth/crypto");
+
+    // 5. Comparar contraseñas
+    const match = await verifyPassword({
+      hash: account.password,
+      password: contrasena,
+    });
+
+    if (!match) {
+      return { success: false, error: "Contraseña incorrecta." };
+    }
+
+    const nombreCompleto = `${user.nombre} ${user.apellido || ""}`.trim();
+    return { 
+      success: true, 
+      supervisor: { 
+        id: user.id, 
+        nombre: nombreCompleto, 
+        email: email,
+        rol: user.rol
+      } 
+    };
+  } catch (error) {
+    console.error("Error al verificar autorización de supervisor:", error);
+    return { success: false, error: "Ocurrió un error al validar la autorización." };
   }
 }

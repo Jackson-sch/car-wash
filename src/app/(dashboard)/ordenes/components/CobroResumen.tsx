@@ -1,4 +1,4 @@
-import { User, Car, Tag } from "lucide-react";
+import { User, Car, Tag, Gift } from "lucide-react";
 import { formatCurrency } from "@/lib/formats";
 import { OrdenResumen } from "./CobrarModal";
 
@@ -6,11 +6,17 @@ interface CobroResumenProps {
   orden: OrdenResumen;
   totalNum: number;
   descuentoCoupon?: number;
+  descuentoPuntos?: number;
 }
 
-export function CobroResumen({ orden, totalNum, descuentoCoupon = 0 }: CobroResumenProps) {
-  const tieneDescuento = descuentoCoupon > 0;
-  const totalFinal = Math.max(0, totalNum - descuentoCoupon);
+export function CobroResumen({
+  orden,
+  totalNum,
+  descuentoCoupon = 0,
+  descuentoPuntos = 0,
+}: CobroResumenProps) {
+  const tieneDescuento = descuentoCoupon > 0 || descuentoPuntos > 0;
+  const totalFinal = Math.max(0, totalNum - descuentoCoupon - descuentoPuntos);
 
   return (
     <div className="p-4 bg-zinc-50/30 border border-zinc-100 rounded-2xl space-y-3 shadow-inner">
@@ -60,7 +66,7 @@ export function CobroResumen({ orden, totalNum, descuentoCoupon = 0 }: CobroResu
             </span>
           </div>
         )}
-        {tieneDescuento && (
+        {descuentoCoupon > 0 && (
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
               <Tag className="h-3 w-3" />
@@ -68,6 +74,17 @@ export function CobroResumen({ orden, totalNum, descuentoCoupon = 0 }: CobroResu
             </span>
             <span className="text-xs font-bold text-emerald-600">
               -{formatCurrency(descuentoCoupon)}
+            </span>
+          </div>
+        )}
+        {descuentoPuntos > 0 && (
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1">
+              <Gift className="h-3 w-3" />
+              Descuento puntos
+            </span>
+            <span className="text-xs font-bold text-amber-600">
+              -{formatCurrency(descuentoPuntos)}
             </span>
           </div>
         )}

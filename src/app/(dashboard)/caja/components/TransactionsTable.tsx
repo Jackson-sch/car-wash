@@ -149,8 +149,8 @@ export function TransactionsTable({ transacciones }: TransactionsTableProps) {
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="p-3 border-t border-border bg-muted/20">
+      {filteredTransactions.length > 0 && (
+        <div className="p-3 border-t border-border bg-transparent">
           <PaginationControls
             activePage={activePage}
             totalPages={totalPages}

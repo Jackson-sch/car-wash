@@ -282,6 +282,10 @@ export async function createOrden(data: {
       .where(and(eq(turnosCaja.sucursalId, sucursalId), sql`${turnosCaja.cierre} IS NULL`))
       .orderBy(desc(turnosCaja.apertura));
 
+    if (!activeTurno) {
+      throw new Error("No es posible registrar la orden porque la caja está cerrada. Por favor abra la caja primero.");
+    }
+
     // 4. Generar número de ticket correlativo del día
     const [ordenCount] = await db
       .select({ value: count() })

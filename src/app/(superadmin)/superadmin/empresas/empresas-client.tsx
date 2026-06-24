@@ -14,6 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { createEmpresa, toggleEmpresaStatus, updateEmpresa, getPlanesActivos } from "@/lib/actions/superadmin";
 import { toast } from "sonner";
+import { useQueryState, parseAsInteger } from "nuqs";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 
 interface EmpresaItem {
   id: string;
@@ -33,6 +35,10 @@ export function EmpresasClientList({ initialEmpresas }: EmpresasClientProps) {
   const [empresas, setEmpresas] = useState<EmpresaItem[]>(initialEmpresas);
   const [searchTerm, setSearchTerm] = useState("");
   const [planFilter, setPlanFilter] = useState("todos");
+  const [page, setPage] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1).withOptions({ shallow: true })
+  );
   
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,6 +201,14 @@ export function EmpresasClientList({ initialEmpresas }: EmpresasClientProps) {
     return matchesSearch && matchesPlan;
   });
 
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredEmpresas.length / itemsPerPage);
+  const activePage = page || 1;
+  const paginatedEmpresas = filteredEmpresas.slice(
+    (activePage - 1) * itemsPerPage,
+    (activePage - 1) * itemsPerPage + itemsPerPage
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -204,7 +218,10 @@ export function EmpresasClientList({ initialEmpresas }: EmpresasClientProps) {
             type="text"
             placeholder="Buscar empresas..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(null);
+            }}
             className="bg-transparent border-0 text-sm text-foreground focus:outline-none w-full focus:ring-0 placeholder-muted-foreground"
           />
         </div>
@@ -212,7 +229,10 @@ export function EmpresasClientList({ initialEmpresas }: EmpresasClientProps) {
         <div className="flex gap-3 w-full sm:w-auto">
           <select
             value={planFilter}
-            onChange={(e) => setPlanFilter(e.target.value)}
+            onChange={(e) => {
+              setPlanFilter(e.target.value);
+              setPage(null);
+            }}
             className="bg-muted/50 border border-border text-xs font-semibold rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-ring"
           >
             <option value="todos">Todos los Planes</option>
@@ -477,14 +497,14 @@ export function EmpresasClientList({ initialEmpresas }: EmpresasClientProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEmpresas.length === 0 ? (
+            {paginatedEmpresas.length === 0 ? (
               <TableRow className="hover:bg-transparent border-b-0">
                 <TableCell colSpan={7} className="text-center py-12 text-muted-foreground text-xs">
                   No se encontraron empresas con los filtros aplicados.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredEmpresas.map((emp) => {
+              paginatedEmpresas.map((emp) => {
                 const isPro = emp.plan === "pro";
                 const isEnterprise = emp.plan === "enterprise";
 
@@ -578,6 +598,18 @@ export function EmpresasClientList({ initialEmpresas }: EmpresasClientProps) {
             )}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-border bg-muted/10">
+            <PaginationControls
+              activePage={activePage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              showInfo
+              totalItems={filteredEmpresas.length}
+              itemsPerPage={itemsPerPage}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

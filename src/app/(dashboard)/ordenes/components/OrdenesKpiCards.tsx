@@ -117,7 +117,7 @@ export function OrdenesKpiCards({ ordenes }: OrdenesKpiCardsProps) {
       </div>
 
       {/* Current Revenue */}
-      <div className="bento-card p-5 rounded-2xl border-l-4 border-l-secondary flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Ingresos de Caja

@@ -47,20 +47,23 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
   }, [turno]);
 
   return (
-    <Card className="col-span-1 md:col-span-12 xl:col-span-4 bg-card border-border shadow-sm p-6 flex flex-col justify-between">
+    <Card className="col-span-1 md:col-span-12 xl:col-span-4 bg-card border-border shadow-sm p-6 flex flex-col justify-between relative overflow-hidden">
+      {/* Decorative background glow */}
+      <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+
       <div>
-        <div className="flex justify-between items-center mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+        <div className="flex justify-between items-center mb-6 border-b border-border/60 pb-4">
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Balance en Caja
           </h3>
-          <span className="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-450 font-bold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
+          <span className="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 font-bold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>{" "}
             Abierto
           </span>
         </div>
 
         <div className="mb-6">
-          <span className="text-3xl font-black text-zinc-900 tracking-tight">
+          <span className="text-3xl font-black text-foreground tracking-tight">
             {formatCurrency(stats.totalBalance)}
           </span>
           <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-0.5 font-medium">
@@ -70,44 +73,44 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
         </div>
 
         <div className="space-y-2 mb-6 text-xs font-medium">
-          <div className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800/40">
+          <div className="flex justify-between items-center py-2 border-b border-border/40">
             <span className="text-muted-foreground flex items-center gap-1.5">
-              <Coins className="size-4 text-zinc-400" /> Fondo Inicial
+              <Coins className="size-4 text-muted-foreground" /> Fondo Inicial
             </span>
-            <span className="text-zinc-800 font-bold">
+            <span className="text-foreground font-bold">
               {formatCurrency(stats.openingCash)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800/40">
+          <div className="flex justify-between items-center py-2 border-b border-border/40">
             <span className="text-muted-foreground flex items-center gap-1.5">
-              <Wallet className="size-4 text-zinc-400" /> Ventas Efectivo
+              <Wallet className="size-4 text-muted-foreground" /> Ventas Efectivo
             </span>
-            <span className="text-zinc-800 font-bold">
+            <span className="text-foreground font-bold">
               {formatCurrency(stats.efectivoVentas)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800/40">
+          <div className="flex justify-between items-center py-2 border-b border-border/40">
             <span className="text-muted-foreground flex items-center gap-1.5">
-              <CreditCard className="size-4 text-zinc-400" /> Cobros Tarjeta
+              <CreditCard className="size-4 text-muted-foreground" /> Cobros Tarjeta
             </span>
-            <span className="text-zinc-800 font-bold">
+            <span className="text-foreground font-bold">
               {formatCurrency(stats.tarjetaVentas)}
             </span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800/40">
+          <div className="flex justify-between items-center py-2 border-b border-border/40">
             <span className="text-muted-foreground flex items-center gap-1.5">
-              <Wallet className="size-4 text-zinc-400" /> Yape / Plin
+              <Wallet className="size-4 text-muted-foreground" /> Yape / Plin
             </span>
-            <span className="text-zinc-800 font-bold">
+            <span className="text-foreground font-bold">
               {formatCurrency(stats.yapePlinVentas)}
             </span>
           </div>
           <div className="flex justify-between items-center py-2">
             <span className="text-muted-foreground flex items-center gap-1.5">
-              <ArrowUpRight className="size-4 text-zinc-400" />{" "}
+              <ArrowUpRight className="size-4 text-muted-foreground" />{" "}
               Transferencias
             </span>
-            <span className="text-zinc-800 font-bold">
+            <span className="text-foreground font-bold">
               {formatCurrency(stats.transferenciasVentas)}
             </span>
           </div>
@@ -117,7 +120,7 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
       <Link
         href="/caja/cierre"
         className={cn(
-          "w-full bg-primary hover:bg-primary/80 text-primary-foreground font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm flex items-center justify-center mt-4",
+          "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm flex items-center justify-center mt-4 transition-all duration-200 hover:scale-[1.01]",
         )}
       >
         <Lock className="size-4" />

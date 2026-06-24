@@ -204,7 +204,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
           </p>
         </Card>
       ) : (
-        <Card className="border border-border bg-card overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+        <Card className="border border-border bg-card p-0 overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
           <div className="overflow-x-auto">
             <Table className="min-w-[750px]">
               <TableHeader>
@@ -323,17 +323,20 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
               </TableBody>
             </Table>
           </div>
+          {filtered.length > 0 && (
+            <div className="p-4 border-t border-border bg-transparent">
+              <PaginationControls
+                activePage={activePage}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                showInfo
+                totalItems={filtered.length}
+                itemsPerPage={itemsPerPage}
+              />
+            </div>
+          )}
         </Card>
       )}
-
-      <PaginationControls
-        activePage={activePage}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        showInfo
-        totalItems={filtered.length}
-        itemsPerPage={itemsPerPage}
-      />
     </div>
   );
 }

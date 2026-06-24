@@ -14,9 +14,9 @@ export function StatsCard({
   label,
   value,
   icon,
-  iconBg = "bg-blue-50",
+  iconBg = "bg-secondary/10",
   iconColor = "text-secondary",
-  valueColor = "text-zinc-900",
+  valueColor = "text-foreground",
 }: StatsCardProps) {
   return (
     <Card className="p-6 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:border-zinc-350 transition-all flex items-center justify-between">

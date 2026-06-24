@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getOrdenes, getEmpleadosLavadores } from "@/lib/actions/ordenes";
+import { getTurnoActivo } from "@/lib/actions/caja";
 import { OrdenesClient } from "./ordenes-client";
 
 export const metadata = {
@@ -8,9 +9,10 @@ export const metadata = {
 };
 
 export default async function OrdenesPage() {
-  const [ordenesList, lavadoresList] = await Promise.all([
+  const [ordenesList, lavadoresList, turnoActivo] = await Promise.all([
     getOrdenes(),
     getEmpleadosLavadores(),
+    getTurnoActivo(),
   ]);
 
   return (
@@ -18,6 +20,7 @@ export default async function OrdenesPage() {
       <OrdenesClient
         initialOrdenes={ordenesList}
         lavadores={lavadoresList}
+        cajaAbierta={!!turnoActivo}
       />
     </Suspense>
   );

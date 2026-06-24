@@ -49,22 +49,30 @@ const TIPO_LABELS: Record<string, string> = {
 };
 
 function TipoIcon({ tipo }: { tipo: string | null }) {
-  const className = "h-5 w-5 text-muted-foreground";
-  switch (tipo) {
-    case "sedan":
-    case "suv":
-      return <Car className={className} />;
-    case "pickup":
-      return <Truck className={className} />;
-    case "moto":
-      return <Bike className={className} />;
-    case "camion":
-      return <Truck className={className} />;
-    case "furgon":
-      return <Van className={className} />;
-    default:
-      return <Car className={className} />;
-  }
+  const className = "h-4 w-4 text-secondary";
+  const icon = (() => {
+    switch (tipo) {
+      case "sedan":
+      case "suv":
+        return <Car className={className} />;
+      case "pickup":
+        return <Truck className={className} />;
+      case "moto":
+        return <Bike className={className} />;
+      case "camion":
+        return <Truck className={className} />;
+      case "furgon":
+        return <Van className={className} />;
+      default:
+        return <Car className={className} />;
+    }
+  })();
+
+  return (
+    <div className="h-8 w-8 rounded-lg bg-secondary/10 flex items-center justify-center border border-secondary/20 shrink-0">
+      {icon}
+    </div>
+  );
 }
 
 
@@ -107,12 +115,16 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
   const totalOrdenes = initialVehiculos.reduce((acc, v) => acc + v.totalOrdenes, 0);
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="relative space-y-8 text-foreground">
+      {/* Background Decorative Glow Orbs */}
+      <div className="absolute top-0 right-0 -z-10 h-72 w-72 rounded-full bg-secondary/5 dark:bg-secondary/10 blur-3xl" />
+      <div className="absolute top-40 left-10 -z-10 h-72 w-72 rounded-full bg-primary/5 dark:bg-primary/10 blur-3xl" />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-            <Car className="h-7 w-7 text-secondary" />
+            <Car className="h-7 w-7 text-secondary animate-pulse" />
             Vehículos Registrados
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -127,20 +139,23 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
           label="Total de Vehículos"
           value={totalVehiculos}
           icon={<Car className="h-5 w-5" />}
+          iconBg="bg-blue-500/10"
+          iconColor="text-blue-500"
         />
         <StatsCard
           label="Con Órdenes"
           value={vehiculosConOrdenes}
           icon={<ClipboardList className="h-5 w-5" />}
-          iconColor="text-blue-500"
+          iconBg="bg-amber-500/10"
+          iconColor="text-amber-500"
         />
         <StatsCard
           label="Órdenes Generadas"
           value={totalOrdenes}
           icon={<Gauge className="h-5 w-5" />}
           iconBg="bg-emerald-500/10"
-          iconColor="text-emerald-600 dark:text-emerald-400"
-          valueColor="text-emerald-600"
+          iconColor="text-emerald-500"
+          valueColor="text-emerald-600 dark:text-emerald-450"
         />
       </div>
 
@@ -154,7 +169,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
             setSearch(e.target.value);
             setPage(null);
           }}
-          className="pl-9 pr-9 bg-card border-zinc-300 hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-lg"
+          className="pl-9 pr-9 bg-card border-border hover:border-zinc-350 dark:hover:border-zinc-750 focus-visible:ring-secondary/30 text-xs h-9 rounded-xl shadow-xs"
         />
         {search && (
           <button
@@ -162,7 +177,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
               setSearch("");
               setPage(null);
             }}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer animate-in fade-in zoom-in duration-200"
           >
             <X className="h-4 w-4" />
           </button>
@@ -170,24 +185,24 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="rounded-xl border border-border bg-card/60 backdrop-blur-md overflow-hidden shadow-xs">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Placa</TableHead>
-              <TableHead>Vehículo</TableHead>
-              <TableHead>Propietario</TableHead>
-              <TableHead>Contacto</TableHead>
-              <TableHead className="text-center">Órdenes</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+            <TableRow className="bg-muted/30 border-b border-border">
+              <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Placa</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Vehículo</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Propietario</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Contacto</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3 text-center">Órdenes</TableHead>
+              <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3 text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground py-16">
-                  <Car className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-                  <p className="font-medium">
+                  <Car className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30 animate-pulse" />
+                  <p className="font-bold text-foreground/80">
                     {search ? "Sin resultados para tu búsqueda" : "No hay vehículos registrados"}
                   </p>
                   <p className="text-xs mt-1 text-muted-foreground/60">
@@ -199,52 +214,63 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
               </TableRow>
             ) : (
               paginatedData.map((v) => (
-                <TableRow key={v.id} className="group">
-                  <TableCell>
-                    <span className="font-mono font-bold tracking-wider text-foreground uppercase text-sm">
+                <TableRow key={v.id} className="group hover:bg-muted/40 transition-colors duration-200">
+                  <TableCell className="py-4">
+                    <span className="inline-flex items-center justify-center font-mono font-bold tracking-wider text-foreground uppercase text-[10px] px-2 py-0.5 rounded-md bg-muted/70 dark:bg-muted/50 border border-border/80 shadow-xs select-all">
                       {v.placa}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
+                  <TableCell className="py-4">
+                    <div className="flex items-center gap-3">
                       <TipoIcon tipo={v.tipo} />
                       <div>
-                        <div className="font-medium text-foreground text-sm">
+                        <div className="font-extrabold text-foreground text-xs leading-tight">
                           {v.marca || "—"} {v.modelo || ""}
                         </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <Badge variant="outline" className="text-[10px] font-normal py-0 h-4">
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Badge variant="outline" className="text-[9px] font-extrabold py-0 px-1.5 h-4.5 bg-muted/30 border-border/50 text-muted-foreground tracking-wide uppercase">
                             {TIPO_LABELS[v.tipo || ""] || v.tipo || "—"}
                           </Badge>
                           {v.anio && (
-                            <span className="text-[11px] text-muted-foreground">{v.anio}</span>
+                            <span className="text-[10px] text-muted-foreground/85 font-semibold">{v.anio}</span>
                           )}
                           {v.color && (
-                            <span className="text-[11px] text-muted-foreground">{v.color}</span>
+                            <>
+                              <span className="text-[9px] text-muted-foreground/45">•</span>
+                              <span className="text-[10px] text-muted-foreground/85 font-semibold capitalize">{v.color}</span>
+                            </>
                           )}
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-foreground font-medium">
-                      {v.clienteNombre} {v.clienteApellido || ""}
-                    </span>
+                  <TableCell className="py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 border border-secondary/20">
+                        <Users className="h-3 w-3 text-secondary" />
+                      </div>
+                      <span className="text-xs text-foreground font-extrabold">
+                        {v.clienteNombre} {v.clienteApellido || ""}
+                      </span>
+                    </div>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-muted-foreground">{v.clienteTelefono || "—"}</span>
+                  <TableCell className="py-4">
+                    <span className="text-xs text-muted-foreground font-bold">{v.clienteTelefono || "—"}</span>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant={v.totalOrdenes > 0 ? "secondary" : "outline"}
-                      className="text-xs font-semibold"
-                    >
-                      {v.totalOrdenes}
-                    </Badge>
+                  <TableCell className="py-4 text-center">
+                    {v.totalOrdenes > 0 ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 border border-emerald-500/20">
+                        {v.totalOrdenes} {v.totalOrdenes === 1 ? "orden" : "órdenes"}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/60">
+                        0 órdenes
+                      </span>
+                    )}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="py-4 text-right">
                     <Link href={`/vehiculos/${v.id}`}>
-                      <Button variant="ghost" size="icon" className="cursor-pointer">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg cursor-pointer hover:bg-secondary/15 hover:text-secondary text-muted-foreground transition-colors duration-200">
                         <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -254,18 +280,19 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
             )}
           </TableBody>
         </Table>
+        {filtered.length > 0 && (
+          <div className="p-4 border-t border-border bg-transparent">
+            <PaginationControls
+              activePage={activePage}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              showInfo
+              totalItems={filtered.length}
+              itemsPerPage={itemsPerPage}
+            />
+          </div>
+        )}
       </div>
-
-      {totalPages > 1 && (
-        <PaginationControls
-          activePage={activePage}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          showInfo
-          totalItems={filtered.length}
-          itemsPerPage={itemsPerPage}
-        />
-      )}
     </div>
   );
 }

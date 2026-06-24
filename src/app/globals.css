@@ -279,6 +279,11 @@
   *::after {
     transition: background-color 0.25s ease, border-color 0.25s ease, color 0.15s ease, box-shadow 0.25s ease;
   }
+  .preload *,
+  .preload *::before,
+  .preload *::after {
+    transition: none !important;
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

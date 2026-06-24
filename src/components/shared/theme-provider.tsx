@@ -26,6 +26,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    // Remueve la clase preload para habilitar las transiciones después del primer pintado
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove("preload");
+      });
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   const toggleTheme = () => {

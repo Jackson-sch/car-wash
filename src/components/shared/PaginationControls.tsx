@@ -83,7 +83,18 @@ export function PaginationControls({
   totalItems,
   itemsPerPage,
 }: PaginationControlsProps) {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {
+    if (showInfo && totalItems !== undefined && totalItems > 0) {
+      return (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+          <span className="text-xs text-zinc-500 font-medium">
+            Mostrando 1–{totalItems} de {totalItems} registros
+          </span>
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3">

@@ -10,6 +10,8 @@ import { ReportesSummaryCards } from "./components/ReportesSummaryCards";
 import { VentasChart } from "./components/VentasChart";
 import { MetodosPagoChart } from "./components/MetodosPagoChart";
 import { ServiciosTopChart } from "./components/ServiciosTopChart";
+import { HorasPicoChart } from "./components/HorasPicoChart";
+import { PredictiveInsights } from "./components/PredictiveInsights";
 
 interface ReportesClientProps {
   initialData: ReportData;
@@ -39,6 +41,22 @@ const DEMO_SERVICIOS_TOP = [
   { name: "Encerado Orbital", cantidad: 35, total: 4200 },
   { name: "Lavado de Motor", cantidad: 28, total: 1260 },
   { name: "Lavado de Salón", cantidad: 15, total: 4200 },
+];
+
+const DEMO_HORAS_PICO = [
+  { hora: "08:00", cantidad: 2, prediccion: 3 },
+  { hora: "09:00", cantidad: 5, prediccion: 6 },
+  { hora: "10:00", cantidad: 11, prediccion: 13 },
+  { hora: "11:00", cantidad: 18, prediccion: 20 },
+  { hora: "12:00", cantidad: 14, prediccion: 17 },
+  { hora: "13:00", cantidad: 8, prediccion: 10 },
+  { hora: "14:00", cantidad: 6, prediccion: 8 },
+  { hora: "15:00", cantidad: 10, prediccion: 12 },
+  { hora: "16:00", cantidad: 13, prediccion: 15 },
+  { hora: "17:00", cantidad: 15, prediccion: 18 },
+  { hora: "18:00", cantidad: 9, prediccion: 11 },
+  { hora: "19:00", cantidad: 4, prediccion: 6 },
+  { hora: "20:00", cantidad: 1, prediccion: 2 },
 ];
 
 export function ReportesClient({ initialData }: ReportesClientProps) {
@@ -95,6 +113,7 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
   const ventasDiarias = useDemo ? DEMO_VENTAS_DIARIAS : initialData.ventasDiarias;
   const pagosMetodo = useDemo ? DEMO_PAGOS_METODO : initialData.pagosMetodo;
   const serviciosTop = useDemo ? DEMO_SERVICIOS_TOP : initialData.serviciosTop;
+  const horasPico = useDemo ? DEMO_HORAS_PICO : (initialData.horasPico || []);
 
   return (
     <div className="space-y-8 text-foreground">
@@ -167,6 +186,20 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
         <VentasChart ventasDiarias={ventasDiarias} />
         <MetodosPagoChart pagosMetodo={pagosMetodo} />
         <ServiciosTopChart serviciosTop={serviciosTop} />
+      </div>
+
+      {/* Analítica Predictiva y Horas Pico */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <HorasPicoChart horasPico={horasPico} />
+        </div>
+        <div className="xl:col-span-1">
+          <PredictiveInsights 
+            kpis={kpis} 
+            serviciosTop={serviciosTop} 
+            horasPico={horasPico} 
+          />
+        </div>
       </div>
     </div>
   );

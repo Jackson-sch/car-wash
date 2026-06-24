@@ -3,7 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import Script from "next/script";
+import { PWARegistration } from "./components/PWARegistration";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "WashMaster Pro - Sistema de Gestión de Autolavado",
   description: "Dashboard operativo premium para la administración de autolavados y servicios estéticos automotrices.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "CarWash Pro",
+  },
 };
 
 export default function RootLayout({
@@ -28,22 +33,22 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark preload ${inter.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
-        <Script
-          id="theme-initializer"
-          strategy="beforeInteractive"
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
                   const savedTheme = localStorage.getItem('theme');
-                  if (savedTheme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                  } else {
+                  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  const initialTheme = savedTheme || (systemDark ? 'dark' : 'light');
+                  if (initialTheme === 'dark') {
                     document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
                   }
                 } catch (e) {}
               })()
@@ -53,7 +58,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <NuqsAdapter>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <PWARegistration />
+            {children}
+          </ThemeProvider>
         </NuqsAdapter>
       </body>
     </html>

@@ -19,6 +19,7 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import { useOrdenesColumns } from "./useOrdenesColumns";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 
 export interface Orden {
   id: string;
@@ -54,6 +55,11 @@ interface OrdenesTableProps {
   lavadores: Lavador[];
   onStatusChange: (id: string, nuevoEstado: Orden["estado"]) => void;
   onAssignLavador: (id: string, empleadoId: string | null) => void;
+  activePage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
 export function OrdenesTable({
@@ -61,6 +67,11 @@ export function OrdenesTable({
   lavadores,
   onStatusChange,
   onAssignLavador,
+  activePage,
+  totalPages,
+  onPageChange,
+  totalItems,
+  itemsPerPage,
 }: OrdenesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -96,7 +107,7 @@ export function OrdenesTable({
   }
 
   return (
-    <Card className="border border-border/80 bg-card/60 backdrop-blur-md overflow-hidden shadow-xs rounded-xl">
+    <Card className="border border-border/80 bg-card/60 p-0 backdrop-blur-md overflow-hidden shadow-xs rounded-xl">
       <div className="overflow-x-auto">
         <Table className="min-w-[1000px]">
           <TableHeader>
@@ -141,6 +152,18 @@ export function OrdenesTable({
           </TableBody>
         </Table>
       </div>
+      {totalItems > 0 && (
+        <div className="p-4 border-t border-border bg-transparent">
+          <PaginationControls
+            activePage={activePage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            showInfo
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
+      )}
     </Card>
   );
 }

@@ -90,7 +90,7 @@ export function SalesByCategoryChart({
   };
 
   return (
-    <Card className="bg-transparent border-border shadow-sm p-6 flex flex-col justify-between relative overflow-visible">
+    <Card className="bg-card border-border shadow-sm p-6 flex flex-col justify-between relative overflow-visible">
       <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
         Ventas por Categoría
       </h3>

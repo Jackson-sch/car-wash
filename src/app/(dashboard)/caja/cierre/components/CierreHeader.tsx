@@ -44,7 +44,7 @@ export function CierreHeader({ turno, systemStats, isPending, onFinalize, onPrin
           <Button
             onClick={onFinalize}
             disabled={isPending}
-            className="flex-1 md:flex-none text-xs font-bold gap-1.5 h-9 rounded-lg bg-black hover:bg-zinc-800 text-white"
+            className="flex-1 md:flex-none text-xs font-bold gap-1.5 h-9 rounded-lg"
           >
             <Lock className="h-4 w-4" /> 
             {isPending ? "Procesando..." : "Finalizar y Cerrar Caja"}

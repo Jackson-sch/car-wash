@@ -50,7 +50,7 @@ export function HourlyVolumeChart({ ventasPorHora }: HourlyVolumeChartProps) {
   }, [yScale]);
 
   return (
-    <Card className="bg-transparent border-border shadow-sm p-6 flex flex-col justify-between relative overflow-visible">
+    <Card className="bg-card border-border shadow-sm p-6 flex flex-col justify-between relative overflow-visible">
       <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
         Volumen de Órdenes por Hora
       </h3>
