@@ -9,6 +9,7 @@ import { OrdenesColaTable } from "./components/OrdenesColaTable";
 import { TurnoCajaPanel } from "./components/TurnoCajaPanel";
 import { DashboardViewSelector } from "./components/DashboardViewSelector";
 import { BranchSummaryTable } from "./components/BranchSummaryTable";
+import { useSession } from "@/lib/auth-client";
 
 interface OrdenCola {
   ticket: string;
@@ -71,6 +72,10 @@ export function DashboardClient({
   sucursales,
   currentBranch,
 }: DashboardClientProps) {
+  const { data: session } = useSession();
+  const userRol = session?.user?.rol;
+  const showSelector = userRol === "admin" || userRol === "superadmin";
+
   return (
     <div className="space-y-6 text-foreground">
       {/* Header */}
@@ -96,7 +101,7 @@ export function DashboardClient({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <DashboardViewSelector currentView={vista} />
+          {showSelector && <DashboardViewSelector currentView={vista} />}
           <Link href="/ordenes/nueva" passHref>
             <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm px-4">
               <Plus className="h-4.5 w-4.5" />

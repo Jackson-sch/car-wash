@@ -32,7 +32,7 @@ export const PERMISSIONS = {
   },
   empleados: {
     ver:       ['admin', 'supervisor'],
-    gestionar: ['admin'],
+    gestionar: ['admin', 'supervisor'],
   },
   paquetes: {
     ver:       ['admin', 'supervisor', 'cajero'],

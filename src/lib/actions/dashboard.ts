@@ -85,12 +85,14 @@ async function getEmpresaBranches(empresaId: string): Promise<{ id: string; nomb
 // ─── Main fetcher ───────────────────────────────────────────────────────────────
 
 export async function getDashboardData(
-  vista: "todas" | "sucursal" = "sucursal"
+  vistaInput: "todas" | "sucursal" = "sucursal"
 ): Promise<DashboardData> {
   const session = await getSessionOrThrow();
   const userSucursalId = session.user?.sucursalId;
   const empresaId = session.user?.empresaId;
   const userRol = session.user?.rol;
+
+  const vista = (userRol !== "admin" && userRol !== "superadmin") ? "sucursal" : vistaInput;
 
   let targetSucursalId: string | null = null;
   let branchIds: string[] = [];

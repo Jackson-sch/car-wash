@@ -48,8 +48,7 @@ export default function LoginPage() {
       } else if (data?.user) {
         const redirectTo = data.user.rol === "superadmin" ? "/superadmin" : "/dashboard";
         toast.success("Sesión iniciada con éxito");
-        router.push(redirectTo);
-        router.refresh();
+        window.location.href = redirectTo;
       }
     } catch (err) {
       toast.error("Ocurrió un error inesperado al iniciar sesión.");

@@ -119,7 +119,7 @@ export function useOrdenesColumns({
       cell: ({ row }) => (
         <div className="inline-flex items-center bg-muted/65 dark:bg-muted/40 border border-border rounded px-1.5 py-0.5 shadow-2xs select-none font-mono">
           <div className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-650 mr-1 shadow-2xs" />
-          <span className="text-[10px] font-bold text-foreground tracking-widest uppercase">
+          <span className="text-[10px] font-bold text-foreground  uppercase">
             {row.getValue("placa")}
           </span>
         </div>

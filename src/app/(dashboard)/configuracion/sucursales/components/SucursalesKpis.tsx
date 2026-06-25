@@ -7,7 +7,7 @@ import { SucursalItem } from "./types";
 
 interface SucursalesKpisProps {
   sucursales: SucursalItem[];
-  limiteSucursales: number;
+  limiteSucursales: number | null;
   userSucursalId: string | null;
 }
 
@@ -36,7 +36,7 @@ export function SucursalesKpis({
         </div>
         <div className="mt-4">
           <p className="text-3xl font-black text-foreground tracking-tight">
-            {total} <span className="text-sm font-semibold text-muted-foreground">/ {limiteSucursales}</span>
+            {total} <span className="text-sm font-semibold text-muted-foreground">/ {limiteSucursales === null ? "Ilimitado" : limiteSucursales}</span>
           </p>
           <p className="text-muted-foreground font-semibold text-[10px] mt-1">
             Sucursales creadas en tu plan

@@ -127,7 +127,7 @@ async function main() {
       telefono: "01-4456789",
       email: "miraflores@carwashpro.pe",
       ruc: "20123456789",
-      config: { igv: 18, moneda: "PEN" },
+      config: { igv: 18, moneda: "PEN", esPrincipal: true },
       activa: true,
     }).returning();
 
@@ -138,7 +138,7 @@ async function main() {
       telefono: "01-3728956",
       email: "surco@carwashpro.pe",
       ruc: "20123456780",
-      config: { igv: 18, moneda: "PEN" },
+      config: { igv: 18, moneda: "PEN", esPrincipal: false },
       activa: true,
     }).returning();
 
@@ -149,7 +149,7 @@ async function main() {
       telefono: "01-4219854",
       email: "sanisidro@carwashpro.pe",
       ruc: "20123456781",
-      config: { igv: 18, moneda: "PEN" },
+      config: { igv: 18, moneda: "PEN", esPrincipal: false },
       activa: true,
     }).returning();
 

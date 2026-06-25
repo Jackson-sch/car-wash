@@ -27,6 +27,7 @@ interface Empleado {
   totalLavados: number;
   montoLavado: number;
   comisionAcumulada: number;
+  sucursalNombre?: string | null;
 }
 
 interface EmpleadosClientProps {

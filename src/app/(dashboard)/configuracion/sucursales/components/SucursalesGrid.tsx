@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Building, MapPin, Phone, Mail, Hash, Pencil, Power, PowerOff, ShieldCheck, Play } from "lucide-react";
+import { Building, MapPin, Phone, Mail, Hash, Pencil, Power, PowerOff, ShieldCheck, Play, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,7 @@ interface SucursalesGridProps {
   onEdit: (sucursal: SucursalItem) => void;
   onToggleStatus: (id: string) => void;
   onSwitchSuccess: (newSucursalId: string) => void;
+  onSetMain: (id: string) => void;
 }
 
 export function SucursalesGrid({
@@ -25,6 +26,7 @@ export function SucursalesGrid({
   onEdit,
   onToggleStatus,
   onSwitchSuccess,
+  onSetMain,
 }: SucursalesGridProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -62,6 +64,8 @@ export function SucursalesGrid({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {data.map((s) => {
         const isCurrent = s.id === userSucursalId;
+        const configObj = s.config as { esPrincipal?: boolean; igv?: number; moneda?: string } | null;
+        const esPrincipal = configObj?.esPrincipal === true;
         return (
           <Card
             key={s.id}
@@ -89,6 +93,17 @@ export function SucursalesGrid({
                 </div>
 
                 <div className="flex flex-col gap-1 items-end shrink-0">
+                  {esPrincipal && (
+                    <Badge
+                      variant="default"
+                      className="text-[9px] font-extrabold tracking-wider uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-xs"
+                    >
+                      <span className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        Principal
+                      </span>
+                    </Badge>
+                  )}
                   {isCurrent && (
                     <Badge
                       variant="default"
@@ -167,6 +182,17 @@ export function SucursalesGrid({
 
               {/* Actions group */}
               <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-xl border border-border/40 ml-auto opacity-90 group-hover:opacity-100 transition-opacity">
+                {!esPrincipal && s.activa && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onSetMain(s.id)}
+                    className="h-8 w-8 rounded-lg hover:bg-card hover:text-amber-500 transition-all cursor-pointer text-muted-foreground"
+                    title="Establecer como Sucursal Principal"
+                  >
+                    <Star className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

@@ -21,7 +21,8 @@ export async function getSessionOrThrow() {
 export async function getEmpresaSucursales() {
   try {
     const session = await getSessionOrThrow();
-    const { rol, empresaId } = session.user;
+    const { rol, sucursalId } = session.user;
+    let { empresaId } = session.user;
 
     // Super Admin puede ver absolutamente todas las sucursales del sistema
     if (rol === "superadmin") {
@@ -33,6 +34,18 @@ export async function getEmpresaSucursales() {
         })
         .from(sucursales)
         .where(eq(sucursales.activa, true));
+    }
+
+    // Si empresaId es null pero tenemos sucursalId, lo resolvemos desde la sucursal
+    if (!empresaId && sucursalId) {
+      const [suc] = await db
+        .select({ empresaId: sucursales.empresaId })
+        .from(sucursales)
+        .where(eq(sucursales.id, sucursalId))
+        .limit(1);
+      if (suc) {
+        empresaId = suc.empresaId;
+      }
     }
 
     if (!empresaId) {

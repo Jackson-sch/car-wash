@@ -5,7 +5,7 @@ import { ArrowLeft, Building2, PlusCircle, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryState } from "nuqs";
-import { toggleSucursalStatusAction } from "@/lib/actions/sucursales";
+import { toggleSucursalStatusAction, setMainSucursalAction } from "@/lib/actions/sucursales";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,7 @@ import { SucursalFormSheet } from "./components/SucursalFormSheet";
 
 interface SucursalesClientProps {
   initialSucursales: SucursalItem[];
-  limiteSucursales: number;
+  limiteSucursales: number | null;
   initialUserSucursalId: string | null;
 }
 
@@ -51,7 +51,7 @@ export function SucursalesClient({
   );
 
   const openCreate = () => {
-    if (sucursales.length >= limiteSucursales) {
+    if (limiteSucursales !== null && sucursales.length >= limiteSucursales) {
       toast.error(
         `Límite alcanzado: Tu plan solo permite un máximo de ${limiteSucursales} sucursal(es).`
       );
@@ -76,6 +76,24 @@ export function SucursalesClient({
       toast.success(updated.activa ? "Sucursal activada" : "Sucursal desactivada");
     } else {
       toast.error(res.error || "Error al cambiar estado");
+    }
+  };
+
+  const handleSetMain = async (id: string) => {
+    const res = await setMainSucursalAction(id);
+    if (res.success) {
+      setSucursales((prev) =>
+        prev.map((s) => {
+          const currentConfig = (s.config || {}) as Record<string, any>;
+          return {
+            ...s,
+            config: { ...currentConfig, esPrincipal: s.id === id },
+          };
+        })
+      );
+      toast.success("Sucursal principal establecida");
+    } else {
+      toast.error(res.error || "Error al establecer sucursal principal");
     }
   };
 
@@ -105,7 +123,7 @@ export function SucursalesClient({
 
           <Button
             onClick={openCreate}
-            disabled={sucursales.length >= limiteSucursales}
+            disabled={limiteSucursales !== null && sucursales.length >= limiteSucursales}
             className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
           >
             <PlusCircle className="h-4.5 w-4.5" />
@@ -149,6 +167,7 @@ export function SucursalesClient({
           onEdit={openEdit}
           onToggleStatus={handleToggleStatus}
           onSwitchSuccess={setUserSucursalId}
+          onSetMain={handleSetMain}
         />
       </div>
 

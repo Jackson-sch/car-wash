@@ -115,7 +115,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
   const totalOrdenes = initialVehiculos.reduce((acc, v) => acc + v.totalOrdenes, 0);
 
   return (
-    <div className="relative space-y-8 text-foreground">
+    <div className="relative space-y-8 text-foreground" suppressHydrationWarning>
       {/* Background Decorative Glow Orbs */}
       <div className="absolute top-0 right-0 -z-10 h-72 w-72 rounded-full bg-secondary/5 dark:bg-secondary/10 blur-3xl" />
       <div className="absolute top-40 left-10 -z-10 h-72 w-72 rounded-full bg-primary/5 dark:bg-primary/10 blur-3xl" />
@@ -224,7 +224,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
                     <div className="flex items-center gap-3">
                       <TipoIcon tipo={v.tipo} />
                       <div>
-                        <div className="font-extrabold text-foreground text-xs leading-tight">
+                        <div className="font-extrabold text-foreground text-[11px] leading-tight">
                           {v.marca || "—"} {v.modelo || ""}
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
@@ -249,13 +249,13 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
                       <div className="h-6 w-6 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 border border-secondary/20">
                         <Users className="h-3 w-3 text-secondary" />
                       </div>
-                      <span className="text-xs text-foreground font-extrabold">
+                      <span className="text-[11px] text-foreground font-extrabold">
                         {v.clienteNombre} {v.clienteApellido || ""}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="py-4">
-                    <span className="text-xs text-muted-foreground font-bold">{v.clienteTelefono || "—"}</span>
+                    <span className="text-[11px] text-muted-foreground font-bold">{v.clienteTelefono || "—"}</span>
                   </TableCell>
                   <TableCell className="py-4 text-center">
                     {v.totalOrdenes > 0 ? (

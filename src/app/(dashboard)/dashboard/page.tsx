@@ -1,5 +1,6 @@
 import { getDashboardData } from "@/lib/actions/dashboard";
 import { DashboardClient } from "./dashboard-client";
+import { getSessionOrThrow } from "@/lib/actions/servicios";
 
 export const metadata = {
   title: "Resumen Operativo - CarWash Pro",
@@ -11,8 +12,22 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ vista?: string }>;
 }) {
+  let session;
+  try {
+    session = await getSessionOrThrow();
+  } catch {
+    return (
+      <div className="p-6 text-center text-zinc-500">
+        No autorizado. Por favor inicie sesión de nuevo.
+      </div>
+    );
+  }
+
+  const userRol = session.user?.rol;
+  const isAuthorizedForGlobal = userRol === "admin" || userRol === "superadmin";
+
   const { vista } = await searchParams;
-  const viewMode = vista === "todas" ? "todas" : "sucursal";
+  const viewMode = (isAuthorizedForGlobal && vista === "todas") ? "todas" : "sucursal";
 
   let data;
   try {

@@ -10,6 +10,7 @@ import {
   servicios,
   turnosCaja,
   pagos,
+  sucursales,
 } from "@/lib/db/schema";
 import { eq, and, desc, sql, count, inArray } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
@@ -286,14 +287,35 @@ export async function createOrden(data: {
       throw new Error("No es posible registrar la orden porque la caja está cerrada. Por favor abra la caja primero.");
     }
 
-    // 4. Generar número de ticket correlativo del día
-    const [ordenCount] = await db
-      .select({ value: count() })
-      .from(ordenes)
-      .where(eq(ordenes.sucursalId, sucursalId));
+    // 4. Generar número de ticket correlativo único para la sucursal
+    const [sucursalInfo] = await db
+      .select({ nombre: sucursales.nombre })
+      .from(sucursales)
+      .where(eq(sucursales.id, sucursalId))
+      .limit(1);
 
-    const nextCorrelativo = (ordenCount.value + 1).toString().padStart(4, "0");
-    const nroTicket = `T-${nextCorrelativo}`;
+    const sucursalNombre = sucursalInfo?.nombre || "TKT";
+    const prefix = `T-${sucursalNombre.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4)}`;
+
+    const [maxTicket] = await db
+      .select({ nroTicket: ordenes.nroTicket })
+      .from(ordenes)
+      .where(and(eq(ordenes.sucursalId, sucursalId), sql`${ordenes.nroTicket} LIKE ${prefix || ""} || '-%'`))
+      .orderBy(desc(ordenes.nroTicket))
+      .limit(1);
+
+    let nextNumber = 1;
+    if (maxTicket && maxTicket.nroTicket) {
+      const parts = maxTicket.nroTicket.split("-");
+      const numPart = parts[parts.length - 1];
+      const currentMax = parseInt(numPart, 10);
+      if (!isNaN(currentMax)) {
+        nextNumber = currentMax + 1;
+      }
+    }
+
+    const nextCorrelativo = nextNumber.toString().padStart(4, "0");
+    const nroTicket = `${prefix}-${nextCorrelativo}`;
 
     // 5. Calcular totales
     let subtotalNumeric = 0;

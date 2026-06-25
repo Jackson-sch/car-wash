@@ -26,6 +26,7 @@ interface Empleado {
   totalLavados: number;
   montoLavado: number;
   comisionAcumulada: number;
+  sucursalNombre?: string | null;
 }
 
 interface EmpleadosGridProps {
@@ -219,6 +220,9 @@ export function EmpleadosGrid({
                   <div className="text-[10px] text-muted-foreground space-y-0.5 font-medium">
                     <div className="truncate">{emp.email}</div>
                     {emp.telefono && <div>Telf: {emp.telefono}</div>}
+                    {emp.sucursalNombre && (
+                      <div className="text-secondary font-bold mt-0.5">Sede: {emp.sucursalNombre}</div>
+                    )}
                   </div>
 
                   {emp.rol === "lavador" && (

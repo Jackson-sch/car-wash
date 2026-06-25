@@ -42,7 +42,7 @@ export async function getSucursalesList() {
       .where(eq(empresas.id, empresaId))
       .limit(1);
 
-    const limiteSucursales = empresaPlan?.limiteSucursales ?? 1;
+    const limiteSucursales = empresaPlan ? empresaPlan.limiteSucursales : 1;
 
     // 2. Obtener lista de sucursales
     const list = await db
@@ -95,7 +95,7 @@ export async function createSucursalAction(data: {
       .where(eq(empresas.id, empresaId))
       .limit(1);
 
-    const limit = empresaPlan?.limiteSucursales ?? 1;
+    const limit = empresaPlan ? empresaPlan.limiteSucursales : 1;
 
     const [currentCountResult] = await db
       .select({
@@ -106,7 +106,7 @@ export async function createSucursalAction(data: {
 
     const currentCount = Number(currentCountResult?.count || 0);
 
-    if (currentCount >= limit) {
+    if (limit !== null && currentCount >= limit) {
       throw new Error(`Has alcanzado el límite de sucursales permitido por tu plan (${limit}).`);
     }
 
@@ -219,6 +219,49 @@ export async function toggleSucursalStatusAction(id: string) {
     return {
       success: false,
       error: getErrorMessage(error, "Error al cambiar estado de la sucursal"),
+    };
+  }
+}
+
+// Establecer una sucursal como principal (y quitar principal a las demás de la misma empresa)
+export async function setMainSucursalAction(id: string) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "configuracion", accion: "gestionar" });
+    const { empresaId } = session.user;
+
+    if (!empresaId) {
+      throw new Error("No tienes una empresa asociada.");
+    }
+
+    // Iniciar transacción para actualizar todas las sucursales de la empresa
+    await db.transaction(async (tx) => {
+      // 1. Obtener todas las sucursales de la empresa
+      const branches = await tx
+        .select({ id: sucursales.id, config: sucursales.config })
+        .from(sucursales)
+        .where(eq(sucursales.empresaId, empresaId));
+
+      for (const branch of branches) {
+        const currentConfig = (branch.config || {}) as Record<string, any>;
+        const isMain = branch.id === id;
+        
+        await tx
+          .update(sucursales)
+          .set({
+            config: { ...currentConfig, esPrincipal: isMain },
+            updatedAt: new Date(),
+          })
+          .where(eq(sucursales.id, branch.id));
+      }
+    });
+
+    revalidatePath("/configuracion/sucursales");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error al establecer sucursal principal:", error);
+    return {
+      success: false,
+      error: getErrorMessage(error, "Error al establecer la sucursal principal"),
     };
   }
 }

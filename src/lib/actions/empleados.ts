@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { usuarios, ordenes, turnosCaja, vehiculos, clientes } from "@/lib/db/schema";
+import { usuarios, ordenes, turnosCaja, vehiculos, clientes, sucursales } from "@/lib/db/schema";
 import { eq, and, sql, count, desc } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { canDo } from "@/lib/auth/permissions";
@@ -26,8 +26,10 @@ export async function getEmpleadosComisiones() {
         telefono: usuarios.telefono,
         rol: usuarios.rol,
         activo: usuarios.activo,
+        sucursalNombre: sucursales.nombre,
       })
       .from(usuarios)
+      .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.id))
       .where(eq(usuarios.sucursalId, sucursalId))
       .orderBy(usuarios.nombre);
 
@@ -88,6 +90,7 @@ export async function registrarEmpleado(data: {
   try {
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "gestionar" });
     const sucursalId = session.user.sucursalId!;
+    const empresaId = session.user.empresaId;
 
     // 1. Registrar usuario en Better Auth (esto crea el usuario y su cuenta con contraseña hashed)
     const defaultPassword = "CarWash2026!";
@@ -98,6 +101,7 @@ export async function registrarEmpleado(data: {
         name: `${data.nombre} ${data.apellido || ""}`.trim(),
         rol: data.rol,
         sucursalId: sucursalId,
+        empresaId: empresaId || undefined,
       }
     });
 
@@ -117,8 +121,20 @@ export async function registrarEmpleado(data: {
 
     await sendWelcomeEmail(data.email, `${data.nombre} ${data.apellido || ""}`.trim());
 
+    const [sucInfo] = await db
+      .select({ nombre: sucursales.nombre })
+      .from(sucursales)
+      .where(eq(sucursales.id, sucursalId))
+      .limit(1);
+
     revalidatePath("/empleados");
-    return { success: true, data: updatedEmp || res.user };
+    return {
+      success: true,
+      data: {
+        ...(updatedEmp || res.user),
+        sucursalNombre: sucInfo?.nombre || null,
+      },
+    };
   } catch (error: unknown) {
     console.error("Error al registrar empleado:", error);
     return { success: false, error: getErrorMessage(error, "Error al registrar el personal") };
@@ -252,8 +268,10 @@ export async function getEmpleadoRendimiento(id: string) {
         rol: usuarios.rol,
         activo: usuarios.activo,
         createdAt: usuarios.createdAt,
+        sucursalNombre: sucursales.nombre,
       })
       .from(usuarios)
+      .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.id))
       .where(and(eq(usuarios.id, id), eq(usuarios.sucursalId, sucursalId)))
       .limit(1);
 

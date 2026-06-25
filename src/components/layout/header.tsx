@@ -182,7 +182,7 @@ export function Header() {
 
         {/* Sucursal Indicator / Switcher (solo para usuarios de sucursal) */}
         {session?.user?.rol !== "superadmin" &&
-          (branches.length > 1 ? (
+          (session?.user?.rol === "admin" && branches.length > 1 ? (
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
@@ -227,7 +227,7 @@ export function Header() {
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border text-xs font-semibold text-muted-foreground">
               <MapPin className="h-3.5 w-3.5 text-secondary" />
               <span>
-                {branches.length === 1 ? branches[0].nombre : "Cargando..."}
+                {activeBranch ? activeBranch.nombre : "Cargando..."}
               </span>
             </div>
           ))}

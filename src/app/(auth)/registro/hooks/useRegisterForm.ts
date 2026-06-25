@@ -53,8 +53,7 @@ export function useRegisterForm() {
       } else {
         setSuccess(true);
         setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
+          window.location.href = "/dashboard";
         }, 1500);
       }
     } catch {
