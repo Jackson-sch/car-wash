@@ -135,7 +135,7 @@ export default function Home() {
         </div>
 
         {/* DASHBOARD PREVIEW MOCKUP */}
-        <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-white/[0.01] dark:from-zinc-950/40 dark:to-zinc-950/20 p-4 sm:p-6 backdrop-blur-xl shadow-2xl relative mb-12 overflow-hidden">
+        <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-white/[0.01] bg-[#0b0b18]/65 p-4 sm:p-6 backdrop-blur-xl shadow-2xl relative mb-12 overflow-hidden">
           
           {/* Glassmorphism Background Glow Orbs behind the mockup content */}
           <div className="absolute -inset-4 -z-10 rounded-[40px] bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 blur-xl opacity-75 pointer-events-none" />
@@ -183,20 +183,20 @@ export default function Home() {
               {/* Mini KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent bg-black/30 border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-all duration-300">
                   <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Caja Abierta (Efectivo)</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">S/ 3,420.50</span>
                   <span className="text-[9px] text-emerald-400 font-medium block mt-0.5">Sede: San Isidro</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Órdenes Activas</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">18 Servicios</span>
                   <span className="text-[9px] text-gray-450 font-medium block mt-0.5">7 en cola, 11 en lavado</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Fidelización de Clientes</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">+125 Canjes</span>
                   <span className="text-[9px] text-gray-450 font-medium block mt-0.5">1 Punto = S/ 0.20 descuento</span>
@@ -205,7 +205,7 @@ export default function Home() {
               </div>
 
               {/* Kanban Mockup */}
-              <div className="rounded-2xl border border-white/10 bg-zinc-950/45 p-4 shadow-xl">
+              <div className="rounded-2xl border border-white/10 bg-[#090911]/85 p-4 shadow-xl backdrop-blur-md">
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="text-xs font-extrabold text-white flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5 text-secondary" />
@@ -217,48 +217,48 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   
                   {/* Column 1: Espera */}
-                  <div className="p-2.5 rounded-xl bg-zinc-900/40 border border-white/5 space-y-2">
+                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/[0.05] space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold text-amber-500 uppercase">
                       <span>En Espera</span>
                       <span>(2)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 space-y-2 shadow-md hover:border-white/20 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-amber-500/25 space-y-2 shadow-md hover:border-amber-500/40 transition-all duration-300">
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>F4L-101</span>
                         <span className="text-[9px] text-gray-400 font-sans bg-white/5 px-1.5 py-0.5 rounded">Toyota</span>
                       </div>
-                      <span className="text-[9px] text-gray-500 block">Lavado Completo</span>
+                      <span className="text-[9px] text-gray-400 block">Lavado Completo</span>
                     </div>
                   </div>
 
                   {/* Column 2: Lavado */}
-                  <div className="p-2.5 rounded-xl bg-zinc-900/40 border border-white/5 space-y-2">
+                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/[0.05] space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold text-blue-500 uppercase">
                       <span>Lavado / Proceso</span>
                       <span>(1)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.07] to-white/[0.01] border border-blue-500/20 space-y-2 relative shadow-md hover:border-blue-500/35 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.07] to-white/[0.01] border border-blue-500/30 space-y-2 relative shadow-md hover:border-blue-500/45 transition-all duration-300">
                       <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping" />
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>B2P-202</span>
-                        <span className="text-[9px] text-blue-400 font-sans bg-blue-500/10 px-1.5 py-0.5 rounded">Hyundai</span>
+                        <span className="text-[9px] text-blue-450 font-sans bg-blue-500/10 px-1.5 py-0.5 rounded">Hyundai</span>
                       </div>
-                      <span className="text-[9px] text-gray-500 block">Lavado Premium + Cera</span>
+                      <span className="text-[9px] text-gray-400 block">Lavado Premium + Cera</span>
                     </div>
                   </div>
 
                   {/* Column 3: Completado */}
-                  <div className="p-2.5 rounded-xl bg-zinc-900/40 border border-white/5 space-y-2">
+                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/[0.05] space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold text-emerald-500 uppercase">
                       <span>Completado</span>
                       <span>(3)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-emerald-500/20 space-y-2 shadow-md hover:border-emerald-500/35 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-emerald-500/30 space-y-2 shadow-md hover:border-emerald-500/45 transition-all duration-300">
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>K9X-909</span>
                         <span className="text-[9px] text-emerald-400 font-sans bg-emerald-500/10 px-1.5 py-0.5 rounded">Kia Rio</span>
                       </div>
-                      <span className="text-[9px] text-gray-500 block">Espera de Cobro</span>
+                      <span className="text-[9px] text-gray-400 block">Espera de Cobro</span>
                     </div>
                   </div>
 

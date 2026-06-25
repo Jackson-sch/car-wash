@@ -35,7 +35,7 @@ export function GrowthSimulator() {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400 font-semibold">Lavados por día</span>
-                <span className="text-white font-mono font-bold text-lg bg-zinc-800/50 px-3 py-1 rounded-lg">
+                <span className="text-white font-mono font-bold text-lg bg-white/[0.08] border border-white/5 px-3 py-1 rounded-lg">
                   {lavadosDiarios}
                 </span>
               </div>
@@ -46,7 +46,7 @@ export function GrowthSimulator() {
                 step="5"
                 value={lavadosDiarios}
                 onChange={(e) => setLavadosDiarios(Number(e.target.value))}
-                className="w-full h-2 rounded-lg bg-zinc-800 appearance-none cursor-pointer accent-secondary"
+                className="w-full h-2 rounded-lg bg-white/10 appearance-none cursor-pointer accent-secondary"
               />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>10</span>
@@ -59,7 +59,7 @@ export function GrowthSimulator() {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400 font-semibold">Ticket promedio (S/)</span>
-                <span className="text-white font-mono font-bold text-lg bg-zinc-800/50 px-3 py-1 rounded-lg">
+                <span className="text-white font-mono font-bold text-lg bg-white/[0.08] border border-white/5 px-3 py-1 rounded-lg">
                   S/ {precioPromedio}
                 </span>
               </div>
@@ -70,7 +70,7 @@ export function GrowthSimulator() {
                 step="5"
                 value={precioPromedio}
                 onChange={(e) => setPrecioPromedio(Number(e.target.value))}
-                className="w-full h-2 rounded-lg bg-zinc-800 appearance-none cursor-pointer accent-secondary"
+                className="w-full h-2 rounded-lg bg-white/10 appearance-none cursor-pointer accent-secondary"
               />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>S/ 15</span>
