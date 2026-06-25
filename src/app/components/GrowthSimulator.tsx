@@ -29,7 +29,7 @@ export function GrowthSimulator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Sliders panel */}
-        <div className="lg:col-span-5 p-8 rounded-3xl bg-white/3 dark:bg-zinc-950/20 border border-white/5 backdrop-blur-xl flex flex-col justify-between">
+        <div className="lg:col-span-5 p-8 rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 backdrop-blur-xl flex flex-col justify-between shadow-xl">
           <div className="space-y-8">
             {/* Slider 1 */}
             <div className="space-y-3">
@@ -92,13 +92,13 @@ export function GrowthSimulator() {
         {/* Results panel */}
         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Card 1: Fidelización */}
-          <div className="p-6 rounded-2xl bg-white/2 dark:bg-zinc-950/10 border border-white/5 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
             <div>
               <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-4">
                 <Gift className="h-5 w-5 text-pink-500" />
               </div>
               <h3 className="text-sm font-bold text-gray-300">Retención por Puntos</h3>
-              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+              <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
                 El club de lealtad incrementa la frecuencia de visitas en un 25%.
               </p>
             </div>
@@ -109,13 +109,13 @@ export function GrowthSimulator() {
           </div>
 
           {/* Card 2: Horas Pico */}
-          <div className="p-6 rounded-2xl bg-white/2 dark:bg-zinc-950/10 border border-white/5 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
             <div>
               <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
               </div>
               <h3 className="text-sm font-bold text-gray-300">Horas Pico & Promociones</h3>
-              <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
+              <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
                 Campañas automatizadas en horas muertas elevan la facturación un 15%.
               </p>
             </div>
@@ -126,24 +126,24 @@ export function GrowthSimulator() {
           </div>
 
           {/* Card 3: Total Proyectado */}
-          <div className="p-6 rounded-2xl bg-white/2 dark:bg-zinc-950/10 border border-white/5 flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Facturación Proyectada</h3>
             <div className="mt-4">
               <div className="text-xs text-gray-500 font-medium">Nuevo ingreso mensual</div>
-              <div className="text-xl font-mono font-black text-white/95 mt-1">
+              <div className="text-xl font-mono font-black text-white/95 mt-1 font-semibold">
                 S/ {ingresosMensualesProyectados.toLocaleString("es-PE", { maximumFractionDigits: 0 })}
               </div>
             </div>
           </div>
 
           {/* Card 4: Impacto Anual */}
-          <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/25 flex flex-col justify-between shadow-lg shadow-emerald-500/2">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/[0.02] border border-emerald-500/25 flex flex-col justify-between shadow-lg shadow-emerald-500/5">
             <div className="flex justify-between items-start">
               <h3 className="text-xs font-bold text-emerald-450 uppercase tracking-wider">Ganancia Anual Extra</h3>
               <Sparkles className="h-4.5 w-4.5 text-emerald-400 animate-pulse" />
             </div>
             <div className="mt-4">
-              <div className="text-[11px] text-emerald-300/70 font-semibold flex items-center gap-1">
+              <div className="text-[11px] text-emerald-350/80 font-semibold flex items-center gap-1">
                 Retorno de Inversión Neto
                 <ArrowUpRight className="h-3 w-3" />
               </div>

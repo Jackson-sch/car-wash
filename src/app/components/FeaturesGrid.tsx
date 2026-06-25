@@ -47,10 +47,11 @@ function FeatureCard({ icon: Icon, title, desc, glow }: typeof features[number])
 
   return (
     <div
-      className="p-6 rounded-2xl backdrop-blur-xl transition-all duration-500 cursor-default group"
+      className={`p-6 rounded-2xl backdrop-blur-xl transition-all duration-500 cursor-default group border shadow-md bg-gradient-to-br ${
+        hovered ? "from-white/[0.06] to-white/[0.01]" : "from-white/[0.02] to-transparent"
+      }`}
       style={{
-        backgroundColor: hovered ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.02)",
-        border: `1px solid ${hovered ? `${glow}33` : "rgba(255,255,255,0.04)"}`,
+        borderColor: hovered ? `${glow}33` : "rgba(255,255,255,0.04)",
         boxShadow: hovered
           ? `inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 30px ${glow}10`
           : "inset 0 1px 0 rgba(255,255,255,0.03)",
