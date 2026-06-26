@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useQueryState, parseAsString } from "nuqs";
 import { Settings, Building, Car, Gift, Database } from "lucide-react";
 import Link from "next/link";
 import { updateSucursalInfo, updateSucursalConfigJSON } from "@/lib/actions/configuracion";
@@ -27,7 +28,10 @@ interface ConfiguracionClientProps {
 
 export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProps) {
   const [sucursal, setSucursal] = useState<Sucursal>(initialSucursal);
-  const [activeTab, setActiveTab] = useState<"general" | "precios" | "lealtad" | "backup">("general");
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsString.withDefault("general").withOptions({ shallow: true, history: "replace" })
+  );
   const [isPending, startTransition] = useTransition();
 
   const config = (sucursal.config as Record<string, any>) || {};
@@ -187,7 +191,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as "general" | "precios" | "lealtad" | "backup")}
+                onClick={() => setActiveTab(tab.id)}
                 className={btnClassName}
               >
                 {innerContent}
