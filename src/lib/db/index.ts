@@ -15,7 +15,7 @@ const globalForDb = globalThis as unknown as {
 const isDev = process.env.NODE_ENV === 'development';
 
 const client = globalForDb.client ??= postgres(connectionString, {
-  max: isDev ? 1 : 5, // Limitar a 1 conexión en desarrollo para evitar agotar el pool de Supabase
+  max: isDev ? 5 : 10, // Aumentar a 5 en desarrollo para evitar deadlocks por peticiones concurrentes (prefetching)
   idle_timeout: isDev ? 10 : 30, // Liberar conexiones inactivas más rápido en desarrollo
   max_lifetime: 60 * 5,
   connect_timeout: 10,
