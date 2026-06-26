@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils"
 const THEMES = { light: "", dark: ".dark" } as const
 
 const INITIAL_DIMENSION = { width: 320, height: 200 } as const
+const CSS_COLOR_VALUE_PATTERN =
+  /^(#[0-9a-fA-F]{3,8}|(?:rgb|hsl|oklch|oklab|lab|lch)a?\([0-9a-zA-Z\s.,%/+-]+\)|var\(--[a-zA-Z0-9_-]+\)|[a-zA-Z]+)$/
 type TooltipNameType = number | string
 
 export type ChartConfig = Record<
@@ -57,7 +59,7 @@ function ChartContainer({
   }
 }) {
   const uniqueId = React.useId()
-  const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`
+  const chartId = `chart-${sanitizeCssIdentifier(id ?? uniqueId.replace(/:/g, ""))}`
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -99,10 +101,13 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
+    const cssVariableName = sanitizeCssIdentifier(key)
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    return isSafeCssColorValue(color)
+      ? `  --color-${cssVariableName}: ${color};`
+      : null
   })
   .join("\n")}
 }
@@ -112,6 +117,14 @@ ${colorConfig
       }}
     />
   )
+}
+
+function sanitizeCssIdentifier(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "")
+}
+
+function isSafeCssColorValue(value: string | undefined) {
+  return typeof value === "string" && CSS_COLOR_VALUE_PATTERN.test(value.trim())
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip

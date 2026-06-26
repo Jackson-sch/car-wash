@@ -95,9 +95,9 @@ export async function solicitarTokenBackup(password: string) {
     });
 
     return { success: true, token };
-  } catch (error: any) {
-    console.error("Error en solicitarTokenBackup:", error);
-    return { success: false, error: error.message || "Error al procesar la solicitud" };
+  } catch {
+    console.error("Backup request failed");
+    return { success: false, error: "Error al procesar la solicitud" };
   }
 }
 
@@ -192,9 +192,8 @@ export async function solicitarTokenBackupEmpresa(password: string) {
     });
 
     return { success: true, token };
-  } catch (error: any) {
-    console.error("Error en solicitarTokenBackupEmpresa:", error);
-    return { success: false, error: error.message || "Error al procesar la solicitud" };
+  } catch {
+    console.error("Company backup request failed");
+    return { success: false, error: "Error al procesar la solicitud" };
   }
 }
-

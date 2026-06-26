@@ -33,6 +33,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
 
+type TurnoActivo = Awaited<ReturnType<typeof getTurnoActivo>>;
+
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
@@ -47,23 +49,20 @@ export function Header() {
     nombre: string;
   } | null>(null);
 
-  const [turnoActivo, setTurnoActivo] = useState<any>(null);
+  const [turnoActivo, setTurnoActivo] = useState<TurnoActivo>(null);
   const [loadingCaja, setLoadingCaja] = useState(true);
 
   const fetchCajaStatus = useCallback(async () => {
     if (session?.user && session.user.rol !== "superadmin") {
       try {
-        console.log("Fetching caja status, session user is:", session.user);
         const turno = await getTurnoActivo();
-        console.log("Turno fetched successfully:", turno);
         setTurnoActivo(turno);
-      } catch (err) {
-        console.error("Error checking caja status:", err);
+      } catch {
+        setTurnoActivo(null);
       } finally {
         setLoadingCaja(false);
       }
     } else {
-      console.log("Skipping caja status fetch, session:", session);
       setLoadingCaja(false);
     }
   }, [session]);
@@ -244,7 +243,7 @@ export function Header() {
               >
                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                 <span className="whitespace-nowrap">Caja: S/ {(() => {
-                  const efectivoPago = turnoActivo.pagos?.find((p: any) => p.metodo === "efectivo")?.total || 0;
+                  const efectivoPago = turnoActivo.pagos?.find((p) => p.metodo === "efectivo")?.total || 0;
                   return (parseFloat(turnoActivo.montoInicial || "0") + efectivoPago).toFixed(2);
                 })()}</span>
               </Button>

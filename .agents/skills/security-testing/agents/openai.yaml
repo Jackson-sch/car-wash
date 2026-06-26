@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security Testing"
+  short_description: "Audit app security with focused checks"
+  default_prompt: "Use $security-testing to audit this project for security risks and propose fixes."

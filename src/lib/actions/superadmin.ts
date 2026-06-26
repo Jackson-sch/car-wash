@@ -2,10 +2,11 @@
 
 import { db } from "@/lib/db";
 import { empresas, sucursales, usuarios, cuentas, planes, sesiones, pagos, ordenes } from "@/lib/db/schema";
-import { eq, and, sql, inArray } from "drizzle-orm";
+import { eq, sql, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
 import { hashPassword } from "better-auth/crypto";
 import { getErrorMessage } from "./action-utils";
 import { logAudit } from "./auditoria";
@@ -168,7 +169,7 @@ export async function createEmpresa(data: {
         })
         .returning();
 
-      const adminId = `usr_${Math.random().toString(36).substring(2, 11)}`;
+      const adminId = `usr_${randomUUID().replace(/-/g, "")}`;
       const [newAdmin] = await tx
         .insert(usuarios)
         .values({

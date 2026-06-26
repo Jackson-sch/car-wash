@@ -32,8 +32,14 @@ interface ServicioType {
 
 interface CuponFormProps {
   servicios: ServicioType[];
-  editingCupon?: any | null;
+  editingCupon?: EditingCupon | null;
   onCancelEdit?: () => void;
+}
+
+interface EditingCupon extends Omit<CuponData, "servicios"> {
+  id: string;
+  codigo: string;
+  servicios?: Array<{ servicioId?: string | null; servicio?: { id: string } | null }>;
 }
 
 export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormProps) {
@@ -60,7 +66,9 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
       setLimiteTotal(editingCupon.limiteTotal?.toString() || "");
       setLimitePorCliente(editingCupon.limitePorCliente?.toString() || "1");
       setServiciosSeleccionados(
-        editingCupon.servicios?.map((s: any) => s.servicioId || s.servicio?.id).filter(Boolean) || []
+        editingCupon.servicios
+          ?.map((s) => s.servicioId || s.servicio?.id)
+          .filter((id): id is string => Boolean(id)) || []
       );
     }
   }, [editingCupon]);
@@ -79,9 +87,18 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
 
   const generateRandomCode = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const values = new Uint8Array(8);
     let code = "";
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    let index = 0;
+
+    while (index < values.length) {
+      crypto.getRandomValues(values);
+      for (const value of values) {
+        if (value >= 252) continue;
+        code += chars[value % chars.length];
+        index++;
+        if (index === values.length) break;
+      }
     }
     setCodigo(code);
   };
