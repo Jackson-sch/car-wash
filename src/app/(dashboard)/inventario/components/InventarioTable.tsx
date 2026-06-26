@@ -121,7 +121,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
     }
   };
 
-  const SortIcon = ({ field }: { field: "nombre" | "stock" | "precio" }) => {
+  const renderSortIcon = (field: "nombre" | "stock" | "precio") => {
     if (sortBy !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-30" />;
     return (
       <ChevronDown
@@ -215,7 +215,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
                       className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       Insumo
-                      <SortIcon field="nombre" />
+                      {renderSortIcon("nombre")}
                     </button>
                   </TableHead>
                   <TableHead className="py-3.5 px-4">
@@ -224,7 +224,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
                       className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       Stock Actual
-                      <SortIcon field="stock" />
+                      {renderSortIcon("stock")}
                     </button>
                   </TableHead>
                   <TableHead className="py-3.5 px-4 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
@@ -242,7 +242,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
                       className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       Costo
-                      <SortIcon field="precio" />
+                      {renderSortIcon("precio")}
                     </button>
                   </TableHead>
                   <TableHead className="py-3.5 pr-4 text-right text-[10px] uppercase font-bold tracking-wider text-muted-foreground">

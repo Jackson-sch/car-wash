@@ -187,7 +187,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
        * independientemente del modo activo en el resto de la app.
        * ────────────────────────────────────────────────────────────────────────
        */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         /* ── Reset completo de zinc dentro del ticket (light values hardcoded) ── */
         #print-area {
           /* Variables nativas que usa tu globals.css */
@@ -277,7 +277,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
             padding: 0 !important;
           }
         }
-      `}</style>
+      `}} />
 
       {/* ── Header Actions ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

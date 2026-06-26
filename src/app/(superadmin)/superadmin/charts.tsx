@@ -201,6 +201,11 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
         tooltip.style("opacity", "0");
       });
 
+    return () => {
+      if (svgRef.current) {
+        d3.select(svgRef.current).selectAll("*").remove();
+      }
+    };
   }, [data]);
 
   return (
@@ -432,6 +437,11 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
         tooltip.style("opacity", "0");
       });
 
+    return () => {
+      if (svgRef.current) {
+        d3.select(svgRef.current).selectAll("*").remove();
+      }
+    };
   }, [data]);
 
   return (

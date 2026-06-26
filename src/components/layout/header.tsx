@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/shared/theme-provider";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   getEmpresaSucursales,
   switchActiveBranch,
@@ -50,7 +50,7 @@ export function Header() {
   const [turnoActivo, setTurnoActivo] = useState<any>(null);
   const [loadingCaja, setLoadingCaja] = useState(true);
 
-  const fetchCajaStatus = async () => {
+  const fetchCajaStatus = useCallback(async () => {
     if (session?.user && session.user.rol !== "superadmin") {
       try {
         console.log("Fetching caja status, session user is:", session.user);
@@ -66,7 +66,7 @@ export function Header() {
       console.log("Skipping caja status fetch, session:", session);
       setLoadingCaja(false);
     }
-  };
+  }, [session]);
 
   useEffect(() => {
     if (session?.user && session.user.rol !== "superadmin") {
@@ -84,7 +84,7 @@ export function Header() {
 
   useEffect(() => {
     fetchCajaStatus();
-  }, [session, pathname]);
+  }, [fetchCajaStatus, pathname]);
 
   useEffect(() => {
     const handleCajaChange = () => {
@@ -95,7 +95,7 @@ export function Header() {
     return () => {
       window.removeEventListener("caja-status-changed", handleCajaChange);
     };
-  }, [session]);
+  }, [fetchCajaStatus]);
 
   const handleBranchChange = async (sucursalId: string) => {
     const res = await switchActiveBranch(sucursalId);

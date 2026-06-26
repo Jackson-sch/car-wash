@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useMemo } from "react";
+import { useState, useTransition, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ClipboardList, ArrowRight, ArrowLeft, CheckCircle2, Printer, PlusCircle, List, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -89,10 +89,10 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {}, ca
     return dbMultipliers[vehiculoTipo] ?? defaultMultipliers[vehiculoTipo] ?? 1.0;
   }, [dbMultipliers, vehiculoTipo]);
 
-  const calculateServicePrice = (basePrice: string) => {
+  const calculateServicePrice = useCallback((basePrice: string) => {
     const base = parseFloat(basePrice) || 0;
     return (base * multiplier).toFixed(2);
-  };
+  }, [multiplier]);
 
   // Cálculo del subtotal y total
   const [subtotal, setSubtotal] = useState(0);
@@ -110,7 +110,7 @@ export function NuevaOrdenClient({ servicios, lavadores, sucursalConfig = {}, ca
 
     const desc = parseFloat(descuento) || 0;
     setTotal(Math.max(0, sub - desc));
-  }, [serviciosSeleccionados, vehiculoTipo, descuento, multiplier]);
+  }, [serviciosSeleccionados, servicios, calculateServicePrice, descuento]);
 
   const handleServiceToggle = (id: string) => {
     setServiciosSeleccionados((prev) =>
