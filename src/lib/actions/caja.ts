@@ -40,7 +40,7 @@ export async function getTurnoActivo() {
       .where(eq(pagos.turnoId, activeTurno.id))
       .groupBy(pagos.metodo);
 
-    // Obtener ventas por categoría de servicio en este turno
+    // Obtener ventas por categoría de servicio en este turno (solo de órdenes cobradas)
     const categoryStats = await db
       .select({
         categoria: categoriasServicio.nombre,
@@ -50,7 +50,12 @@ export async function getTurnoActivo() {
       .innerJoin(servicios, eq(ordenServicios.servicioId, servicios.id))
       .innerJoin(categoriasServicio, eq(servicios.categoriaId, categoriasServicio.id))
       .innerJoin(ordenes, eq(ordenServicios.ordenId, ordenes.id))
-      .where(eq(ordenes.turnoId, activeTurno.id))
+      .where(
+        and(
+          eq(ordenes.turnoId, activeTurno.id),
+          eq(ordenes.estado, "cobrado")
+        )
+      )
       .groupBy(categoriasServicio.nombre);
 
     const ventasPorCategoria = categoryStats.map((c) => ({
@@ -125,7 +130,7 @@ export async function getDetalleCierreCaja() {
     const turno = await getTurnoActivo();
     if (!turno) return null;
 
-    // 2. Calcular estadísticas del resumen operativo
+    // 2. Calcular estadísticas del resumen operativo (solo órdenes cobradas/pagadas)
     const [resumenStats] = await db
       .select({
         totalServicios: sql<string>`count(${ordenes.id})`,
@@ -134,7 +139,12 @@ export async function getDetalleCierreCaja() {
         ingresosNetos: sql<string>`sum(${ordenes.total})`,
       })
       .from(ordenes)
-      .where(eq(ordenes.turnoId, turno.id));
+      .where(
+        and(
+          eq(ordenes.turnoId, turno.id),
+          eq(ordenes.estado, "cobrado")
+        )
+      );
 
     const resumen = {
       totalServicios: parseInt(resumenStats?.totalServicios || "0") || 0,

@@ -4,7 +4,7 @@ import { SucursalItem } from "./components/types";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Administración de Sucursales - CarWash Pro",
+  title: "Administración de Sucursales - WashMaster Pro",
   description: "Administra los locales de servicio y datos comerciales de la empresa.",
 };
 

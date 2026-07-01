@@ -343,7 +343,7 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
               <Input
                 id="sup-email"
                 type="email"
-                placeholder="supervisor@carwash.com"
+                placeholder="supervisor@washmaster.com"
                 value={supEmail}
                 onChange={(e) => setSupEmail(e.target.value)}
                 className="h-9 text-xs rounded-xl font-medium"

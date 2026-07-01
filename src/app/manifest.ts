@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CarWash Pro",
-    short_name: "CarWashPro",
+    name: "WashMaster Pro",
+    short_name: "WashMaster",
     description: "Sistema de Gestión y Fidelización para Autolavados",
     start_url: "/",
     display: "standalone",

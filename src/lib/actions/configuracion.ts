@@ -1,13 +1,35 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { sucursales } from "@/lib/db/schema";
+import { sucursales, empresas } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { revalidatePath } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 type SucursalConfig = Record<string, unknown>;
+
+// Obtener el nombre de la empresa vinculada al usuario actual
+export async function getMiEmpresaNombre() {
+  try {
+    const session = await getSessionOrThrow();
+    if (session.user.rol === "superadmin") {
+      return "WashMaster Central";
+    }
+    const empresaId = session.user.empresaId;
+    if (!empresaId) return null;
+
+    const [empresa] = await db
+      .select({ nombre: empresas.nombre })
+      .from(empresas)
+      .where(eq(empresas.id, empresaId));
+
+    return empresa?.nombre || null;
+  } catch (error) {
+    console.error("Error al obtener el nombre de la empresa:", error);
+    return null;
+  }
+}
 
 // Obtener los datos y configuración de la sucursal actual
 export async function getSucursalConfig() {

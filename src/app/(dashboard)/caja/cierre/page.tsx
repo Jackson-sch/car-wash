@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { CierreCajaClient } from "./cierre-client";
 
 export const metadata = {
-  title: "Cierre de Turno y Arqueo - CarWash Pro",
+  title: "Cierre de Turno y Arqueo - WashMaster Pro",
   description: "Reconciliación de saldos y cierre de caja activo.",
 };
 

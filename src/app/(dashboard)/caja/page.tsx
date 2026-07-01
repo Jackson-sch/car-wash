@@ -2,7 +2,7 @@ import { getTurnoActivo, getTurnosHistorial } from "@/lib/actions/caja";
 import { CajaClient } from "./caja-client";
 
 export const metadata = {
-  title: "Caja y Turnos - CarWash Pro",
+  title: "Caja y Turnos - WashMaster Pro",
   description: "Administración de turnos de caja, cortes de efectivo e historial de transacciones.",
 };
 

@@ -2,7 +2,7 @@ import { getReportesVentas } from "@/lib/actions/reportes";
 import { ReportesClient } from "./reportes-client";
 
 export const metadata = {
-  title: "Reportes y Estadísticas - CarWash Pro",
+  title: "Reportes y Estadísticas - WashMaster Pro",
   description: "Estadísticas de facturación, gráficos de ventas e informes de rendimiento de lavado.",
 };
 

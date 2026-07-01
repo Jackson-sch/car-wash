@@ -1,134 +1,298 @@
 import Link from "next/link";
-import { Ban, Car, Mail, Phone, Clock, ArrowRight } from "lucide-react";
+import { Ban, Car, Mail, Phone, ArrowUpRight, AlertTriangle } from "lucide-react";
 
 export default function SuspendidoPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] right-[-5%] w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-15%] left-[-5%] w-[500px] h-[500px] bg-destructive/5 rounded-full blur-[120px]" />
+    <div className="min-h-screen bg-background overflow-hidden">
+
+      {/* ── Keyframes ───────────────────────────────────────────────────────── */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slide-right {
+          from { transform: scaleX(0); }
+          to   { transform: scaleX(1); }
+        }
+        @keyframes pulse-ring {
+          0%, 100% { opacity: 0.4; transform: scale(1);    }
+          50%       { opacity: 0.15; transform: scale(1.12); }
+        }
+        .anim-1 { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+        .anim-2 { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+        .anim-3 { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.25s both; }
+        .anim-4 { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.35s both; }
+        .anim-5 { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.45s both; }
+        .anim-6 { animation: fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
+        .bar-anim {
+          transform-origin: left;
+          animation: slide-right 1s cubic-bezier(0.22,1,0.36,1) 0.3s both;
+        }
+        .pulse-ring {
+          animation: pulse-ring 3s ease-in-out infinite;
+        }
+        .contact-card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .contact-card:hover {
+          transform: translateY(-2px);
+          border-color: rgb(186 26 26 / 0.8) !important;
+          box-shadow: 0 8px 32px rgb(186 26 26 / 0.09);
+        }
+        .btn-primary-hover {
+          transition: all 0.2s ease;
+        }
+        .btn-primary-hover:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 24px rgb(0 0 0 / 0.15);
+        }
+        .btn-secondary-hover {
+          transition: all 0.2s ease;
+        }
+        .btn-secondary-hover:hover {
+          border-color: rgb(186 26 26 / 0.9) !important;
+          color: var(--destructive) !important;
+        }
+      ` }} />
+
+      {/* ── Ambient background ──────────────────────────────────────────────── */}
+      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+        {/* Blob top-right: destructive tint */}
+        <div className="absolute top-[-15%] right-[-8%] w-[700px] h-[700px] rounded-full bg-destructive/10 blur-[120px]" />
+        {/* Blob bottom-left: secondary tint */}
+        <div className="absolute bottom-[-20%] left-[-5%] w-[600px] h-[600px] rounded-full bg-secondary/10 blur-[100px]" />
+        {/* Fine grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.018]"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
       </div>
 
-      <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-4xl mx-auto">
-          <div className="bg-card border border-border/60 rounded-3xl shadow-lg overflow-hidden backdrop-blur-sm">
-            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border/60">
-              {/* LEFT: Message + Reasons */}
-              <div className="p-8 sm:p-10 space-y-7">
-                <div className="flex items-center gap-4">
-                  <div className="relative shrink-0">
-                    <div className="size-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
-                      <Ban className="size-6 text-destructive" />
-                    </div>
-                    <div className="absolute -top-0.5 -right-0.5 size-5 rounded-full bg-destructive/20 border border-destructive/30 flex items-center justify-center">
-                      <span className="text-[8px] font-black text-destructive">!</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-                      Suscripción Suspendida
-                    </h1>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Tu cuenta ha sido desactivada temporalmente.
-                    </p>
-                  </div>
-                </div>
+      {/* ── Narrow top bar ──────────────────────────────────────────────────── */}
+      <div className="relative z-10 border-b border-border/40 anim-1">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="size-4.5 flex items-center justify-center shrink-0">
+              <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
+            </div>
+            <span className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground/60">
+              WashMaster Pro
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-1.5 rounded-full bg-destructive animate-pulse" />
+            <span className="text-[10px] font-medium text-destructive/80 tracking-wide uppercase">
+              Cuenta suspendida
+            </span>
+          </div>
+        </div>
+      </div>
 
-                <div className="space-y-2">
-                  {[
-                    { label: "Factura pendiente de pago", desc: "La suscripción mensual no ha sido procesada." },
-                    { label: "Periodo de prueba finalizado", desc: "El plan gratuito ha expirado sin renovación." },
-                    { label: "Términos del servicio", desc: "Se ha detectado una actividad fuera de lo permitido." },
-                    { label: "Solicitud del administrador", desc: "El superadmin ha desactivado la cuenta manualmente." },
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 border border-border/50"
-                    >
-                      <div className="size-5 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-[9px] font-black text-destructive">{i + 1}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-foreground">{item.label}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      {/* ── Main content ────────────────────────────────────────────────────── */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-20">
 
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
-                  <Clock className="size-3 shrink-0" />
-                  <span>Si crees que es un error, contáctanos por los canales de la derecha.</span>
-                </div>
-              </div>
-
-              {/* RIGHT: Contact + Actions */}
-              <div className="p-8 sm:p-10 flex flex-col justify-between gap-7">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-px flex-1 bg-border/60" />
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
-                      Para resolverlo
-                    </span>
-                    <div className="h-px flex-1 bg-border/60" />
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="p-4 rounded-xl bg-secondary/5 border border-secondary/10 space-y-2">
-                      <div className="size-8 rounded-lg bg-secondary/10 text-secondary border border-secondary/20 flex items-center justify-center">
-                        <Mail className="size-4" />
-                      </div>
-                      <p className="text-xs font-bold text-foreground">Escríbenos</p>
-                      <p className="text-[10px] text-muted-foreground leading-relaxed">
-                        Envía un correo a{" "}
-                        <span className="text-secondary font-semibold">soporte@washmaster.pe</span>{" "}
-                        con los detalles de tu caso.
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-secondary/5 border border-secondary/10 space-y-2">
-                      <div className="size-8 rounded-lg bg-secondary/10 text-secondary border border-secondary/20 flex items-center justify-center">
-                        <Phone className="size-4" />
-                      </div>
-                      <p className="text-xs font-bold text-foreground">Llámanos</p>
-                      <p className="text-[10px] text-muted-foreground leading-relaxed">
-                        Comunícate al{" "}
-                        <span className="text-secondary font-semibold">(01) 445 6789</span>{" "}
-                        en horario de oficina.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground">
-                    <Clock className="size-3" />
-                    <span>Lun – Vie, 9:00 a 18:00</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  <Link
-                    href="/login"
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground font-bold text-sm rounded-xl hover:bg-secondary/90 transition-all active:scale-[0.98]"
-                  >
-                    Volver al Login
-                    <ArrowRight className="size-4" />
-                  </Link>
-                  <Link
-                    href="mailto:soporte@washmaster.pe?subject=Reactivación%20de%20cuenta&body=Hola,%20solicito%20la%20reactivación%20de%20mi%20suscripción."
-                    className="w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-transparent text-muted-foreground font-semibold text-xs rounded-xl border border-border hover:bg-muted/30 hover:text-foreground transition-all"
-                  >
-                    <Mail className="size-3.5" />
-                    Solicitar Reactivación
-                  </Link>
-                </div>
-              </div>
+        {/* ── Hero section ────────────────────────────────────────────────── */}
+        <div className="mb-16">
+          {/* Eyebrow */}
+          <div className="anim-2 flex items-center gap-3 mb-6">
+            <div
+              className="relative flex items-center justify-center size-10 rounded-xl bg-destructive/10 border border-destructive/20"
+            >
+              <Ban className="size-4.5 text-destructive" />
+              {/* Pulse ring */}
+              <div className="pulse-ring absolute inset-0 rounded-xl border border-destructive/40" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-px w-8 bg-destructive/30 bar-anim" />
+              <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-destructive/70">
+                Error de acceso
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mt-6 text-[10px] text-muted-foreground/60">
-            <Car className="size-3" />
-            <span>WashMaster Pro — Sistema de Gestión para Car Washes</span>
+          {/* Heading — editorial scale */}
+          <h1 className="anim-3">
+            <span
+              className="block text-[clamp(2.8rem,7vw,5.5rem)] font-black leading-[0.92] tracking-[-0.03em] text-foreground"
+            >
+              Suscripción
+            </span>
+            <span
+              className="block text-[clamp(2.8rem,7vw,5.5rem)] font-black leading-[0.92] tracking-[-0.03em]"
+              style={{
+                WebkitTextStroke: "1px rgb(186 26 26 / 0.8)",
+                color: "transparent",
+                fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+              }}
+            >
+              Suspendida.
+            </span>
+          </h1>
+
+          {/* Subheading */}
+          <p className="anim-4 mt-6 max-w-lg text-base text-white/95 leading-relaxed font-medium">
+            Tu acceso a la plataforma ha sido desactivado temporalmente.
+            Revisa los motivos a continuación o contacta soporte para resolverlo.
+          </p>
+        </div>
+
+        {/* ── Grid: Reasons + Contact ──────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 anim-5">
+
+          {/* LEFT — Reasons */}
+          <div className="space-y-3">
+            <p className="text-[11px] font-extrabold tracking-[0.14em] uppercase text-muted-foreground mb-4">
+              Posibles motivos
+            </p>
+            {[
+              {
+                n: "01",
+                label: "Factura pendiente",
+                desc: "La suscripción mensual no ha sido procesada o el pago fue rechazado.",
+              },
+              {
+                n: "02",
+                label: "Periodo de prueba finalizado",
+                desc: "El plan gratuito ha expirado sin renovación activa.",
+              },
+              {
+                n: "03",
+                label: "Términos del servicio",
+                desc: "Se detectó actividad fuera de los términos permitidos.",
+              },
+              {
+                n: "04",
+                label: "Solicitud del administrador",
+                desc: "El superadmin ha desactivado la cuenta manualmente.",
+              },
+            ].map((item) => (
+              <div
+                key={item.n}
+                className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm transition-all duration-200 hover:border-destructive/60 hover:bg-card/80"
+              >
+                {/* Number badge */}
+                <span
+                  className="shrink-0 text-[11px] font-black tabular-nums text-destructive/40 mt-0.5 w-7"
+                >
+                  {item.n}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-white">{item.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+                {/* Hover indicator */}
+                <div className="ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <AlertTriangle className="size-3.5 text-destructive/40" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* RIGHT — Contact + CTAs */}
+          <div className="flex flex-col gap-4">
+
+            {/* Contact cards */}
+            <div>
+              <p className="text-[11px] font-extrabold tracking-[0.14em] uppercase text-zinc-300 mb-4">
+                Canales de soporte
+              </p>
+              <div className="space-y-3">
+                {/* Email */}
+                <div
+                  className="contact-card p-5 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="size-9 rounded-xl bg-muted/60 border border-border/60 flex items-center justify-center shrink-0">
+                      <Mail className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-extrabold text-white">Correo electrónico</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Escríbenos con los detalles de tu caso
+                      </p>
+                      <p className="text-xs font-semibold text-secondary mt-2">
+                        soporte@washmaster.pe
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div
+                  className="contact-card p-5 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="size-9 rounded-xl bg-muted/60 border border-border/60 flex items-center justify-center shrink-0">
+                      <Phone className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-extrabold text-white">Llamada directa</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Lun – Vie · 9:00 a 18:00 hrs
+                      </p>
+                      <p className="text-xs font-semibold text-secondary mt-2">
+                        (01) 445 6789
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-border/40" />
+              <span className="text-[9px] font-bold tracking-widest uppercase text-muted-foreground/40">
+                Acciones
+              </span>
+              <div className="h-px flex-1 bg-border/40" />
+            </div>
+
+            {/* CTA buttons */}
+            <div className="space-y-2.5">
+              <Link
+                href="/login"
+                className="btn-primary-hover w-full flex items-center justify-between gap-2 px-5 py-3.5 bg-foreground text-background font-bold text-sm rounded-xl"
+              >
+                <span>Volver al login</span>
+                <ArrowUpRight className="size-4 opacity-70" />
+              </Link>
+              <Link
+                href="mailto:soporte@washmaster.pe?subject=Reactivación%20de%20cuenta&body=Hola,%20solicito%20la%20reactivación%20de%20mi%20suscripción."
+                className="btn-secondary-hover w-full flex items-center justify-center gap-2 px-5 py-3 border border-border/70 text-muted-foreground font-semibold text-xs rounded-xl bg-transparent"
+              >
+                <Mail className="size-3.5" />
+                Solicitar reactivación
+              </Link>
+            </div>
+
           </div>
         </div>
+
+        {/* ── Bottom footnote ─────────────────────────────────────────────── */}
+        <div className="anim-6 mt-16 pt-6 border-t border-border/30 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Car className="size-3.5 text-zinc-500" />
+            <span className="text-[10px] text-zinc-400">
+              WashMaster Pro — Sistema de Gestión para Car Washes
+            </span>
+          </div>
+          <span className="text-[10px] tabular-nums text-zinc-500">
+            ERR_SUBSCRIPTION_SUSPENDED
+          </span>
+        </div>
+
       </div>
     </div>
   );

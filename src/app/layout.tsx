@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { PWARegistration } from "./components/PWARegistration";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CarWash Pro",
+    title: "WashMaster Pro",
   },
 };
 
@@ -61,6 +62,7 @@ export default function RootLayout({
           <ThemeProvider>
             <PWARegistration />
             {children}
+            <Toaster />
           </ThemeProvider>
         </NuqsAdapter>
       </body>

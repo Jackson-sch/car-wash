@@ -43,7 +43,7 @@ export default function RegisterForm({ branches }: RegisterFormProps) {
               Crear Cuenta Administrativa
             </h2>
             <p className="text-muted-foreground text-xs">
-              Únete al equipo administrativo y operativo del CarWash.
+              Únete al equipo administrativo y operativo de WashMaster.
             </p>
           </div>
 

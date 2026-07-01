@@ -93,7 +93,7 @@ export async function registrarEmpleado(data: {
     const empresaId = session.user.empresaId;
 
     // 1. Registrar usuario en Better Auth (esto crea el usuario y su cuenta con contraseña hashed)
-    const defaultPassword = "CarWash2026!";
+    const defaultPassword = "WashMaster2026!";
     const res = await auth.api.signUpEmail({
       body: {
         email: data.email.toLowerCase().trim(),

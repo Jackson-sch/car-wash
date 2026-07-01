@@ -38,21 +38,15 @@ export default function Home() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div
-              className="h-10 w-10 rounded-xl flex items-center justify-center"
-              style={{
-                background: "linear-gradient(135deg, #0ea5e9, #38bdf8)",
-                boxShadow: "0 0 20px rgba(14,165,233,0.35)",
-              }}
-            >
-              <Car className="h-5.5 w-5.5" style={{ color: "#050510" }} />
+            <div className="h-10 w-10 flex items-center justify-center shrink-0">
+              <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
             </div>
             <div>
               <span
                 className="font-bold text-xl tracking-tight bg-clip-text text-transparent"
                 style={{ backgroundImage: "linear-gradient(to right, #0ea5e9, #38bdf8)" }}
               >
-                CarWash
+                WashMaster
               </span>
               <span className="font-semibold text-xl tracking-tight" style={{ color: "#f4f4f5" }}>
                 {" "}Pro
@@ -135,10 +129,10 @@ export default function Home() {
         </div>
 
         {/* DASHBOARD PREVIEW MOCKUP */}
-        <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.03] to-white/[0.01] bg-[#0b0b18]/65 p-4 sm:p-6 backdrop-blur-xl shadow-2xl relative mb-12 overflow-hidden">
+        <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-linear-to-b from-white/3 to-white/1 bg-[#0b0b18]/65 p-4 sm:p-6 backdrop-blur-xl shadow-2xl relative mb-12 overflow-hidden">
           
           {/* Glassmorphism Background Glow Orbs behind the mockup content */}
-          <div className="absolute -inset-4 -z-10 rounded-[40px] bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 blur-xl opacity-75 pointer-events-none" />
+          <div className="absolute -inset-4 -z-10 rounded-[40px] bg-linear-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 blur-xl opacity-75 pointer-events-none" />
 
           {/* Mockup Title bar */}
           <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
@@ -183,20 +177,20 @@ export default function Home() {
               {/* Mini KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent bg-black/30 border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-all duration-300">
                   <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Caja Abierta (Efectivo)</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">S/ 3,420.50</span>
                   <span className="text-[9px] text-emerald-400 font-medium block mt-0.5">Sede: San Isidro</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Órdenes Activas</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">18 Servicios</span>
                   <span className="text-[9px] text-gray-450 font-medium block mt-0.5">7 en cola, 11 en lavado</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Fidelización de Clientes</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">+125 Canjes</span>
                   <span className="text-[9px] text-gray-450 font-medium block mt-0.5">1 Punto = S/ 0.20 descuento</span>
@@ -217,12 +211,12 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   
                   {/* Column 1: Espera */}
-                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/[0.05] space-y-2">
+                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/5 space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold text-amber-500 uppercase">
                       <span>En Espera</span>
                       <span>(2)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-amber-500/25 space-y-2 shadow-md hover:border-amber-500/40 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-amber-500/25 space-y-2 shadow-md hover:border-amber-500/40 transition-all duration-300">
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>F4L-101</span>
                         <span className="text-[9px] text-gray-400 font-sans bg-white/5 px-1.5 py-0.5 rounded">Toyota</span>
@@ -232,12 +226,12 @@ export default function Home() {
                   </div>
 
                   {/* Column 2: Lavado */}
-                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/[0.05] space-y-2">
+                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/5 space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold text-blue-500 uppercase">
                       <span>Lavado / Proceso</span>
                       <span>(1)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.07] to-white/[0.01] border border-blue-500/30 space-y-2 relative shadow-md hover:border-blue-500/45 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/[0.07] to-white/1 border border-blue-500/30 space-y-2 relative shadow-md hover:border-blue-500/45 transition-all duration-300">
                       <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping" />
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>B2P-202</span>
@@ -248,12 +242,12 @@ export default function Home() {
                   </div>
 
                   {/* Column 3: Completado */}
-                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/[0.05] space-y-2">
+                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/5 space-y-2">
                     <div className="flex justify-between items-center text-[10px] font-bold text-emerald-500 uppercase">
                       <span>Completado</span>
                       <span>(3)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-emerald-500/30 space-y-2 shadow-md hover:border-emerald-500/45 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-emerald-500/30 space-y-2 shadow-md hover:border-emerald-500/45 transition-all duration-300">
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>K9X-909</span>
                         <span className="text-[9px] text-emerald-400 font-sans bg-emerald-500/10 px-1.5 py-0.5 rounded">Kia Rio</span>
@@ -295,7 +289,7 @@ export default function Home() {
         }}
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p>© 2026 CarWash Pro. Todos los derechos reservados. Diseñado para rendimiento corporativo y multi-tenant.</p>
+          <p>© 2026 WashMaster Pro. Todos los derechos reservados. Diseñado para rendimiento corporativo y multi-tenant.</p>
           <div className="flex items-center gap-4 text-[11px] font-semibold">
             <span className="text-emerald-450 border border-emerald-500/10 px-2 py-0.5 rounded bg-emerald-500/5">PWA Activa</span>
             <span className="text-gray-500">v1.5_Release</span>

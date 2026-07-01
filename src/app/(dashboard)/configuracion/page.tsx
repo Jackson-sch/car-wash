@@ -3,7 +3,7 @@ import { ConfiguracionClient } from "./configuracion-client";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Configuración del Sistema - CarWash Pro",
+  title: "Configuración del Sistema - WashMaster Pro",
   description: "Configura la sucursal, las tarifas de vehículos y las reglas de lealtad.",
 };
 

@@ -3,7 +3,7 @@ import { getInventario } from "@/lib/actions/inventario";
 import { InventarioClient } from "./inventario-client";
 
 export const metadata = {
-  title: "Gestión de Inventario de Insumos - CarWash Pro",
+  title: "Gestión de Inventario de Insumos - WashMaster Pro",
   description: "Registro de productos, control de stock y alertas automáticas de reposición.",
 };
 

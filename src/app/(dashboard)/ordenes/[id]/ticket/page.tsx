@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { TicketClient } from "./ticket-client";
 
 export const metadata = {
-  title: "Ticket de Servicio - CarWash Pro",
+  title: "Ticket de Servicio - WashMaster Pro",
   description: "Visualización e impresión de ticket de trabajo.",
 };
 

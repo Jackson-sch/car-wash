@@ -3,7 +3,7 @@ import { getEmpleadosComisiones } from "@/lib/actions/empleados";
 import { EmpleadosClient } from "./empleados-client";
 
 export const metadata = {
-  title: "Gestión de Empleados y Comisiones - CarWash Pro",
+  title: "Gestión de Empleados y Comisiones - WashMaster Pro",
   description: "Monitoreo del personal, control de asistencia y comisiones acumuladas por lavado.",
 };
 

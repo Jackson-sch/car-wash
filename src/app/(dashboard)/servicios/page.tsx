@@ -3,7 +3,7 @@ import { getServicios, getCategoriasServicio } from "@/lib/actions/servicios";
 import { ServiciosClient } from "./servicios-client";
 
 export const metadata = {
-  title: "Catálogo de Servicios - CarWash Pro",
+  title: "Catálogo de Servicios - WashMaster Pro",
   description: "Gestión de los servicios ofrecidos, tarifas y duración de lavado.",
 };
 

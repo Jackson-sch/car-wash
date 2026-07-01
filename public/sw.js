@@ -1,4 +1,4 @@
-const CACHE_NAME = 'carwash-pro-v1';
+const CACHE_NAME = 'washmaster-pro-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/offline.html',

@@ -92,8 +92,8 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
   // Evitar desajustes de hidratación de Recharts
   useEffect(() => {
     setMounted(true);
-    // Si no hay datos en la DB, activar demo automáticamente para deleitar visualmente
-    if (initialData.ventasDiarias.length === 0) {
+    // Si no hay ventas registradas en absoluto en los KPIs generales, activar demo automáticamente
+    if (initialData.kpis.totalVentas === 0 && initialData.kpis.ordenesCompletadas === 0) {
       setUseDemo(true);
     }
   }, [initialData]);
@@ -160,20 +160,13 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
               </div>
             </div>
 
-            {initialData.ventasDiarias.length === 0 ? (
-              <div className="flex items-center gap-2 text-[10px] font-bold text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">
-                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-                <span>Modo Demostración Activo</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => setUseDemo(!useDemo)}
-                className="text-[10px] font-bold bg-card border border-zinc-350 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-secondary" />
-                {useDemo ? "Ver Datos Reales" : "Ver Simulación Demo"}
-              </button>
-            )}
+            <button
+              onClick={() => setUseDemo(!useDemo)}
+              className="text-[10px] font-bold bg-card border border-zinc-350 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-secondary" />
+              {useDemo ? "Ver Datos Reales" : "Ver Simulación Demo"}
+            </button>
           </div>
         </div>
       </div>

@@ -186,7 +186,7 @@ export async function createEmpresa(data: {
         })
         .returning();
 
-      const defaultPassword = "CarWash2026!";
+      const defaultPassword = "WashMaster2026!";
       const hashedPassword = await hashPassword(defaultPassword);
 
       await tx.insert(cuentas).values({

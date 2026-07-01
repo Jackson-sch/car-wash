@@ -5,8 +5,8 @@ import { checkSystemStatus } from "@/lib/actions/bootstrap";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Inicializar Sistema - CarWash Pro",
-  description: "Asistente de inicialización de la plataforma CarWash Pro.",
+  title: "Inicializar Sistema - WashMaster Pro",
+  description: "Asistente de inicialización de la plataforma WashMaster Pro.",
 };
 
 export default async function RegisterPage() {

@@ -3,7 +3,7 @@ import { getClientes } from "@/lib/actions/clientes";
 import { ClientesClient } from "./clientes-client";
 
 export const metadata = {
-  title: "Directorio de Clientes - CarWash Pro",
+  title: "Directorio de Clientes - WashMaster Pro",
   description: "Gestión de clientes, historial de visitas y programa de lealtad por puntos.",
 };
 

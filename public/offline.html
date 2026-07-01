@@ -3,126 +3,494 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sin Conexión - CarWash Pro</title>
+  <title>Sin Conexión — WashMaster Pro</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #06060f;
+      --surface:   rgba(255,255,255,0.025);
+      --border:    rgba(255,255,255,0.06);
+      --border-hi: rgba(14,165,233,0.25);
+      --sky:       #0ea5e9;
+      --sky-dim:   rgba(14,165,233,0.18);
+      --sky-glow:  rgba(14,165,233,0.08);
+      --text-hi:   #f4f4f5;
+      --text-mid:  #71717a;
+      --text-lo:   #3f3f46;
+      --mono:      'JetBrains Mono', monospace;
+      --display:   'Syne', sans-serif;
+    }
+
     body {
-      background-color: #050510;
-      color: #e4e4e7;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-hi);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-      box-sizing: border-box;
-      text-align: center;
+      padding: 24px;
       position: relative;
       overflow: hidden;
     }
-    .orb {
+
+    /* ── Ambient background ─────────────────────────────────────────── */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
       pointer-events: none;
+      z-index: 0;
+    }
+    .orb {
       position: absolute;
-      width: 400px;
-      height: 400px;
       border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.15;
-      z-index: 1;
+      filter: blur(110px);
     }
     .orb-1 {
-      top: -10%;
-      left: -10%;
-      background: radial-gradient(circle, #0ea5e9 0%, transparent 70%);
+      width: 600px; height: 600px;
+      top: -25%; left: -15%;
+      background: radial-gradient(circle, rgba(14,165,233,0.09) 0%, transparent 65%);
     }
     .orb-2 {
-      bottom: -10%;
-      right: -10%;
-      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      width: 500px; height: 500px;
+      bottom: -20%; right: -10%;
+      background: radial-gradient(circle, rgba(14,165,233,0.06) 0%, transparent 65%);
     }
-    .container {
+
+    /* Fine dot grid */
+    .bg-layer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 1;
+    }
+
+    /* ── Top status bar ─────────────────────────────────────────────── */
+    .status-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 44px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 20;
+      background: rgba(6,6,15,0.7);
+      backdrop-filter: blur(20px);
+    }
+    .status-brand {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    .status-label {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #ef4444;
+    }
+
+    /* ── Main card ──────────────────────────────────────────────────── */
+    .card {
       position: relative;
       z-index: 10;
-      max-width: 450px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 24px;
-      padding: 40px 30px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 40px 36px 36px;
+      backdrop-filter: blur(30px);
+      overflow: hidden;
+      animation: card-in 0.7s cubic-bezier(0.22,1,0.36,1) both;
     }
-    .icon-container {
-      width: 70px;
-      height: 70px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+
+    /* Subtle top highlight */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(14,165,233,0.35), transparent);
+    }
+
+    /* ── Radar SVG icon ─────────────────────────────────────────────── */
+    .icon-wrap {
+      position: relative;
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 32px;
+    }
+
+    /* Pulsing rings behind the icon */
+    .pulse-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--sky);
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.5);
+      opacity: 0;
+      animation: ring-pulse 2.8s ease-out infinite;
+    }
+    .pulse-ring:nth-child(2) { animation-delay: 0.9s; }
+    .pulse-ring:nth-child(3) { animation-delay: 1.8s; }
+
+    .icon-box {
+      position: relative;
+      z-index: 2;
+      width: 84px;
+      height: 84px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(14,165,233,0.15), rgba(14,165,233,0.05));
+      border: 1px solid rgba(14,165,233,0.25);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 25px;
-      box-shadow: 0 0 25px rgba(14, 165, 233, 0.3);
     }
-    .icon {
-      width: 32px;
-      height: 32px;
-      color: #050510;
+
+    .wifi-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding-bottom: 4px;
     }
-    h1 {
-      font-size: 22px;
+    .wifi-arc {
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      border: 2.5px solid currentColor;
+      border-bottom: none;
+      display: block;
+    }
+    .wifi-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Staggered fade-out on arcs to show "no signal" */
+    .arc-1 { width: 32px; height: 16px; color: var(--text-lo); }
+    .arc-2 { width: 20px; height: 10px; color: var(--text-lo); }
+    .arc-3 { width: 8px;  height: 4px;  color: var(--sky); }
+
+    /* Diagonal slash */
+    .slash-line {
+      position: absolute;
+      top: 10%; left: 82%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      width: 2.5px;
+      height: 64px;
+      background: linear-gradient(180deg, transparent 0%, #ef4444 40%, #ef4444 60%, transparent 100%);
+      border-radius: 2px;
+    }
+
+    /* ── Typography ─────────────────────────────────────────────────── */
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--sky);
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: fade-up 0.5s ease 0.3s both;
+    }
+
+    .heading {
+      font-family: var(--display);
+      font-size: clamp(1.9rem, 5vw, 2.6rem);
       font-weight: 800;
-      margin: 0 0 10px;
-      background: linear-gradient(to right, #ffffff, #d4d4d8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      color: var(--text-hi);
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: fade-up 0.5s ease 0.4s both;
     }
-    p {
-      font-size: 13.5px;
-      line-height: 1.6;
-      color: #71717a;
-      margin: 0 0 25px;
+
+    .subtext {
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text-mid);
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fade-up 0.5s ease 0.5s both;
+    }
+
+    /* ── Diagnostic rows ────────────────────────────────────────────── */
+    .diag-block {
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fade-up 0.5s ease 0.55s both;
+    }
+    .diag-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-lo);
+      margin-bottom: 8px;
+    }
+    .diag-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .diag-row-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-mid);
+    }
+    .diag-indicator {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .ind-red   { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+    .ind-amber { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+    .ind-green { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+    .diag-value {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .val-red   { color: #ef4444; }
+    .val-amber { color: #f59e0b; }
+    .val-green { color: #22c55e; }
+
+    /* ── CTA button ─────────────────────────────────────────────────── */
+    .btn-wrap {
+      opacity: 0;
+      animation: fade-up 0.5s ease 0.65s both;
     }
     .btn {
-      display: inline-flex;
+      width: 100%;
+      display: flex;
       align-items: center;
       justify-content: center;
+      gap: 10px;
+      padding: 14px 24px;
       background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-      color: #050510;
+      color: #050a14;
       font-weight: 700;
-      font-size: 13.5px;
-      padding: 12px 24px;
-      border-radius: 12px;
-      text-decoration: none;
-      transition: all 0.2s ease;
+      font-size: 13px;
+      letter-spacing: 0.01em;
+      border-radius: 14px;
+      border: none;
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+      box-shadow: 0 4px 24px rgba(14,165,233,0.25);
+      font-family: inherit;
     }
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 25px rgba(14, 165, 233, 0.35);
+      box-shadow: 0 8px 32px rgba(14,165,233,0.38);
+      filter: brightness(1.05);
     }
     .btn:active {
       transform: translateY(0);
+      filter: brightness(0.97);
+    }
+
+    /* Spinner inside button when retrying */
+    .btn-spinner {
+      display: none;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(5,10,20,0.3);
+      border-top-color: rgba(5,10,20,0.8);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .btn-icon { display: none; }
+    .btn.loading .btn-spinner { display: block; }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 24px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text-lo);
+      letter-spacing: 0.1em;
+      text-align: center;
+      opacity: 0;
+      animation: fade-up 0.5s ease 0.75s both;
+    }
+
+    /* ── Keyframes ──────────────────────────────────────────────────── */
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+    @keyframes ring-pulse {
+      0%   { transform: translate(-50%,-50%) scale(0.4); opacity: 0.5; }
+      70%  { transform: translate(-50%,-50%) scale(2.0); opacity: 0;   }
+      100% { transform: translate(-50%,-50%) scale(2.0); opacity: 0;   }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%     { opacity: 0; }
+    }
+
+    /* Blinking cursor on error code */
+    .cursor {
+      display: inline-block;
+      width: 7px; height: 11px;
+      background: var(--sky);
+      margin-left: 2px;
+      vertical-align: -1px;
+      animation: blink 1s step-start infinite;
     }
   </style>
 </head>
 <body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="container">
-    <div class="icon-container">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="1" y1="1" x2="23" y2="23"></line>
-        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.5"></path>
-        <path d="M5 12.5a10.94 10.94 0 0 1 5.83-2.84"></path>
-        <path d="M8.58 8.58a15 15 0 0 1 13.84 3.09"></path>
-        <path d="M1.42 11.67a15 15 0 0 1 7.16-3.09"></path>
-        <line x1="12" y1="18" x2="12.01" y2="18"></line>
-      </svg>
-    </div>
-    <h1>Sin conexión a internet</h1>
-    <p>Parece que no tienes acceso a la red en este momento. La aplicación de CarWash Pro requiere conexión activa para sincronizar datos operativos, pero puedes reintentar cuando recuperes señal.</p>
-    <a onclick="window.location.reload()" class="btn">Reintentar Conexión</a>
+
+  <!-- Ambient background -->
+  <div class="bg-layer">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
   </div>
+
+  <!-- Top status bar -->
+  <div class="status-bar">
+    <span class="status-brand">WashMaster Pro</span>
+    <div class="status-right">
+      <span class="status-dot"></span>
+      <span class="status-label">Sin conexión</span>
+    </div>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+
+    <!-- Radar icon with pulse rings -->
+    <div class="icon-wrap">
+      <div class="pulse-ring" style="width:84px;height:84px"></div>
+      <div class="pulse-ring" style="width:84px;height:84px"></div>
+      <div class="pulse-ring" style="width:84px;height:84px"></div>
+      <div class="icon-box">
+        <div class="wifi-icon">
+          <div class="arc-1 wifi-arc"></div>
+          <div class="arc-2 wifi-arc"></div>
+          <div class="arc-3 wifi-arc"></div>
+          <div class="wifi-dot" style="color: var(--sky)"></div>
+        </div>
+        <div class="slash-line"></div>
+      </div>
+    </div>
+
+    <!-- Eyebrow -->
+    <p class="eyebrow">ERR_NETWORK_OFFLINE<span class="cursor"></span></p>
+
+    <!-- Heading -->
+    <h1 class="heading">Sin señal<br>de red.</h1>
+
+    <!-- Subtext -->
+    <p class="subtext">
+      WashMaster Pro no puede sincronizar datos operativos sin conexión activa.
+      Verifica tu red y reintenta cuando recuperes señal.
+    </p>
+
+    <!-- Diagnostic rows -->
+    <div class="diag-block">
+      <p class="diag-label">Diagnóstico de red</p>
+      <div class="diag-row">
+        <div class="diag-row-left">
+          <span class="diag-indicator ind-red"></span>
+          <span>Conexión a internet</span>
+        </div>
+        <span class="diag-value val-red">OFFLINE</span>
+      </div>
+      <div class="diag-row">
+        <div class="diag-row-left">
+          <span class="diag-indicator ind-amber"></span>
+          <span>Servidor WashMaster</span>
+        </div>
+        <span class="diag-value val-amber">UNREACHABLE</span>
+      </div>
+      <div class="diag-row">
+        <div class="diag-row-left">
+          <span class="diag-indicator ind-green"></span>
+          <span>Datos en caché local</span>
+        </div>
+        <span class="diag-value val-green">DISPONIBLE</span>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="btn-wrap">
+      <button class="btn" id="retryBtn" onclick="handleRetry()">
+        <span class="btn-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 21v-5h5"/>
+          </svg>
+        </span>
+        <span class="btn-text">Reintentar conexión</span>
+        <div class="btn-spinner"></div>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <p class="footer">WASHMASTER PRO &nbsp;·&nbsp; SYNC ENGINE v2.4 &nbsp;·&nbsp; OFFLINE MODE ACTIVE</p>
+
+  <script>
+    function handleRetry() {
+      const btn = document.getElementById('retryBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      setTimeout(() => {
+        window.location.reload();
+      }, 1400);
+    }
+
+    // Auto-reload when connection is restored
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+  </script>
+
 </body>
 </html>

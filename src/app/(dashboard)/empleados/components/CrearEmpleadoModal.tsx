@@ -109,7 +109,7 @@ export function CrearEmpleadoModal({ isOpen, onClose, isPending, onSave }: Crear
               className="bg-card border-border focus:border-secondary text-xs h-9 rounded-lg"
             />
             <p className="text-[10px] text-muted-foreground mt-1">
-              Contraseña inicial: <code className="bg-muted px-1.5 py-0.5 rounded font-mono font-bold text-foreground">CarWash2026!</code>
+              Contraseña inicial: <code className="bg-muted px-1.5 py-0.5 rounded font-mono font-bold text-foreground">WashMaster2026!</code>
             </p>
           </div>
 

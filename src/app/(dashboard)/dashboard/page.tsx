@@ -3,7 +3,7 @@ import { DashboardClient } from "./dashboard-client";
 import { getSessionOrThrow } from "@/lib/actions/servicios";
 
 export const metadata = {
-  title: "Resumen Operativo - CarWash Pro",
+  title: "Resumen Operativo - WashMaster Pro",
   description: "Monitoreo en tiempo real de bahías, cola de lavado y balances de caja.",
 };
 

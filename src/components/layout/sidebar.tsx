@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { canDo } from "@/lib/auth/permissions";
+import { getMiEmpresaNombre } from "@/lib/actions/configuracion";
 import {
   Car,
   LayoutDashboard,
@@ -52,6 +54,16 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
   const { data: session } = useSession();
   const serverRol = session?.user?.rol || userRole;
   const rol = serverRol || "cajero";
+
+  const [empresaNombre, setEmpresaNombre] = useState<string>("WashMaster Pro");
+
+  useEffect(() => {
+    getMiEmpresaNombre().then((nombre) => {
+      if (nombre) {
+        setEmpresaNombre(nombre);
+      }
+    });
+  }, []);
 
   const superAdminNavItems = [
     {
@@ -184,11 +196,11 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
               className="data-[slot=sidebar-menu-button]:p-1.5! hover:bg-transparent focus:bg-transparent active:bg-transparent"
               render={<Link href="/dashboard" />}
             >
-              <div className="size-5 rounded-full border-2 border-white/30 flex items-center justify-center shrink-0">
-                <Car className="size-3 text-white/70" />
+              <div className="size-5 flex items-center justify-center shrink-0">
+                <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
               </div>
               <span className="text-base font-semibold text-white/90 truncate group-data-[collapsible=icon]:hidden">
-                WashMaster Pro
+                {empresaNombre}
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>

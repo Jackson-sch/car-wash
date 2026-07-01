@@ -4,7 +4,7 @@ import { getTurnoActivo } from "@/lib/actions/caja";
 import { OrdenesClient } from "./ordenes-client";
 
 export const metadata = {
-  title: "Bandeja de Órdenes - CarWash Pro",
+  title: "Bandeja de Órdenes - WashMaster Pro",
   description: "Monitoreo y administración de las órdenes de lavado y asignaciones de personal.",
 };
 

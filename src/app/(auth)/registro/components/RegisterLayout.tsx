@@ -18,8 +18,8 @@ export function RegisterLayout({ leftPanel, rightPanel }: RegisterLayoutProps) {
       <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-10 lg:p-12 relative z-10 bg-card/40 border-r border-border overflow-y-auto max-h-screen">
         <div className="flex items-center justify-between mb-6 lg:mb-0 shrink-0">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center shadow-md shadow-secondary/10 group-hover:scale-105 transition-transform duration-300">
-              <Car className="h-5.5 w-5.5 text-secondary-foreground font-bold" />
+            <div className="h-10 w-10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
             </div>
             <div>
               <span className="font-extrabold text-xl tracking-tight text-foreground">

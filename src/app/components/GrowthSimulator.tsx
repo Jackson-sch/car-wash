@@ -16,7 +16,10 @@ export function GrowthSimulator() {
   return (
     <div className="w-full max-w-5xl mt-24 mb-16 relative">
       {/* Background decoration */}
-      <div className="absolute inset-0 -z-10 bg-radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 60%) blur-3xl pointer-events-none" />
+      <div 
+        className="absolute inset-0 -z-10 blur-3xl pointer-events-none" 
+        style={{ background: "radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 60%)" }}
+      />
 
       <div className="text-center mb-10">
         <h2 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight mb-3">
@@ -29,13 +32,13 @@ export function GrowthSimulator() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Sliders panel */}
-        <div className="lg:col-span-5 p-8 rounded-3xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/10 backdrop-blur-xl flex flex-col justify-between shadow-xl">
+        <div className="lg:col-span-5 p-8 rounded-3xl bg-linear-to-b from-white/4 to-white/1 border border-white/10 backdrop-blur-xl flex flex-col justify-between shadow-xl">
           <div className="space-y-8">
             {/* Slider 1 */}
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400 font-semibold">Lavados por día</span>
-                <span className="text-white font-mono font-bold text-lg bg-white/[0.08] border border-white/5 px-3 py-1 rounded-lg">
+                <span className="text-white font-mono font-bold text-lg bg-white/8 border border-white/5 px-3 py-1 rounded-lg">
                   {lavadosDiarios}
                 </span>
               </div>
@@ -59,7 +62,7 @@ export function GrowthSimulator() {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400 font-semibold">Ticket promedio (S/)</span>
-                <span className="text-white font-mono font-bold text-lg bg-white/[0.08] border border-white/5 px-3 py-1 rounded-lg">
+                <span className="text-white font-mono font-bold text-lg bg-white/8 border border-white/5 px-3 py-1 rounded-lg">
                   S/ {precioPromedio}
                 </span>
               </div>
@@ -92,7 +95,7 @@ export function GrowthSimulator() {
         {/* Results panel */}
         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Card 1: Fidelización */}
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
             <div>
               <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-4">
                 <Gift className="h-5 w-5 text-pink-500" />
@@ -109,7 +112,7 @@ export function GrowthSimulator() {
           </div>
 
           {/* Card 2: Horas Pico */}
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
             <div>
               <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
@@ -126,18 +129,18 @@ export function GrowthSimulator() {
           </div>
 
           {/* Card 3: Total Proyectado */}
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Facturación Proyectada</h3>
             <div className="mt-4">
               <div className="text-xs text-gray-500 font-medium">Nuevo ingreso mensual</div>
-              <div className="text-xl font-mono font-black text-white/95 mt-1 font-semibold">
+              <div className="text-xl font-mono text-white/95 mt-1 font-semibold">
                 S/ {ingresosMensualesProyectados.toLocaleString("es-PE", { maximumFractionDigits: 0 })}
               </div>
             </div>
           </div>
 
           {/* Card 4: Impacto Anual */}
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/[0.02] border border-emerald-500/25 flex flex-col justify-between shadow-lg shadow-emerald-500/5">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-emerald-500/10 to-emerald-500/2 border border-emerald-500/25 flex flex-col justify-between shadow-lg shadow-emerald-500/5">
             <div className="flex justify-between items-start">
               <h3 className="text-xs font-bold text-emerald-450 uppercase tracking-wider">Ganancia Anual Extra</h3>
               <Sparkles className="h-4.5 w-4.5 text-emerald-400 animate-pulse" />

@@ -5,7 +5,7 @@ import { getTurnoActivo } from "@/lib/actions/caja";
 import { NuevaOrdenClient } from "./nueva-client";
 
 export const metadata = {
-  title: "Nueva Orden de Servicio - CarWash Pro",
+  title: "Nueva Orden de Servicio - WashMaster Pro",
   description: "Registra vehículos y clientes para iniciar un nuevo lavado.",
 };
 

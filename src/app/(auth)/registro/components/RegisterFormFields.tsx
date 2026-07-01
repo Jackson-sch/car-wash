@@ -74,7 +74,7 @@ export function RegisterFormFields({
         label="Correo Electrónico"
         type="email"
         required
-        placeholder="juan@carwash.com"
+        placeholder="juan@washmaster.com"
         value={email}
         onChange={onEmailChange}
         disabled={disabled}

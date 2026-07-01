@@ -239,7 +239,7 @@ export async function preCargarServiciosDemo() {
     // 2. Crear Servicios
     const serviciosDemo = [
       {
-        nombre: "Lavado Completo CarWash",
+        nombre: "Lavado Completo WashMaster",
         descripcion: "Lavado exterior con shampoo PH neutro, aspirado de salón completo, silicona en plásticos y perfume premium.",
         precio: "30.00",
         duracionMin: 30,

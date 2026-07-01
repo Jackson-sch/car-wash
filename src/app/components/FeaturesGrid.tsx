@@ -1,4 +1,4 @@
-"use client";
+"use client";[0.01]
 
 import { Car, Coins, TrendingUp, Gift, Building2, Smartphone } from "lucide-react";
 import { useState } from "react";

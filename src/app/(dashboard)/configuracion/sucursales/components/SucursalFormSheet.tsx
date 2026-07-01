@@ -144,7 +144,7 @@ export function SucursalFormSheet({
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="Ej. miraflores@carwash.pe"
+                placeholder="Ej. miraflores@washmaster.pe"
               />
             </div>
           </div>
