@@ -47,8 +47,8 @@ function FeatureCard({ icon: Icon, title, desc, glow }: typeof features[number])
 
   return (
     <div
-      className={`p-6 rounded-2xl backdrop-blur-xl transition-all duration-500 cursor-default group border shadow-md bg-gradient-to-br ${
-        hovered ? "from-white/[0.06] to-white/[0.01]" : "from-white/[0.02] to-transparent"
+      className={`p-6 rounded-2xl backdrop-blur-xl transition-all duration-500 cursor-default group border shadow-md bg-linear-to-br ${
+        hovered ? "from-white/6 to-white/1" : "from-white/2 to-transparent"
       }`}
       style={{
         borderColor: hovered ? `${glow}33` : "rgba(255,255,255,0.04)",

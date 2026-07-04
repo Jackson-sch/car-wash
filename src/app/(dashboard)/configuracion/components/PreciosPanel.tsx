@@ -45,6 +45,22 @@ export function PreciosPanel({ initialMultipliers, isPending, onSave }: PreciosP
         </div>
       </div>
       <div className="p-6 space-y-4">
+        {/* Explicación de las tarifas */}
+        <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
+          <p className="font-bold text-secondary flex items-center gap-1.5">
+            💡 ¿Cómo funcionan los multiplicadores?
+          </p>
+          <p className="text-muted-foreground">
+            El sistema calcula el precio de cada servicio de manera dinámica multiplicando el precio base del catálogo por el factor del vehículo seleccionado:
+          </p>
+          <div className="pl-3 border-l-2 border-secondary/40 font-mono text-[10.5px] text-foreground py-0.5">
+            Precio Final = Precio Base × Multiplicador del Vehículo
+          </div>
+          <p className="text-muted-foreground/80">
+            <strong>Ejemplo práctico:</strong> Si el servicio <span className="underline">Lavado Simple</span> tiene un costo base de <strong>S/ 30.00</strong> y el tipo de vehículo es una <strong>SUV (x1.5)</strong>, el precio final cobrado en la orden será de <strong>S/ 45.00</strong> (30.00 × 1.5).
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {VEHICULOS.map((v) => {
             const Icon = v.icon;

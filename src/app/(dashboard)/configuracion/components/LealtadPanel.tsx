@@ -43,6 +43,23 @@ export function LealtadPanel({
         </div>
       </div>
       <div className="p-6 space-y-5">
+        {/* Explicación de reglas de lealtad */}
+        <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
+          <p className="font-bold text-secondary flex items-center gap-1.5">
+            🎁 ¿Cómo funcionan las reglas de lealtad y puntos?
+          </p>
+          <p className="text-muted-foreground">
+            Permite premiar la fidelidad de los clientes mediante un monedero virtual de puntos acumulables que luego se pueden canjear como saldo a favor en caja:
+          </p>
+          <div className="pl-3 border-l-2 border-secondary/40 font-mono text-[10.5px] text-foreground py-0.5">
+            1. Puntos Obtenidos = Precio Total Pagado × Ganancia de Puntos<br />
+            2. Descuento Disponible = Puntos Acumulados × Valor del Punto (S/)
+          </div>
+          <p className="text-muted-foreground/80">
+            <strong>Ejemplo práctico:</strong> Con una ganancia de <strong>1 punto por Sol</strong> y un valor de canje de <strong>S/ 0.10 por punto</strong>, un servicio de S/ 100.00 otorgará 100 puntos. El cliente podrá canjear esos 100 puntos en su siguiente visita para obtener un descuento inmediato de <strong>S/ 10.00</strong> (100 × 0.10).
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="p-5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-3">
             <div className="flex items-center gap-2">

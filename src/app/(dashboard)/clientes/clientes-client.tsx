@@ -9,7 +9,6 @@ import { createCliente, getClienteHistorial, ajustarPuntosCliente } from "@/lib/
 import { toast } from "sonner";
 
 import { Card } from "@/components/ui/card";
-import { StatsCard } from "@/components/shared/StatsCard";
 import { ClientesTable, Cliente } from "./components/ClientesTable";
 import { ClienteDrawer, Vehiculo, PuntosLog, OrdenVisita } from "./components/ClienteDrawer";
 import { AjustarPuntosModal } from "./components/AjustarPuntosModal";
@@ -170,7 +169,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
             <Users className="h-7 w-7 text-secondary" />
             Directorio de Clientes
           </h1>
@@ -191,50 +190,102 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          label="Total de Clientes"
-          value={totalClientes}
-          icon={<Users className="h-5 w-5" />}
-        />
-        <StatsCard
-          label="Vehículos Asociados"
-          value={totalVehiculosRegistrados}
-          icon={<Car className="h-5 w-5" />}
-          iconColor="text-blue-500"
-        />
-        <StatsCard
-          label="Puntos Activos"
-          value={`${totalCirculationPoints} pts`}
-          icon={<Gift className="h-5 w-5" />}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
-          valueColor="text-amber-600"
-        />
-        <Card className="p-6 border-amber-200 bg-linear-to-br from-amber-500/3 to-transparent shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:border-amber-300 transition-all flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+        {/* Card 1: Total Clientes */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Total de Clientes
+              </span>
+              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
+                {totalClientes} <span className="text-sm font-medium text-muted-foreground">clientes</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
+              <Users className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
+            <span>Clientes registrados en el sistema</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 2: Vehículos Asociados */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Vehículos Asociados
+              </span>
+              <h3 className="text-3xl font-extrabold text-blue-500 tracking-tight">
+                {totalVehiculosRegistrados} <span className="text-sm font-medium text-muted-foreground">autos</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
+              <Car className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <span>Vehículos vinculados a propietarios</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 3: Puntos Activos */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Puntos Activos
+              </span>
+              <h3 className="text-3xl font-extrabold text-amber-500 tracking-tight">
+                {totalCirculationPoints} <span className="text-sm font-medium text-muted-foreground">pts</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-500 transition-transform group-hover:scale-110 duration-300">
+              <Gift className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span>Puntos circulantes por canjear</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 4: Programa de Puntos Custom */}
+        <Card className="p-6 border-amber-500/20 bg-card shadow-sm hover:border-amber-500/40 transition-all flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-300">
             <Award className="h-24 w-24 text-amber-500" />
           </div>
           <div className="space-y-2.5 relative z-10">
             <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-amber-500" />
-              <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">
+              <Award className="h-5 w-5 text-amber-500 animate-pulse" />
+              <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">
                 Programa de Puntos
               </span>
             </div>
-            <p className="text-xs text-zinc-500 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Fidelización automática para clientes. Acumula y canjea en cada servicio de autolavado.
             </p>
             <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="bg-background border border-muted rounded-lg p-2 flex flex-col justify-center">
+              <div className="bg-muted/30 border border-border rounded-lg p-2 flex flex-col justify-center">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Acumulación</span>
                 <span className="text-xs font-extrabold mt-0.5">{formatCurrency(10)} = 1 pt</span>
               </div>
-              <div className="bg-background border border-muted rounded-lg p-2 flex flex-col justify-center">
+              <div className="bg-muted/30 border border-border rounded-lg p-2 flex flex-col justify-center">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Canje / Descuento</span>
-                <span className="text-xs font-extrabold text-amber-600 mt-0.5">1 pt = {formatCurrency(0.20)}</span>
+                <span className="text-xs font-extrabold text-amber-500 mt-0.5">1 pt = {formatCurrency(0.20)}</span>
               </div>
             </div>
           </div>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Card>
       </div>
 

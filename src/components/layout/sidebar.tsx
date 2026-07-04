@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
 import { canDo } from "@/lib/auth/permissions";
-import { getMiEmpresaNombre } from "@/lib/actions/configuracion";
+import { getMiEmpresaNombre, getSucursalConfig } from "@/lib/actions/configuracion";
 import {
   Car,
   LayoutDashboard,
@@ -56,11 +56,18 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
   const rol = serverRol || "cajero";
 
   const [empresaNombre, setEmpresaNombre] = useState<string>("WashMaster Pro");
+  const [logoUrl, setLogoUrl] = useState<string>("/logo-shield.png");
 
   useEffect(() => {
     getMiEmpresaNombre().then((nombre) => {
       if (nombre) {
         setEmpresaNombre(nombre);
+      }
+    });
+
+    getSucursalConfig().then((sucursal) => {
+      if (sucursal?.logoUrl) {
+        setLogoUrl(sucursal.logoUrl);
       }
     });
   }, []);
@@ -197,7 +204,7 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
               render={<Link href="/dashboard" />}
             >
               <div className="size-5 flex items-center justify-center shrink-0">
-                <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
+                <img src={logoUrl} alt="Logo" className="h-full w-full object-contain rounded-md" />
               </div>
               <span className="text-base font-semibold text-white/90 truncate group-data-[collapsible=icon]:hidden">
                 {empresaNombre}

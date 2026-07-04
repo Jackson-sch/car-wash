@@ -7,7 +7,6 @@ import { Car, Search, X, Eye, Users, ClipboardList, Gauge, Truck, Bike, Van } fr
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { StatsCard } from "@/components/shared/StatsCard";
 import {
   Table,
   TableBody,
@@ -134,29 +133,85 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <StatsCard
-          label="Total de Vehículos"
-          value={totalVehiculos}
-          icon={<Car className="h-5 w-5" />}
-          iconBg="bg-blue-500/10"
-          iconColor="text-blue-500"
-        />
-        <StatsCard
-          label="Con Órdenes"
-          value={vehiculosConOrdenes}
-          icon={<ClipboardList className="h-5 w-5" />}
-          iconBg="bg-amber-500/10"
-          iconColor="text-amber-500"
-        />
-        <StatsCard
-          label="Órdenes Generadas"
-          value={totalOrdenes}
-          icon={<Gauge className="h-5 w-5" />}
-          iconBg="bg-emerald-500/10"
-          iconColor="text-emerald-500"
-          valueColor="text-emerald-600 dark:text-emerald-450"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Card 1: Total Vehículos */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Total de Vehículos
+              </span>
+              <h3 className="text-3xl font-extrabold text-blue-500 tracking-tight">
+                {totalVehiculos} <span className="text-sm font-medium text-muted-foreground">vehículos</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
+              <Car className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <span>Vehículos en base de datos</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 2: Con Órdenes */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Con Órdenes
+              </span>
+              <h3 className="text-3xl font-extrabold text-amber-500 tracking-tight">
+                {vehiculosConOrdenes} <span className="text-sm font-medium text-muted-foreground">activos</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-500 transition-transform group-hover:scale-110 duration-300">
+              <ClipboardList className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4">
+            {totalVehiculos > 0 ? (
+              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                  style={{ width: `${(vehiculosConOrdenes / totalVehiculos) * 100}%` }}
+                />
+              </div>
+            ) : (
+              <div className="h-1.5" />
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              Vehículos atendidos
+            </p>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 3: Órdenes Generadas */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Órdenes Generadas
+              </span>
+              <h3 className="text-3xl font-extrabold text-emerald-500 tracking-tight">
+                {totalOrdenes} <span className="text-sm font-medium text-muted-foreground">órdenes</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110 duration-300">
+              <Gauge className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Total de servicios solicitados</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
       </div>
 
       {/* Search */}

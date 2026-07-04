@@ -54,7 +54,40 @@ export async function sendEmail(options: {
   try {
     const tr = await getTransporter();
     if (!tr) {
-      console.warn("SMTP no configurado. Email no enviado.");
+      // Intentar fallback de la API de Resend
+      const resendKey = process.env.RESEND_API_KEY;
+      if (resendKey && resendKey !== "re_placeholder") {
+        console.log("SMTP no configurado. Utilizando fallback de la API de Resend...");
+        const fromEmail = process.env.EMAIL_FROM || "onboarding@resend.dev";
+        const fromName = process.env.NEXT_PUBLIC_APP_NAME || "WashMaster Pro";
+
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${resendKey}`,
+          },
+          body: JSON.stringify({
+            from: `"${fromName}" <${fromEmail}>`,
+            to: Array.isArray(options.to) ? options.to : [options.to],
+            subject: options.subject,
+            html: options.html,
+            text: options.text || "",
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log(`Email enviado vía Resend API: ${data.id}`);
+          return { success: true, messageId: data.id };
+        } else {
+          const errText = await res.text();
+          console.error("Error al enviar email vía Resend API:", errText);
+          return { success: false, error: errText };
+        }
+      }
+
+      console.warn("SMTP no configurado y fallback de Resend no disponible. Email no enviado.");
       return { success: false, error: "SMTP no configurado" };
     }
 

@@ -7,7 +7,8 @@ import { ClipboardList, Search, Plus, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
-import { updateOrdenEstado, asignarLavadorAOrden } from "@/lib/actions/ordenes";
+import { updateOrdenEstado, asignarLavadorAOrden, getOrdenById } from "@/lib/actions/ordenes";
+import { createClient } from "@/lib/client";
 import { cobrarOrden } from "@/lib/actions/caja";
 import { toast } from "sonner";
 import { OrdenesKpiCards } from "./components/OrdenesKpiCards";
@@ -31,6 +32,81 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
   useEffect(() => {
     setCajaAbiertaLocal(cajaAbierta);
   }, [cajaAbierta]);
+
+  // Sync state when server-side initialOrdenes changes
+  useEffect(() => {
+    setOrdenes(initialOrdenes);
+  }, [initialOrdenes]);
+
+  // Subscribe to real-time changes in the database
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel("ordenes-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ordenes",
+        },
+        async (payload) => {
+          console.log("Realtime event received:", payload.eventType, payload);
+
+          if (payload.eventType === "DELETE") {
+            const deletedId = payload.old.id;
+            setOrdenes((prev) => prev.filter((o) => o.id !== deletedId));
+            return;
+          }
+
+          // For INSERT and UPDATE, fetch the full details with joins
+          const orderId = payload.new.id;
+          try {
+            const detail = await getOrdenById(orderId);
+            if (detail) {
+              const updatedOrden: Orden = {
+                id: detail.id,
+                nroTicket: detail.nroTicket,
+                estado: detail.estado as any,
+                prioridad: detail.prioridad,
+                total: detail.total,
+                notas: detail.notas,
+                createdAt: detail.createdAt ? new Date(detail.createdAt) : null,
+                updatedAt: detail.createdAt ? new Date(detail.createdAt) : null,
+                placa: detail.placa,
+                vehiculoMarca: detail.vehiculoMarca,
+                vehiculoModelo: detail.vehiculoModelo,
+                vehiculoTipo: detail.vehiculoTipo as any,
+                clienteNombre: detail.clienteNombre,
+                clienteApellido: detail.clienteApellido,
+                lavadorNombre: detail.lavadorNombre,
+                lavadorApellido: detail.lavadorApellido,
+                comprobanteTipo: detail.comprobanteTipo,
+                comprobanteSerie: detail.comprobanteSerie,
+                comprobanteNumero: detail.comprobanteNumero,
+              };
+
+              setOrdenes((prev) => {
+                const exists = prev.some((o) => o.id === orderId);
+                if (exists) {
+                  return prev.map((o) => (o.id === orderId ? updatedOrden : o));
+                } else {
+                  return [updatedOrden, ...prev];
+                }
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching realtime order detail:", err);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
   
   // nuqs States
   const [searchQuery, setSearchQuery] = useQueryState("search", {

@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LogoUploader } from "@/components/shared/LogoUploader";
 import { Switch } from "@/components/ui/switch";
 import { updateConfigGlobal } from "@/lib/actions/config-global";
 import { solicitarTokenBackup } from "@/lib/actions/backups";
@@ -201,13 +202,10 @@ export function ConfigForm({ config }: { config: ConfigData }) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="logoUrl" className="text-xs font-semibold text-foreground">URL del Logo</Label>
-              <Input
-                id="logoUrl"
-                value={form.logoUrl}
-                onChange={(e) => setForm({ ...form, logoUrl: e.target.value })}
-                placeholder="https://ejemplo.com/logo.png"
-                className="bg-muted/30 border-border focus-visible:ring-ring/50 text-foreground text-xs py-5 rounded-xl"
+              <Label htmlFor="logoUrl" className="text-xs font-semibold text-foreground">Logotipo de la Plataforma</Label>
+              <LogoUploader
+                value={form.logoUrl || ""}
+                onChange={(url) => setForm({ ...form, logoUrl: url })}
               />
             </div>
           </div>

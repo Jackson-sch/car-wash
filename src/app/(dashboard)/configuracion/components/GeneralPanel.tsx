@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LogoUploader } from "@/components/shared/LogoUploader";
 
 interface Sucursal {
   id: string;
@@ -132,14 +133,11 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
         <div className="space-y-2">
           <Label htmlFor="logo" className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
             <Image className="h-3.5 w-3.5" />
-            Logo URL
+            Logotipo de la Sucursal
           </Label>
-          <Input
-            id="logo"
-            placeholder="https://..."
+          <LogoUploader
             value={logoUrl}
-            onChange={(e) => setLogoUrl(e.target.value)}
-            className="bg-card border-border focus:border-secondary text-sm h-10 rounded-lg"
+            onChange={setLogoUrl}
           />
         </div>
 

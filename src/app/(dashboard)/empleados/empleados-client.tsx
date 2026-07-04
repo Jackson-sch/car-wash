@@ -181,26 +181,99 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <StatsCard
-          label="Total de Personal Activo"
-          value={totalPersonal}
-          icon={<UserCog className="h-5 w-5" />}
-        />
-        <StatsCard
-          label="Lavadores Activos"
-          value={totalLavadores}
-          icon={<ClipboardCheck className="h-5 w-5" />}
-          iconColor="text-blue-500"
-        />
-        <StatsCard
-          label="Comisiones por Pagar (30%)"
-          value={`${formatCurrency(totalComisiones)}`}
-          icon={<Coins className="h-5 w-5" />}
-          iconBg="bg-emerald-500/10"
-          iconColor="text-emerald-600 dark:text-emerald-400"
-          valueColor="text-emerald-600"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Card 1: Total Personal */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Total de Personal Activo
+              </span>
+              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
+                {totalPersonal} <span className="text-sm font-medium text-muted-foreground">colaboradores</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
+              <UserCog className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
+            <span>Colaboradores registrados y activos</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 2: Lavadores Activos */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Lavadores Activos
+              </span>
+              <h3 className="text-3xl font-extrabold text-blue-500 tracking-tight">
+                {totalLavadores} <span className="text-sm font-medium text-muted-foreground">lavadores</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
+              <ClipboardCheck className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4">
+            {totalPersonal > 0 ? (
+              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                  style={{ width: `${(totalLavadores / totalPersonal) * 100}%` }}
+                />
+              </div>
+            ) : (
+              <div className="h-1.5" />
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              Operarios en bahía de lavado
+            </p>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 3: Comisiones */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-500/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Comisiones por Pagar
+              </span>
+              <h3 className="text-3xl font-extrabold text-emerald-500 tracking-tight">
+                {formatCurrency(totalComisiones)}
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110 duration-300">
+              <Coins className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Suma acumulada por pagar</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+      </div>
+
+      {/* Explicación de comisiones de lavadores */}
+      <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
+        <p className="font-bold text-secondary flex items-center gap-1.5">
+          💡 ¿Cómo funcionan las comisiones de lavado?
+        </p>
+        <p className="text-muted-foreground">
+          La comisión devengada por el personal de lavado se calcula de manera transparente al completarse un servicio asignado:
+        </p>
+        <ul className="list-disc pl-5 text-muted-foreground/80 space-y-1">
+          <li><strong>Monto del Lavado:</strong> Representa la facturación bruta total de los servicios que el lavador atendió directamente.</li>
+          <li><strong>Comisión Acumulada:</strong> Por política de negocio, los lavadores reciben una tasa fija del <strong>30%</strong> calculada sobre el precio base de cada servicio realizado, acumulándose automáticamente en su saldo.</li>
+        </ul>
       </div>
 
       {/* Employees Grid Component */}

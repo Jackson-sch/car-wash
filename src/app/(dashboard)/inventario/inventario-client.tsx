@@ -136,29 +136,114 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <StatsCard
-          label="Total de Productos"
-          value={totalItems}
-          icon={<Package className="h-5 w-5" />}
-          iconBg="bg-secondary/10"
-        />
-        <StatsCard
-          label="Bajo Stock Mínimo"
-          value={`${lowStockItems} ítems`}
-          icon={<AlertTriangle className="h-5 w-5" />}
-          iconBg="bg-amber-500/10"
-          iconColor="text-amber-600 dark:text-amber-400"
-          valueColor="text-amber-600"
-        />
-        <StatsCard
-          label="Insumos Agotados"
-          value={`${outOfStockItems} ítems`}
-          icon={<TrendingDown className="h-5 w-5" />}
-          iconBg="bg-rose-500/10"
-          iconColor="text-rose-600 dark:text-rose-400"
-          valueColor="text-rose-600"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Card 1: Total Productos */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Total de Productos
+              </span>
+              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
+                {totalItems} <span className="text-sm font-medium text-muted-foreground">ítems</span>
+              </h3>
+            </div>
+            <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
+              <Package className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Monitoreando catálogo de materiales</span>
+          </div>
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+
+        {/* Card 2: Bajo Stock */}
+        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md ${
+          lowStockItems > 0 
+            ? "border-amber-500/30 hover:border-amber-500/60" 
+            : "border-border hover:border-zinc-350"
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Bajo Stock Mínimo
+              </span>
+              <h3 className={`text-3xl font-extrabold tracking-tight ${
+                lowStockItems > 0 ? "text-amber-500" : "text-foreground"
+              }`}>
+                {lowStockItems} <span className="text-sm font-medium text-muted-foreground">alertas</span>
+              </h3>
+            </div>
+            <div className={`p-3.5 rounded-xl transition-transform group-hover:scale-110 duration-300 ${
+              lowStockItems > 0 ? "bg-amber-500/10 text-amber-500" : "bg-zinc-500/10 text-zinc-500"
+            }`}>
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4">
+            {totalItems > 0 ? (
+              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    lowStockItems > 0 ? "bg-amber-500" : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${(lowStockItems / totalItems) * 100}%` }}
+                />
+              </div>
+            ) : (
+              <div className="h-1.5" />
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              {lowStockItems > 0 
+                ? "Requiere reabastecimiento pronto" 
+                : "Niveles de stock estables"}
+            </p>
+          </div>
+          {lowStockItems > 0 && (
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent" />
+          )}
+        </div>
+
+        {/* Card 3: Agotados */}
+        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md ${
+          outOfStockItems > 0 
+            ? "border-rose-500/30 hover:border-rose-500/60" 
+            : "border-border hover:border-zinc-350"
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Insumos Agotados
+              </span>
+              <h3 className={`text-3xl font-extrabold tracking-tight ${
+                outOfStockItems > 0 ? "text-rose-500" : "text-foreground"
+              }`}>
+                {outOfStockItems} <span className="text-sm font-medium text-muted-foreground">ítems</span>
+              </h3>
+            </div>
+            <div className={`p-3.5 rounded-xl transition-transform group-hover:scale-110 duration-300 ${
+              outOfStockItems > 0 ? "bg-rose-500/10 text-rose-500 animate-pulse" : "bg-zinc-500/10 text-zinc-500"
+            }`}>
+              <TrendingDown className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className={`h-1.5 w-1.5 rounded-full ${
+              outOfStockItems > 0 ? "bg-rose-500 animate-ping" : "bg-emerald-500"
+            }`} />
+            <span>
+              {outOfStockItems > 0 
+                ? "¡Crítico! Reponer stock inmediatamente" 
+                : "Sin rupturas de stock"}
+            </span>
+          </div>
+          {outOfStockItems > 0 && (
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-rose-500/50 to-transparent" />
+          )}
+        </div>
       </div>
 
       {/* Inventory Table */}
