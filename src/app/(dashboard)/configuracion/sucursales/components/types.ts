@@ -13,10 +13,10 @@ export interface SucursalItem {
   updatedAt: Date | null;
 }
 
-export type SucursalFormData = {
+export interface SucursalFormData {
   nombre: string;
   direccion: string;
   telefono: string;
   email: string;
   ruc: string;
-};
+}

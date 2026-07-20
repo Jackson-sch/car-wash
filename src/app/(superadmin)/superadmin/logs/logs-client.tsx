@@ -121,11 +121,12 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
             placeholder="Buscar por usuario o acción..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
+            aria-label="Buscar logs"
             className="bg-transparent border-0 text-sm text-foreground focus:outline-none w-full focus:ring-0 placeholder-muted-foreground"
           />
           {searchTerm && (
-            <button
-              onClick={() => handleSearchChange("")}
+            <button type="button" onClick={() => handleSearchChange("")}
+              aria-label="Limpiar búsqueda"
               className="text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="size-4" />
@@ -140,6 +141,7 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
             <select
               value={actionFilter}
               onChange={(e) => handleActionFilterChange(e.target.value)}
+              aria-label="Filtrar por acción"
               className="bg-transparent border-none focus:ring-0 font-bold text-foreground py-0 pl-1 pr-6 cursor-pointer focus:outline-none text-xs"
             >
               <option value="todos">Todos los eventos</option>
@@ -196,7 +198,7 @@ export function LogsClient({ initialLogs }: LogsClientProps) {
                           <User className="size-3" />
                           {log.usuarioNombre}
                         </span>
-                        <span>
+                        <span suppressHydrationWarning>
                           {new Date(log.createdAt).toLocaleString("es-PE", {
                             day: "2-digit",
                             month: "2-digit",

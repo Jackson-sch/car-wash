@@ -34,7 +34,7 @@ export function ConciliacionTable({
   reconciliado,
 }: ConciliacionTableProps) {
   return (
-    <Card className="border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
+    <Card className="border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden print:shadow-none print:bg-white">
       <div className="p-4 border-b border-border bg-zinc-50/50 flex justify-between items-center">
         <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
           <CreditCard className="h-4.5 w-4.5 text-secondary" />
@@ -89,6 +89,29 @@ export function ConciliacionTable({
                 )}
               </td>
             </tr>
+
+            {/* EGRESOS DE CAJA CHICA */}
+            {systemStats.totalEgresos > 0 && (
+              <tr className="bg-red-50/30 hover:bg-red-50/50 transition-colors border-l-2 border-red-500">
+                <td className="p-3 font-semibold text-red-900 flex items-center gap-2">
+                  <span className="p-1 rounded bg-red-100 text-red-600"><Coins className="h-3.5 w-3.5" /></span>
+                  Egresos / Caja Chica (-)
+                </td>
+                <td className="p-3 text-right font-bold text-red-600">
+                  {reconciliado ? (
+                    `-${formatCurrency(systemStats.totalEgresos)}`
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-red-500 font-bold uppercase bg-red-100 px-1.5 py-0.5 rounded">-${formatCurrency(systemStats.totalEgresos)}</span>
+                  )}
+                </td>
+                <td className="p-3 text-right text-xs font-semibold text-red-600">
+                  Salidas registradas
+                </td>
+                <td className="p-3 text-right font-medium text-red-500 text-[11px]">
+                  Descontado
+                </td>
+              </tr>
+            )}
 
             {/* TARJETA */}
             <tr className="hover:bg-zinc-50/50 transition-colors">

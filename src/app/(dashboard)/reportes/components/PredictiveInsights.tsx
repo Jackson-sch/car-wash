@@ -2,7 +2,7 @@
 
 import { BrainCircuit, TrendingUp, Users, Zap, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { KPIStats, ServicioTop, HoraPico } from "./types";
+import type { KPIStats, ServicioTop, HoraPico } from "./types";
 
 interface PredictiveInsightsProps {
   kpis: KPIStats;
@@ -104,7 +104,7 @@ export function PredictiveInsights({ kpis, serviciosTop, horasPico }: Predictive
         {/* Promoción Recomendada */}
         <div className="p-3 bg-amber-500/5 rounded-xl border border-amber-500/10 space-y-1">
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-            <Zap className="h-3.5 w-3.5 animate-bounce" />
+            <Zap className="h-3.5 w-3.5 animate-pulse" />
             Oportunidad de Promoción
           </div>
           <p className="text-[11px] font-semibold text-foreground">

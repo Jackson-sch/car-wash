@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { calculateCashCloseDetail, calculateCommissions, PagoSimulado, ServicioSimulado } from "../lib/utils/calculator";
+import type { PagoSimulado, ServicioSimulado } from "../lib/utils/calculator";
+import { calculateCashCloseDetail, calculateCommissions } from "../lib/utils/calculator";
 
 describe("Cálculos de Cierre de Caja", () => {
   it("debería calcular el cuadre de caja esperado correctamente", () => {

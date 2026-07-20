@@ -3,7 +3,6 @@ import { auditoriaLogs } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { LogsClient } from "./logs-client";
 
-export const dynamic = "force-dynamic";
 
 export default async function AuditLogsPage() {
   const logs = await db

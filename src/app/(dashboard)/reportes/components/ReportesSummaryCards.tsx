@@ -1,5 +1,5 @@
 import { Coins, TrendingUp, ClipboardCheck } from "lucide-react";
-import { KPIStats } from "./types";
+import type { KPIStats } from "./types";
 
 interface ReportesSummaryCardsProps {
   kpis: KPIStats;

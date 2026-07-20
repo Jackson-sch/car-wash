@@ -4,7 +4,7 @@ import Link from "next/link";
 import { User, Phone, Mail, MessageSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { getInitials } from "@/lib/formats";
-import { VehiculoData } from "../types";
+import type { VehiculoData } from "../types";
 
 interface ClienteCardProps {
   vehiculo: VehiculoData;

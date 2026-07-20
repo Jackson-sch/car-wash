@@ -1,9 +1,8 @@
 import { getSuperAdminMetrics } from "@/lib/actions/superadmin";
-import { Building2, Store, Users, ShieldAlert, BadgePercent, ArrowRight } from "lucide-react";
+import { Building2, Store, Users, ShieldAlert, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { RevenueChart, GrowthChart } from "./charts";
 
-export const dynamic = "force-dynamic";
 
 export default async function SuperAdminDashboardPage() {
   const metricsResult = await getSuperAdminMetrics();

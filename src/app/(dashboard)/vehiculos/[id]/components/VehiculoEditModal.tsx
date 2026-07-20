@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateVehiculo } from "@/lib/actions/vehiculos";
-import { TIPO_LABELS, VehiculoData } from "../types";
+import type { VehiculoData } from "../types";
+import { TIPO_LABELS } from "../types";
 import { Loader2 } from "lucide-react";
 
 interface VehiculoEditModalProps {

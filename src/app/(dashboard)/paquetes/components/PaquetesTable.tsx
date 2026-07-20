@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/formats";
-import { PaqueteItem } from "./types";
+import type { PaqueteItem } from "./types";
 
 interface PaquetesTableProps {
   data: PaqueteItem[];
@@ -58,7 +58,7 @@ export function PaquetesTable({
                 colSpan={5}
                 className="text-center text-muted-foreground py-20"
               >
-                <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/35 animate-bounce duration-1000" />
+                <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/35 animate-pulse duration-2000" />
                 <p className="font-bold text-base text-foreground">
                   {searchQuery
                     ? "Sin resultados para tu búsqueda"

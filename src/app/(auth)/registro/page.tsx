@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import BootstrapForm from "./bootstrap-form";
 import { checkSystemStatus } from "@/lib/actions/bootstrap";
 
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Inicializar Sistema - WashMaster Pro",

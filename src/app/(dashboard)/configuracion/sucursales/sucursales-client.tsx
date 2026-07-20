@@ -9,7 +9,7 @@ import { toggleSucursalStatusAction, setMainSucursalAction } from "@/lib/actions
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { SucursalItem } from "./components/types";
+import type { SucursalItem } from "./components/types";
 import { SucursalesKpis } from "./components/SucursalesKpis";
 import { SucursalesGrid } from "./components/SucursalesGrid";
 import { SucursalFormSheet } from "./components/SucursalFormSheet";
@@ -84,7 +84,7 @@ export function SucursalesClient({
     if (res.success) {
       setSucursales((prev) =>
         prev.map((s) => {
-          const currentConfig = (s.config || {}) as Record<string, any>;
+          const currentConfig = (s.config || {}) as Record<string, unknown>;
           return {
             ...s,
             config: { ...currentConfig, esPrincipal: s.id === id },
@@ -149,8 +149,8 @@ export function SucursalesClient({
           className="pl-9 pr-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
         />
         {search && (
-          <button
-            onClick={() => setSearch("")}
+          <button type="button" onClick={() => setSearch("")}
+            aria-label="Limpiar búsqueda"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -173,6 +173,7 @@ export function SucursalesClient({
 
       {/* Form Sheet */}
       <SucursalFormSheet
+        key={`sucursal-${editingId ?? "new"}-${isSheetOpen ? "open" : "closed"}`}
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         editingId={editingId}

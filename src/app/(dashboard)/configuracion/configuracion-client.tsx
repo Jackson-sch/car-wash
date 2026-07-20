@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { useQueryState, parseAsString } from "nuqs";
 import { Settings, Building, Car, Gift, Database } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +22,15 @@ interface Sucursal {
   config: unknown;
 }
 
+interface SucursalConfig {
+  multipliers?: Record<string, number>;
+  loyalty?: {
+    puntosPorSol?: number;
+    solesPorPunto?: number;
+  };
+  [key: string]: unknown;
+}
+
 interface ConfiguracionClientProps {
   initialSucursal: Sucursal;
 }
@@ -34,7 +43,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
   );
   const [isPending, startTransition] = useTransition();
 
-  const config = (sucursal.config as Record<string, any>) || {};
+  const config = (sucursal.config as SucursalConfig) || {};
 
   const handleSaveInfo = async (data: {
     nombre: string;
@@ -93,7 +102,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
     });
   };
 
-  const tabs = [
+  const tabs = useMemo(() => [
     {
       id: "general" as const,
       label: "General Sucursal",
@@ -125,7 +134,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
       icon: Building,
       href: "/configuracion/sucursales",
     },
-  ];
+  ], []);
 
   return (
     <div className="space-y-8 text-foreground">
@@ -143,7 +152,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         {/* Sidebar Navigation */}
         <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-1.5 bg-card/30 p-2.5 rounded-2xl border border-border/60">
-          {tabs.map((tab) => {
+          {tabs.map((tab: typeof tabs[number]) => {
             const Icon = tab.icon;
             const hasHref = "href" in tab;
             const isActive = !hasHref && activeTab === tab.id;
@@ -189,8 +198,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
             }
 
             return (
-              <button
-                key={tab.id}
+              <button type="button" key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={btnClassName}
               >

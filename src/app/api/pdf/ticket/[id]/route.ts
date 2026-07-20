@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ordenes, vehiculos, clientes, usuarios, ordenServicios, sucursales } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";

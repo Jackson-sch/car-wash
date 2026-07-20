@@ -1,16 +1,30 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/formats";
-import * as d3 from "d3";
+import { useD3 } from "@/lib/hooks/useD3";
 
 interface SalesByCategoryChartProps {
   ventasPorCategoria: { categoria: string; total: number }[];
 }
 
+function ChartSkeleton() {
+  return (
+    <div className="bg-card border-border shadow-sm p-6 rounded-xl space-y-4">
+      <div className="h-3 w-36 bg-muted/40 rounded animate-pulse" />
+      <div className="flex items-center justify-center">
+        <div className="w-36 h-36 rounded-full bg-muted/20 animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
 export function SalesByCategoryChart({
   ventasPorCategoria,
 }: SalesByCategoryChartProps) {
+  const d3 = useD3();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [activeSegment, setActiveSegment] = useState<{
     categoria: string;
@@ -21,6 +35,7 @@ export function SalesByCategoryChart({
     y: number;
   } | null>(null);
 
+  // ── All useMemo must be BEFORE any early return (React Rules of Hooks) ──
   const categoryColors = useMemo(() => [
     { fill: "fill-blue-600 dark:fill-blue-400", bg: "bg-blue-600 dark:bg-blue-400" },
     { fill: "fill-blue-500 dark:fill-blue-300", bg: "bg-blue-500 dark:bg-blue-300" },
@@ -34,24 +49,26 @@ export function SalesByCategoryChart({
     return ventasPorCategoria.reduce((acc, c) => acc + c.total, 0) || 1;
   }, [ventasPorCategoria]);
 
-  // D3 Pie Generator
+  // D3 Pie Generator — returns [] while d3 is loading
   const pieData = useMemo(() => {
+    if (!d3) return [] as d3.PieArcDatum<{ categoria: string; total: number }>[];
     const pieGenerator = d3
       .pie<{ categoria: string; total: number }>()
-      .value((d) => d.total)
+      .value((d: { categoria: string; total: number }) => d.total)
       .sort(null);
     return pieGenerator(ventasPorCategoria);
-  }, [ventasPorCategoria]);
+  }, [ventasPorCategoria, d3]);
 
-  // D3 Arc Generator
+  // D3 Arc Generator — returns a dummy generator while d3 is loading
   const arcGenerator = useMemo(() => {
+    if (!d3) return null;
     return d3
       .arc<d3.PieArcDatum<{ categoria: string; total: number }>>()
       .innerRadius(48)
       .outerRadius(72)
       .cornerRadius(4)
       .padAngle(0.04);
-  }, []);
+  }, [d3]);
 
   // Generar leyendas con porcentaje para el gráfico
   const categoryLegends = useMemo(() => {
@@ -68,6 +85,9 @@ export function SalesByCategoryChart({
       };
     });
   }, [ventasPorCategoria, total, categoryColors]);
+
+  // Early return solo después de TODOS los hooks
+  if (!d3 || !arcGenerator) return <ChartSkeleton />;
 
   const handleMouseMove = (
     e: React.MouseEvent<SVGPathElement>,
@@ -110,14 +130,14 @@ export function SalesByCategoryChart({
               className="overflow-visible select-none"
             >
               <g>
-                {pieData.map((slice, index) => {
+                {pieData.map((slice: d3.PieArcDatum<{ categoria: string; total: number }>, index: number) => {
                   const path = arcGenerator(slice);
                   const isHovered = hoveredIndex === index;
                   const colors = categoryColors[index % categoryColors.length];
 
                   return (
                     <path
-                      key={index}
+                      key={slice.data.categoria}
                       d={path || undefined}
                       className={cn(
                         "transition-all duration-300 cursor-pointer origin-center outline-none",
@@ -155,7 +175,7 @@ export function SalesByCategoryChart({
               const isHovered = hoveredIndex === index;
               return (
                 <div
-                  key={index}
+                  key={leg.categoria}
                   className={cn(
                     "flex items-center gap-1.5 text-xs cursor-pointer transition-all duration-200 p-1.5 rounded-md border",
                     isHovered ? "bg-accent border-border scale-[1.02]" : "border-transparent hover:bg-accent/50 hover:border-border/50"
@@ -197,4 +217,3 @@ export function SalesByCategoryChart({
     </Card>
   );
 }
-

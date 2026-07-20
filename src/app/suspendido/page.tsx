@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Ban, Car, Mail, Phone, ArrowUpRight, AlertTriangle } from "lucide-react";
 
 export default function SuspendidoPage() {
@@ -82,7 +83,7 @@ export default function SuspendidoPage() {
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="size-4.5 flex items-center justify-center shrink-0">
-              <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
+              <Image src="/logo-shield.png" alt="WashMaster Logo" width={18} height={18} className="h-full w-full object-contain" />
             </div>
             <span className="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground/60">
               WashMaster Pro

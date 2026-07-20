@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { empresas, sucursales, usuarios, cuentas, planes, sesiones, pagos, ordenes } from "@/lib/db/schema";
+import { empresas, sucursales, usuarios, cuentas, sesiones, pagos, ordenes } from "@/lib/db/schema";
 import { eq, sql, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
 import { headers } from "next/headers";
@@ -92,7 +92,7 @@ export async function getSuperAdminMetrics() {
 }
 
 // Obtener todas las empresas con sus métricas
-export async function getEmpresas() {
+async function _getEmpresas() {
   try {
     await verifySuperAdminSession();
 
@@ -273,7 +273,7 @@ export async function toggleEmpresaStatus(empresaId: string, activo: boolean) {
 }
 
 // Obtener empresa por ID con sucursales y usuarios
-export async function getEmpresaById(empresaId: string) {
+async function _getEmpresaById(empresaId: string) {
   try {
     await verifySuperAdminSession();
 
@@ -347,18 +347,4 @@ export async function updateEmpresa(
   }
 }
 
-// Obtener planes activos para el selector
-export async function getPlanesActivos() {
-  try {
-    return await db
-      .select({ codigo: planes.codigo, nombre: planes.nombre, precio: planes.precio })
-      .from(planes)
-      .where(eq(planes.activo, true))
-      .orderBy(planes.precio);
-  } catch (error) {
-    console.error("Error fetching planes:", error);
-    return [];
-  }
-}
 
-export type EmpresaDetalle = Awaited<ReturnType<typeof getEmpresaById>>["data"];

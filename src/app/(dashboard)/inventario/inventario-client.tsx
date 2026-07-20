@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { Package, Plus, AlertTriangle, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StatsCard } from "@/components/shared/StatsCard";
 import { registrarItemInventario, registrarMovimientoStock } from "@/lib/actions/inventario";
 import { toast } from "sonner";
 import { InventarioTable } from "./components/InventarioTable";

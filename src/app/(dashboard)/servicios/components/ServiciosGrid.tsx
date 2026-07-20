@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Coins, Layers, Sparkles, Car, Edit3, Trash2 } from "lucide-react";
+import { Clock, Layers, Sparkles, Car, Edit3, Trash2, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formats";
@@ -40,6 +40,7 @@ interface ServiciosGridProps {
   activeTab: string;
   isPending: boolean;
   onEdit: (servicio: Servicio) => void;
+  onReceta: (servicio: Servicio) => void;
   onDelete: (id: string) => void;
   onLoadDemo: () => void;
   onAddClick: () => void;
@@ -47,11 +48,12 @@ interface ServiciosGridProps {
 
 export function ServiciosGrid({
   servicios,
-  categorias,
+  categorias: _categorias,
   searchQuery,
   activeTab,
   isPending,
   onEdit,
+  onReceta,
   onDelete,
   onLoadDemo,
   onAddClick,
@@ -159,25 +161,38 @@ export function ServiciosGrid({
           </div>
 
           {/* Actions Footer */}
-          <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 mt-6">
+          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 mt-6">
             <Button
               type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(serv)}
-              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+              variant="outline"
+              size="sm"
+              onClick={() => onReceta(serv)}
+              className="text-[11px] font-bold h-8 gap-1.5 text-purple-600 border-purple-500/30 hover:bg-purple-50"
             >
-              <Edit3 className="h-4 w-4" />
+              <FlaskConical className="h-3.5 w-3.5 text-purple-600" />
+              Receta Insumos
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(serv.id)}
-              className="h-8 w-8 text-zinc-500 hover:text-rose-600 hover:bg-rose-50"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(serv)}
+                className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(serv.id)}
+                className="h-8 w-8 text-zinc-500 hover:text-rose-600 hover:bg-rose-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       ))}

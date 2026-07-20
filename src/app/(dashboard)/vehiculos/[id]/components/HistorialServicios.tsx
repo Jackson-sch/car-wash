@@ -18,7 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/formats";
-import { OrdenItem } from "../types";
+import type { OrdenItem } from "../types";
 
 interface HistorialServiciosProps {
   vehiculoId: string;
@@ -102,7 +102,7 @@ export function HistorialServicios({ vehiculoId, ordenes }: HistorialServiciosPr
               <div key={o.id} className="relative">
                 {/* Timeline node dot */}
                 <div className={`absolute left-[-27px] sm:left-[-29px] top-1.5 h-6 w-6 rounded-full border-2 border-background flex items-center justify-center ring-4 transition-all duration-300 ${dotStyle} bg-white dark:bg-zinc-950 shadow-xs z-10`}>
-                  {cloneElement(config.icon as any, { className: "h-3.5 w-3.5" })}
+                  {cloneElement(config.icon as React.ReactElement<{ className?: string }>, { className: "h-3.5 w-3.5" })}
                 </div>
 
                 <Card

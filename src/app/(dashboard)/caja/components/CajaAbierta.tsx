@@ -1,6 +1,6 @@
 "use client";
 
-import { TurnoActivo } from "./types";
+import type { TurnoActivo } from "./types";
 import { CajaSummaryCard } from "./CajaSummaryCard";
 import { SalesByCategoryChart } from "./SalesByCategoryChart";
 import { HourlyVolumeChart } from "./HourlyVolumeChart";

@@ -1,7 +1,6 @@
 import { getSucursalesList } from "@/lib/actions/sucursales";
 import { SucursalesClient } from "./sucursales-client";
-import { SucursalItem } from "./components/types";
-import { redirect } from "next/navigation";
+import type { SucursalItem } from "./components/types";
 
 export const metadata = {
   title: "Administración de Sucursales - WashMaster Pro",

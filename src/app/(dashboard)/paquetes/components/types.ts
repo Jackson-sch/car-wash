@@ -14,9 +14,9 @@ export interface ServicioOption {
   precio: string;
 }
 
-export type PaqueteFormData = {
+export interface PaqueteFormData {
   nombre: string;
   descripcion: string;
   precio: string;
   servicioIds: string[];
-};
+}

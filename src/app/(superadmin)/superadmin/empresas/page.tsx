@@ -1,9 +1,7 @@
 import { db } from "@/lib/db";
-import { empresas } from "@/lib/db/schema";
 import { sql } from "drizzle-orm";
 import { EmpresasClientList } from "./empresas-client";
 
-export const dynamic = "force-dynamic";
 
 async function getEmpresasFromDB() {
   const rows = await db.execute(

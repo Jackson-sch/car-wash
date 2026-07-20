@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { Car, CarFront, Truck, Bike, Sparkles, XCircle, Pencil, Eye, Printer, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,19 +49,21 @@ export function OrderCard({
     return lavadores.find(l => l.nombre === orden.lavadorNombre && l.apellido === orden.lavadorApellido)?.id || "unassigned";
   }, [lavadores, orden.lavadorNombre, orden.lavadorApellido]);
 
-  const getGradientClass = (estado: string) => {
+  const getGradientClass = useCallback((estado: string) => {
     switch(estado) {
       case "pendiente": return "bg-gradient-to-br from-amber-500/10 via-card/90 to-card/80 border-amber-500/20";
       case "en_proceso": return "bg-gradient-to-br from-sky-500/10 via-card/90 to-card/80 border-sky-500/20";
       case "completado": return "bg-gradient-to-br from-emerald-500/10 via-card/90 to-card/80 border-emerald-500/20";
       default: return "bg-gradient-to-br from-card/90 to-muted/30 border-border/60";
     }
-  };
+  }, []);
 
   return (
     <Card 
       className={`flex flex-col gap-3 p-3 ${getGradientClass(orden.estado)} backdrop-blur-xl border shadow-[0_2px_4px_0_rgba(0,0,0,0.02)] transition-all duration-300 rounded-xl group w-full ${
-        isDragging ? "opacity-50 border-secondary scale-105 shadow-xl ring-2 ring-secondary/50 cursor-grabbing" : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] hover:border-zinc-400/50"
+        isDragging
+          ? "opacity-85 border-secondary/80 scale-[1.02] shadow-xl shadow-secondary/15 ring-2 ring-secondary/50 cursor-grabbing"
+          : "cursor-grab hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] hover:border-zinc-400/50 active:scale-[0.98] active:shadow-sm"
       }`}
     >
       {/* Header: Plate & Timer */}

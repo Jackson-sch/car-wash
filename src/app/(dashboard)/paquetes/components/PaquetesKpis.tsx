@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Package, Gift, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/formats";
-import { PaqueteItem } from "./types";
+import type { PaqueteItem } from "./types";
 
 interface PaquetesKpisProps {
   paquetes: PaqueteItem[];

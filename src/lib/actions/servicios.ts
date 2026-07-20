@@ -1,23 +1,35 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { servicios, categoriasServicio, sucursales } from "@/lib/db/schema";
+import { servicios, categoriasServicio, sucursales, servicioRecetas, inventario } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
-import { canDo, PERMISSIONS } from "@/lib/auth/permissions";
+import type { PERMISSIONS } from "@/lib/auth/permissions";
+import { canDo } from "@/lib/auth/permissions";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 type PermissionModule = keyof typeof PERMISSIONS;
+
+/*
+  NOTA: React.cache() deduplica llamadas a getSessionOrThrow() dentro del
+  mismo render (request). Si un layout + página + 2 server actions llaman
+  a getSessionOrThrow(), auth.api.getSession() solo se ejecuta UNA vez.
+*/
+import { cache } from "react";
+
+const getSessionCached = cache(async () => {
+  return await auth.api.getSession({
+    headers: await headers(),
+  });
+});
 
 export async function getSessionOrThrow(permission?: {
   modulo: PermissionModule;
   accion: string;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getSessionCached();
   if (!session) {
     throw new Error("No autorizado. Inicie sesión nuevamente.");
   }
@@ -41,7 +53,7 @@ export async function getSessionOrThrow(permission?: {
 }
 
 // Obtener todas las categorías de servicio de la sucursal
-export async function getCategoriasServicio() {
+async function getCategoriasServicio() {
   try {
     const session = await getSessionOrThrow({ modulo: "servicios", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
@@ -112,6 +124,7 @@ export async function createServicio(data: {
       })
       .returning();
 
+    revalidateTag("servicios", { expire: 3600 });
     revalidatePath("/servicios");
     return { success: true, data: newServicio };
   } catch (error: unknown) {
@@ -146,6 +159,7 @@ export async function updateServicio(
       .where(and(eq(servicios.id, id), eq(servicios.sucursalId, sucursalId)))
       .returning();
 
+    revalidateTag("servicios", { expire: 3600 });
     revalidatePath("/servicios");
     return { success: true, data: updated };
   } catch (error: unknown) {
@@ -168,6 +182,7 @@ export async function deleteServicio(id: string) {
       })
       .where(and(eq(servicios.id, id), eq(servicios.sucursalId, sucursalId)));
 
+    revalidateTag("servicios", { expire: 3600 });
     revalidatePath("/servicios");
     return { success: true };
   } catch (error: unknown) {
@@ -191,6 +206,7 @@ export async function createCategoriaServicio(nombre: string, orden: number = 0)
       })
       .returning();
 
+    revalidateTag("servicios", { expire: 3600 });
     revalidatePath("/servicios");
     return { success: true, data: newCat };
   } catch (error: unknown) {
@@ -223,18 +239,19 @@ export async function preCargarServiciosDemo() {
       { nombre: "Servicios Especiales", orden: 4 },
     ];
 
-    const insertedCats = [];
-    for (const c of catsData) {
-      const [inserted] = await db
-        .insert(categoriasServicio)
-        .values({
-          sucursalId,
-          nombre: c.nombre,
-          orden: c.orden,
-        })
-        .returning();
-      insertedCats.push(inserted);
-    }
+    const insertedCats = await Promise.all(
+      catsData.map(c =>
+        db
+          .insert(categoriasServicio)
+          .values({
+            sucursalId,
+            nombre: c.nombre,
+            orden: c.orden,
+          })
+          .returning()
+          .then(r => r[0])
+      )
+    );
 
     // 2. Crear Servicios
     const serviciosDemo = [
@@ -288,23 +305,81 @@ export async function preCargarServiciosDemo() {
       },
     ];
 
-    for (const s of serviciosDemo) {
-      await db.insert(servicios).values({
-        sucursalId,
-        nombre: s.nombre,
-        descripcion: s.descripcion,
-        precio: s.precio,
-        duracionMin: s.duracionMin,
-        categoriaId: s.categoriaId,
-        aplicaA: s.aplicaA,
-        activo: true,
-      });
-    }
+    await Promise.all(
+      serviciosDemo.map(s =>
+        db.insert(servicios).values({
+          sucursalId,
+          nombre: s.nombre,
+          descripcion: s.descripcion,
+          precio: s.precio,
+          duracionMin: s.duracionMin,
+          categoriaId: s.categoriaId,
+          aplicaA: s.aplicaA,
+          activo: true,
+        })
+      )
+    );
 
+    revalidateTag("servicios", { expire: 3600 });
     revalidatePath("/servicios");
     return { success: true };
   } catch (error: unknown) {
     console.error("Error al cargar demo:", error);
     return { success: false, error: getErrorMessage(error, "Error al cargar los datos de prueba") };
+  }
+}
+
+export async function getRecetaServicio(servicioId: string) {
+  try {
+    await getSessionOrThrow({ modulo: "servicios", accion: "ver" });
+
+    const receta = await db
+      .select({
+        id: servicioRecetas.id,
+        itemId: servicioRecetas.itemId,
+        itemNombre: inventario.nombre,
+        unidad: inventario.unidad,
+        cantidadConsumo: servicioRecetas.cantidadConsumo,
+      })
+      .from(servicioRecetas)
+      .innerJoin(inventario, eq(servicioRecetas.itemId, inventario.id))
+      .where(eq(servicioRecetas.servicioId, servicioId));
+
+    return receta;
+  } catch (error) {
+    console.error("Error al obtener receta del servicio:", error);
+    return [];
+  }
+}
+
+export async function asignarRecetaServicio(
+  servicioId: string,
+  items: { itemId: string; cantidadConsumo: string }[]
+) {
+  try {
+    await getSessionOrThrow({ modulo: "servicios", accion: "gestionar" });
+
+    // 1. Limpiar receta anterior
+    await db
+      .delete(servicioRecetas)
+      .where(eq(servicioRecetas.servicioId, servicioId));
+
+    // 2. Insertar nuevos insumos de receta
+    if (items.length > 0) {
+      await db.insert(servicioRecetas).values(
+        items.map((i) => ({
+          servicioId,
+          itemId: i.itemId,
+          cantidadConsumo: i.cantidadConsumo,
+        }))
+      );
+    }
+
+    revalidateTag("servicios", { expire: 3600 });
+    revalidatePath("/servicios");
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error, "Error al guardar la receta") };
   }
 }

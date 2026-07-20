@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Wallet } from "lucide-react";
 import { abrirTurnoCaja } from "@/lib/actions/caja";
 import { toast } from "sonner";
@@ -46,8 +46,9 @@ interface CajaClientProps {
 }
 
 export function CajaClient({ turnoActivo, initialHistorial }: CajaClientProps) {
-  const [turno, setTurno] = useState<TurnoActivo | null>(turnoActivo);
-  const [historial, setHistorial] = useState<TurnoHistorial[]>(initialHistorial);
+  // Se usa el prop directamente (nunca se modifica localmente)
+  const turno = turnoActivo;
+  const historial = initialHistorial;
   const [isPending, startTransition] = useTransition();
 
   // Acción: Abrir Caja

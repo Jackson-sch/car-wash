@@ -3,18 +3,21 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/variants";
 import { Card } from "@/components/ui/card";
 import { 
   ArrowLeft, 
   Mail, 
   Phone, 
-  Calendar, 
-  User, 
-  Briefcase 
+  Calendar 
 } from "lucide-react";
 import { EmployeeKpis } from "./components/EmployeeKpis";
-import { ProductivityChart } from "./components/ProductivityChart";
+import dynamic from "next/dynamic";
+
+const ProductivityChart = dynamic(
+  () => import("./components/ProductivityChart").then((m) => ({ default: m.ProductivityChart })),
+  { ssr: false }
+);
 import { RecentOrdersList } from "./components/RecentOrdersList";
 
 interface Empleado {

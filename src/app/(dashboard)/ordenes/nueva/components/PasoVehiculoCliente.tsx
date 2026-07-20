@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { Car, User, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ interface PasoVehiculoClienteProps {
   setClienteTelefono: (v: string) => void;
   clienteEmail: string;
   setClienteEmail: (v: string) => void;
-  sucursalConfig: Record<string, any>;
+  sucursalConfig: { multipliers?: Record<string, number> };
 }
 
 const defaultMultipliers: Record<string, number> = {
@@ -74,8 +74,20 @@ export function PasoVehiculoCliente({
   sucursalConfig,
 }: PasoVehiculoClienteProps) {
   
+  interface VehiculoSearchResult {
+    placa: string;
+    tipo: string | null;
+    marca: string | null;
+    modelo: string | null;
+    color: string | null;
+    clienteNombre: string;
+    clienteApellido: string | null;
+    clienteTelefono: string | null;
+    clienteEmail: string | null;
+  }
+
   const [isSearching, setIsSearching] = useState(false);
-  const [vehiculoEncontrado, setVehiculoEncontrado] = useState<any>(null);
+  const [vehiculoEncontrado, setVehiculoEncontrado] = useState<VehiculoSearchResult | null>(null);
   const [lastAutoFilledPlaca, setLastAutoFilledPlaca] = useState("");
 
   const dbMultipliers = sucursalConfig.multipliers || {};
@@ -83,9 +95,11 @@ export function PasoVehiculoCliente({
   useEffect(() => {
     const cleanPlaca = placa.trim();
     if (cleanPlaca.length < 3) {
-      setVehiculoEncontrado(null);
-      setIsSearching(false);
-      setLastAutoFilledPlaca("");
+      startTransition(() => {
+        setVehiculoEncontrado(null);
+        setIsSearching(false);
+        setLastAutoFilledPlaca("");
+      });
       return;
     }
 
@@ -96,7 +110,7 @@ export function PasoVehiculoCliente({
         if (res) {
           setVehiculoEncontrado(res);
           if (cleanPlaca !== lastAutoFilledPlaca) {
-            setVehiculoTipo(res.tipo as any);
+            setVehiculoTipo((res.tipo ?? "sedan") as VehiculoTipo);
             setVehiculoMarca(res.marca || "");
             setVehiculoModelo(res.modelo || "");
             setVehiculoColor(res.color || "");

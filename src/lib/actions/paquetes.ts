@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { paquetes, paqueteServicios, servicios } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 export async function getPaquetes() {
@@ -96,6 +96,7 @@ export async function createPaquete(data: {
       );
     }
 
+    revalidateTag("paquetes", { expire: 3600 });
     revalidatePath("/paquetes");
     return { success: true, data: paquete };
   } catch (error: unknown) {
@@ -141,6 +142,7 @@ export async function updatePaquete(
       }
     }
 
+    revalidateTag("paquetes", { expire: 3600 });
     revalidatePath("/paquetes");
     return { success: true, data: updated };
   } catch (error: unknown) {
@@ -167,6 +169,7 @@ export async function togglePaqueteStatus(id: string) {
       .set({ activo: !existing.activo })
       .where(eq(paquetes.id, id));
 
+    revalidateTag("paquetes", { expire: 3600 });
     revalidatePath("/paquetes");
     return { success: true };
   } catch (error: unknown) {
@@ -185,6 +188,7 @@ export async function deletePaquete(id: string) {
       .set({ activo: false })
       .where(and(eq(paquetes.id, id), eq(paquetes.sucursalId, sucursalId)));
 
+    revalidateTag("paquetes", { expire: 3600 });
     revalidatePath("/paquetes");
     return { success: true };
   } catch (error: unknown) {

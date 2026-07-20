@@ -120,38 +120,41 @@ async function main() {
 
     // --- 2. SUCURSALES ---
     console.log("🌱 Sembrando sucursales...");
-    const [sucursalMiraflores] = await db.insert(schema.sucursales).values({
-      empresaId: empresaDefault.id,
-      nombre: "Sucursal Lima - Miraflores",
-      direccion: "Av. Santa Cruz 830, Miraflores, Lima",
-      telefono: "01-4456789",
-      email: "miraflores@carwashpro.pe",
-      ruc: "20123456789",
-      config: { igv: 18, moneda: "PEN", esPrincipal: true },
-      activa: true,
-    }).returning();
-
-    const [sucursalSurco] = await db.insert(schema.sucursales).values({
-      empresaId: empresaDefault.id,
-      nombre: "Sucursal Lima - Surco",
-      direccion: "Av. Primavera 1240, Santiago de Surco, Lima",
-      telefono: "01-3728956",
-      email: "surco@carwashpro.pe",
-      ruc: "20123456780",
-      config: { igv: 18, moneda: "PEN", esPrincipal: false },
-      activa: true,
-    }).returning();
-
-    const [sucursalSanIsidro] = await db.insert(schema.sucursales).values({
-      empresaId: empresaDefault.id,
-      nombre: "Sucursal Lima - San Isidro",
-      direccion: "Av. Javier Prado Oeste 1150, San Isidro, Lima",
-      telefono: "01-4219854",
-      email: "sanisidro@carwashpro.pe",
-      ruc: "20123456781",
-      config: { igv: 18, moneda: "PEN", esPrincipal: false },
-      activa: true,
-    }).returning();
+    const [miraResult, surcoResult, siResult] = await Promise.all([
+      db.insert(schema.sucursales).values({
+        empresaId: empresaDefault.id,
+        nombre: "Sucursal Lima - Miraflores",
+        direccion: "Av. Santa Cruz 830, Miraflores, Lima",
+        telefono: "01-4456789",
+        email: "miraflores@carwashpro.pe",
+        ruc: "20123456789",
+        config: { igv: 18, moneda: "PEN", esPrincipal: true },
+        activa: true,
+      }).returning(),
+      db.insert(schema.sucursales).values({
+        empresaId: empresaDefault.id,
+        nombre: "Sucursal Lima - Surco",
+        direccion: "Av. Primavera 1240, Santiago de Surco, Lima",
+        telefono: "01-3728956",
+        email: "surco@carwashpro.pe",
+        ruc: "20123456780",
+        config: { igv: 18, moneda: "PEN", esPrincipal: false },
+        activa: true,
+      }).returning(),
+      db.insert(schema.sucursales).values({
+        empresaId: empresaDefault.id,
+        nombre: "Sucursal Lima - San Isidro",
+        direccion: "Av. Javier Prado Oeste 1150, San Isidro, Lima",
+        telefono: "01-4219854",
+        email: "sanisidro@carwashpro.pe",
+        ruc: "20123456781",
+        config: { igv: 18, moneda: "PEN", esPrincipal: false },
+        activa: true,
+      }).returning(),
+    ]);
+    const [sucursalMiraflores] = miraResult;
+    const [sucursalSurco] = surcoResult;
+    const [sucursalSanIsidro] = siResult;
 
     // --- 3. USUARIOS ---
     console.log("🌱 Sembrando usuarios...");
@@ -339,24 +342,24 @@ async function main() {
       },
     ];
 
-    for (const u of usersData) {
-      await db.insert(schema.usuarios).values(u);
-    }
+    await Promise.all(usersData.map(u => db.insert(schema.usuarios).values(u)));
 
     // --- 3.5. CUENTAS (PASSWORDS) ---
     console.log("🔑 Sembrando contraseñas para usuarios...");
     const defaultPassword = "CarWash2026!";
     const hashedPassword = await hashPassword(defaultPassword);
 
-    for (const u of usersData) {
-      await db.insert(schema.cuentas).values({
-        id: `acc_${u.id}`,
-        accountId: u.id,
-        providerId: "credential",
-        userId: u.id,
-        password: hashedPassword,
-      });
-    }
+    await Promise.all(
+      usersData.map(u =>
+        db.insert(schema.cuentas).values({
+          id: `acc_${u.id}`,
+          accountId: u.id,
+          providerId: "credential",
+          userId: u.id,
+          password: hashedPassword,
+        })
+      )
+    );
 
     // --- 4. CLIENTES ---
     console.log("🌱 Sembrando clientes...");
@@ -388,11 +391,9 @@ async function main() {
       { sucursalId: sucursalSanIsidro.id, nombre: "Víctor", apellido: "Solís", telefono: "980819265", email: "vsolis@gmail.com", tipoDoc: "DNI" as const, nroDoc: "12345670" },
     ];
 
-    const insertedClientes: any[] = [];
-    for (const c of clientesData) {
-      const [inserted] = await db.insert(schema.clientes).values(c).returning();
-      insertedClientes.push(inserted);
-    }
+    const insertedClientes = await Promise.all(
+      clientesData.map(c => db.insert(schema.clientes).values(c).returning().then(r => r[0]))
+    );
 
     // --- 5. VEHÍCULOS ---
     console.log("🌱 Sembrando vehículos...");
@@ -421,29 +422,41 @@ async function main() {
       { clienteId: insertedClientes[19].id, placa: "S4D-999", marca: "Subaru", modelo: "Impreza", anio: 2018, color: "Azul", tipo: "sedan" as const }
     ];
 
-    const insertedVehiculos: any[] = [];
-    for (const v of vehiculosData) {
-      const [inserted] = await db.insert(schema.vehiculos).values(v).returning();
-      insertedVehiculos.push(inserted);
-    }
+    const insertedVehiculos = await Promise.all(
+      vehiculosData.map(v => db.insert(schema.vehiculos).values(v).returning().then(r => r[0]))
+    );
 
     // --- 6. CATEGORÍAS DE SERVICIO ---
     console.log("🌱 Sembrando categorías de servicio...");
-    // Miraflores
-    const [catLavado] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Lavado Básico", orden: 1 }).returning();
-    const [catEstetica] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Estética y Pulido", orden: 2 }).returning();
-    const [catTratamientos] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Tratamientos Especiales", orden: 3 }).returning();
-    const [catInterior] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Servicios de Interior", orden: 4 }).returning();
-
-    // Surco
-    const [catLavadoSurco] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSurco.id, nombre: "Lavado Básico", orden: 1 }).returning();
-    const [catEsteticaSurco] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSurco.id, nombre: "Estética y Pulido", orden: 2 }).returning();
-    const [catTratamientosSurco] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSurco.id, nombre: "Tratamientos Especiales", orden: 3 }).returning();
-
-    // San Isidro
-    const [catLavadoSI] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSanIsidro.id, nombre: "Lavado Básico", orden: 1 }).returning();
-    const [catEsteticaSI] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSanIsidro.id, nombre: "Estética y Pulido", orden: 2 }).returning();
-    const [catTratamientosSI] = await db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSanIsidro.id, nombre: "Tratamientos Especiales", orden: 3 }).returning();
+    // Miraflores + Surco + San Isidro en paralelo
+    const [catMiraRes, catSurcoRes, catSIRes] = await Promise.all([
+      Promise.all([
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Lavado Básico", orden: 1 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Estética y Pulido", orden: 2 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Tratamientos Especiales", orden: 3 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalMiraflores.id, nombre: "Servicios de Interior", orden: 4 }).returning(),
+      ]),
+      Promise.all([
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSurco.id, nombre: "Lavado Básico", orden: 1 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSurco.id, nombre: "Estética y Pulido", orden: 2 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSurco.id, nombre: "Tratamientos Especiales", orden: 3 }).returning(),
+      ]),
+      Promise.all([
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSanIsidro.id, nombre: "Lavado Básico", orden: 1 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSanIsidro.id, nombre: "Estética y Pulido", orden: 2 }).returning(),
+        db.insert(schema.categoriasServicio).values({ sucursalId: sucursalSanIsidro.id, nombre: "Tratamientos Especiales", orden: 3 }).returning(),
+      ]),
+    ]);
+    const [catLavado] = catMiraRes[0];
+    const [catEstetica] = catMiraRes[1];
+    const [catTratamientos] = catMiraRes[2];
+    const [catInterior] = catMiraRes[3];
+    const [catLavadoSurco] = catSurcoRes[0];
+    const [catEsteticaSurco] = catSurcoRes[1];
+    const [catTratamientosSurco] = catSurcoRes[2];
+    const [catLavadoSI] = catSIRes[0];
+    const [catEsteticaSI] = catSIRes[1];
+    const [catTratamientosSI] = catSIRes[2];
 
     // --- 7. SERVICIOS ---
     console.log("🌱 Sembrando servicios...");
@@ -477,11 +490,9 @@ async function main() {
       { sucursalId: sucursalSanIsidro.id, categoriaId: catTratamientosSI.id, nombre: "Tratamiento Cerámico 9H", descripcion: "Corrección en 2 pasos + Sellador cerámico de alta repelencia", precio: "750.00", duracionMin: 480, aplicaA: ["sedan", "suv", "pickup"] },
     ];
 
-    const insertedServicios = [];
-    for (const s of serviciosData) {
-      const [inserted] = await db.insert(schema.servicios).values(s).returning();
-      insertedServicios.push(inserted);
-    }
+    const insertedServicios = await Promise.all(
+      serviciosData.map(s => db.insert(schema.servicios).values(s).returning().then(r => r[0]))
+    );
 
     // Filtros de servicios para Miraflores (usado para paquetes y bucle)
     const miraServicios = insertedServicios.filter(s => s.sucursalId === sucursalMiraflores.id);
@@ -491,29 +502,32 @@ async function main() {
     // --- 8. PAQUETES ---
     console.log("🌱 Sembrando paquetes...");
     // Miraflores
-    const [paqueteFull] = await db.insert(schema.paquetes).values({
-      sucursalId: sucursalMiraflores.id,
-      nombre: "Combo Brillo Extremo",
-      descripcion: "Lavado Premium + Encerado Orbital con Carnauba",
-      precio: "125.00",
-      activo: true,
-    }).returning();
-
-    const [paqueteSalonMotor] = await db.insert(schema.paquetes).values({
-      sucursalId: sucursalMiraflores.id,
-      nombre: "Combo Renovación Total",
-      descripcion: "Lavado de Salón + Lavado de Motor + Encerado Orbital",
-      precio: "350.00",
-      activo: true,
-    }).returning();
-
-    const [paqueteProtector] = await db.insert(schema.paquetes).values({
-      sucursalId: sucursalMiraflores.id,
-      nombre: "Combo Protector Interior",
-      descripcion: "Lavado Premium + Desinfección con Ozono y Vapor",
-      precio: "85.00",
-      activo: true,
-    }).returning();
+    const [paqRes1, paqRes2, paqRes3] = await Promise.all([
+      db.insert(schema.paquetes).values({
+        sucursalId: sucursalMiraflores.id,
+        nombre: "Combo Brillo Extremo",
+        descripcion: "Lavado Premium + Encerado Orbital con Carnauba",
+        precio: "125.00",
+        activo: true,
+      }).returning(),
+      db.insert(schema.paquetes).values({
+        sucursalId: sucursalMiraflores.id,
+        nombre: "Combo Renovación Total",
+        descripcion: "Lavado de Salón + Lavado de Motor + Encerado Orbital",
+        precio: "350.00",
+        activo: true,
+      }).returning(),
+      db.insert(schema.paquetes).values({
+        sucursalId: sucursalMiraflores.id,
+        nombre: "Combo Protector Interior",
+        descripcion: "Lavado Premium + Desinfección con Ozono y Vapor",
+        precio: "85.00",
+        activo: true,
+      }).returning(),
+    ]);
+    const [paqueteFull] = paqRes1;
+    const [paqueteSalonMotor] = paqRes2;
+    const [paqueteProtector] = paqRes3;
 
     // --- 9. RELACIONES PAQUETE-SERVICIOS ---
     console.log("🌱 Enlazando paquete-servicios...");
@@ -590,27 +604,30 @@ async function main() {
       }
     ];
 
-    const insertedItems: any[] = [];
-    for (const item of itemsInventario) {
-      const [inserted] = await db.insert(schema.inventario).values(item).returning();
-      insertedItems.push(inserted);
-    }
+    const insertedItems = await Promise.all(
+      itemsInventario.map(item => db.insert(schema.inventario).values(item).returning().then(r => r[0]))
+    );
 
-    // Registrar compras iniciales (movimiento entrada)
-    for (const item of insertedItems) {
-      await db.insert(schema.inventarioMovimientos).values({
-        itemId: item.id,
-        tipo: "entrada" as const,
-        cantidad: "25.000",
-        motivo: "Compra e ingreso inicial del almacén central",
-        usuarioId: "usr_admin",
-        createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) // Hace 8 días
-      });
-    }
+    // Registrar compras iniciales (movimiento entrada) en paralelo
+    await Promise.all(
+      insertedItems.map(item =>
+        db.insert(schema.inventarioMovimientos).values({
+          itemId: item.id,
+          tipo: "entrada" as const,
+          cantidad: "25.000",
+          motivo: "Compra e ingreso inicial del almacén central",
+          usuarioId: "usr_admin",
+          createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) // Hace 8 días
+        })
+      )
+    );
 
 
     // --- 11. GENERACIÓN DINÁMICA DE HISTORIAL DE 8 DÍAS ---
     console.log("🌱 Generando historial financiero de 8 días...");
+
+    // Build lookup maps once to avoid O(n²) repeated property access in loops
+    const clienteSucursalMap = new Map(insertedClientes.map(c => [c.id, c.sucursalId]));
 
     const sucursalesList = [
       {
@@ -619,7 +636,7 @@ async function main() {
         lavadores: ["usr_lavador_mira1", "usr_lavador_mira2", "usr_lavador_mira3"],
         servicios: miraServicios,
         clientes: insertedClientes.filter(c => c.sucursalId === sucursalMiraflores.id),
-        vehiculos: insertedVehiculos.filter(v => insertedClientes.find(c => c.id === v.clienteId)?.sucursalId === sucursalMiraflores.id),
+        vehiculos: insertedVehiculos.filter(v => clienteSucursalMap.get(v.clienteId) === sucursalMiraflores.id),
         ticketPrefix: "T-MIRA"
       },
       {
@@ -628,7 +645,7 @@ async function main() {
         lavadores: ["usr_lavador_surco1", "usr_lavador_surco2", "usr_lavador_surco3"],
         servicios: surcoServicios,
         clientes: insertedClientes.filter(c => c.sucursalId === sucursalSurco.id),
-        vehiculos: insertedVehiculos.filter(v => insertedClientes.find(c => c.id === v.clienteId)?.sucursalId === sucursalSurco.id),
+        vehiculos: insertedVehiculos.filter(v => clienteSucursalMap.get(v.clienteId) === sucursalSurco.id),
         ticketPrefix: "T-SURC"
       },
       {
@@ -637,7 +654,7 @@ async function main() {
         lavadores: ["usr_lavador_sanisidro1", "usr_lavador_sanisidro2"],
         servicios: siServicios,
         clientes: insertedClientes.filter(c => c.sucursalId === sucursalSanIsidro.id),
-        vehiculos: insertedVehiculos.filter(v => insertedClientes.find(c => c.id === v.clienteId)?.sucursalId === sucursalSanIsidro.id),
+        vehiculos: insertedVehiculos.filter(v => clienteSucursalMap.get(v.clienteId) === sucursalSanIsidro.id),
         ticketPrefix: "T-SANI"
       }
     ];
@@ -650,7 +667,6 @@ async function main() {
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() - dayOffset);
       
-      const dateString = targetDate.toDateString();
       console.log(`  📅 Procesando día: ${targetDate.toLocaleDateString('es-PE')} (${isToday ? 'Hoy' : 'Historial'})`);
 
       for (const branch of sucursalesList) {
@@ -662,9 +678,20 @@ async function main() {
         const montoInicial = "200.00";
         let totalCajaDia = parseFloat(montoInicial);
 
+        // Cache repeated property accesses for loop performance
+        const branchId = branch.info.id;
+        const branchVehiculos = branch.vehiculos;
+        const branchLavadores = branch.lavadores;
+        const branchServicios = branch.servicios;
+        const branchTicketPrefix = branch.ticketPrefix;
+        const branchCajeroId = branch.cajeroId;
+        const branchVehiculosLen = branchVehiculos.length;
+        const branchLavadoresLen = branchLavadores.length;
+        const branchServiciosLen = branchServicios.length;
+
         const [turno] = await db.insert(schema.turnosCaja).values({
-          sucursalId: branch.info.id,
-          empleadoId: branch.cajeroId,
+          sucursalId: branchId,
+          empleadoId: branchCajeroId,
           apertura: aperturaTime,
           montoInicial: montoInicial,
           observaciones: isToday ? "Turno activo de hoy" : `Cierre diario consolidado para el ${targetDate.toLocaleDateString()}`,
@@ -681,10 +708,10 @@ async function main() {
           orderTime.setHours(9 + Math.floor(Math.random() * 9), Math.floor(Math.random() * 60), 0);
 
           // Seleccionar vehículo y lavador
-          const vehiculo = branch.vehiculos[Math.floor(Math.random() * branch.vehiculos.length)];
+          const vehiculo = branchVehiculos[Math.floor(Math.random() * branchVehiculosLen)];
           if (!vehiculo) continue;
           
-          const lavadorId = branch.lavadores[Math.floor(Math.random() * branch.lavadores.length)];
+          const lavadorId = branchLavadores[Math.floor(Math.random() * branchLavadoresLen)];
 
           // Determinar estado de la orden
           let estado: "pendiente" | "en_proceso" | "completado" | "cobrado" | "cancelado" = "cobrado";
@@ -704,10 +731,13 @@ async function main() {
 
           // Seleccionar 1 o 2 servicios
           const cantServicios = Math.random() < 0.85 ? 1 : 2;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const selectedServs: any[] = [];
+          const selectedServsSet = new Set<string>();
           for (let sIdx = 0; sIdx < cantServicios; sIdx++) {
-            const serv = branch.servicios[Math.floor(Math.random() * branch.servicios.length)];
-            if (serv && !selectedServs.includes(serv)) {
+            const serv = branchServicios[Math.floor(Math.random() * branchServiciosLen)];
+            if (serv && !selectedServsSet.has(serv.id)) {
+              selectedServsSet.add(serv.id);
               selectedServs.push(serv);
             }
           }
@@ -721,14 +751,12 @@ async function main() {
           }
 
           // Si es Miraflores y se puede agrupar como paquete, a veces simular el paquete
-          let nombreTicketServicio = selectedServs[0].nombre;
           let esPaquete = false;
           let paqueteIdRef = null;
 
-          if (branch.info.id === sucursalMiraflores.id && selectedServs.length === 2 && Math.random() < 0.5) {
+          if (branchId === sucursalMiraflores.id && selectedServs.length === 2 && Math.random() < 0.5) {
             // Cambiar a precio Combo Brillo Extremo
             subtotal = 125.00;
-            nombreTicketServicio = "Combo Brillo Extremo";
             esPaquete = true;
             paqueteIdRef = paqueteFull.id;
           }
@@ -740,18 +768,18 @@ async function main() {
 
           // Crear la orden
           const [orden] = await db.insert(schema.ordenes).values({
-            sucursalId: branch.info.id,
+            sucursalId: branchId,
             turnoId: turno.id,
             vehiculoId: vehiculo.id,
             empleadoId: estado === "pendiente" ? null : lavadorId,
-            cajeroId: branch.cajeroId,
+            cajeroId: branchCajeroId,
             estado: estado,
             prioridad: Math.random() < 0.2 ? 1 : 0,
             subtotal: subtotal.toFixed(2),
             descuento: descuento.toFixed(2),
             igv: igv.toFixed(2),
             total: total.toFixed(2),
-            nroTicket: `${branch.ticketPrefix}-${ticketCounter}`,
+            nroTicket: `${branchTicketPrefix}-${ticketCounter}`,
             notas: estado === "cancelado" ? "Cancelado por el cliente por demora" : undefined,
             createdAt: orderTime,
             updatedAt: orderTime
@@ -780,17 +808,19 @@ async function main() {
               createdAt: orderTime
             });
           } else {
-            for (const s of selectedServs) {
-              await db.insert(schema.ordenServicios).values({
-                ordenId: orden.id,
-                servicioId: s.id,
-                nombreServicio: s.nombre,
-                precioUnitario: s.precio,
-                cantidad: 1,
-                subtotal: s.precio,
-                createdAt: orderTime
-              });
-            }
+            await Promise.all(
+              selectedServs.map(s =>
+                db.insert(schema.ordenServicios).values({
+                  ordenId: orden.id,
+                  servicioId: s.id,
+                  nombreServicio: s.nombre,
+                  precioUnitario: s.precio,
+                  cantidad: 1,
+                  subtotal: s.precio,
+                  createdAt: orderTime
+                })
+              )
+            );
           }
 
           // Si está cobrado, agregar pago e historial de fidelidad
@@ -799,12 +829,12 @@ async function main() {
             const metodoPago = pagoMetodos[Math.floor(Math.random() * pagoMetodos.length)];
             
             await db.insert(schema.pagos).values({
-              ordenId: orden.id,
-              turnoId: turno.id,
-              metodo: metodoPago,
-              monto: total.toFixed(2),
-              referencia: metodoPago !== "efectivo" ? `OP-${Math.floor(100000 + Math.random() * 900000)}` : null,
-              cajeroId: branch.cajeroId,
+            ordenId: orden.id,
+            turnoId: turno.id,
+            metodo: metodoPago,
+            monto: total.toFixed(2),
+            referencia: metodoPago !== "efectivo" ? `OP-${Math.floor(100000 + Math.random() * 900000)}` : null,
+            cajeroId: branchCajeroId,
               createdAt: new Date(orderTime.getTime() + 15 * 60 * 1000) // 15 minutos después
             });
 
@@ -825,7 +855,7 @@ async function main() {
           }
 
           // Simular consumo de insumos de inventario de manera aleatoria por cada lavado simple/premium
-          if (branch.info.id === sucursalMiraflores.id && estado === "cobrado") {
+          if (branchId === sucursalMiraflores.id && estado === "cobrado") {
             const itemShampoo = insertedItems[0];
             const itemMicrofibra = insertedItems[1];
 

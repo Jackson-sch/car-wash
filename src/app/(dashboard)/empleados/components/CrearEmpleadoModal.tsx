@@ -65,8 +65,8 @@ export function CrearEmpleadoModal({ isOpen, onClose, isPending, onSave }: Crear
             <h3 className="text-base font-bold text-foreground">Registrar Nuevo Personal</h3>
             <p className="text-xs text-muted-foreground mt-1">Completa los datos del nuevo miembro del equipo.</p>
           </div>
-          <button
-            onClick={onClose}
+          <button type="button" onClick={onClose}
+            aria-label="Cerrar"
             className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center"
           >
             <X className="h-4 w-4" />
@@ -129,7 +129,7 @@ export function CrearEmpleadoModal({ isOpen, onClose, isPending, onSave }: Crear
               <Label htmlFor="empRol" className="text-xs font-bold text-muted-foreground">Rol Asignado</Label>
               <Select
                 value={rol}
-                onValueChange={(val: string | null) => val && setRol(val as any)}
+                onValueChange={(val: string | null) => val && setRol(val as "admin" | "supervisor" | "cajero" | "lavador")}
               >
                 <SelectTrigger id="empRol" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-9 px-3">
                   <SelectValue>

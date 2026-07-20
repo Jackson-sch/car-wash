@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,8 +13,8 @@ import {
 } from "@/components/ui/sheet";
 import { createPaquete, updatePaquete } from "@/lib/actions/paquetes";
 import { toast } from "sonner";
-import { formatCurrency } from "@/lib/formats";
-import { PaqueteItem, ServicioOption, PaqueteFormData } from "./types";
+import type { PaqueteItem, ServicioOption, PaqueteFormData } from "./types";
+import { ServicioSelector } from "./ServicioSelector";
 
 interface PaqueteFormSheetProps {
   isOpen: boolean;
@@ -41,23 +40,19 @@ export function PaqueteFormSheet({
   servicios,
   onSuccess,
 }: PaqueteFormSheetProps) {
-  const [form, setForm] = useState<PaqueteFormData>(emptyForm);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (editingId && initialData) {
-        setForm({
-          nombre: initialData.nombre,
-          descripcion: initialData.descripcion || "",
-          precio: initialData.precio,
-          servicioIds: initialData.servicios.map((s) => s.id),
-        });
-      } else {
-        setForm(emptyForm);
-      }
+  // La inicialización se maneja con key en el padre, forzando remount
+  const [form, setForm] = useState<PaqueteFormData>(() => {
+    if (editingId && initialData) {
+      return {
+        nombre: initialData.nombre,
+        descripcion: initialData.descripcion || "",
+        precio: initialData.precio,
+        servicioIds: initialData.servicios.map((s) => s.id),
+      };
     }
-  }, [isOpen, editingId, initialData]);
+    return emptyForm;
+  });
+  const [saving, setSaving] = useState(false);
 
   const toggleServicio = (id: string) => {
     setForm((prev) => ({
@@ -138,46 +133,13 @@ export function PaqueteFormSheet({
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label>Servicios Incluidos</Label>
-            <p className="text-xs text-muted-foreground">
-              Selecciona los servicios que forman parte de este paquete.
-            </p>
-            <div className="space-y-2 max-h-80 overflow-y-auto border border-border rounded-lg p-3">
-              {servicios
-                .filter((s) => s.nombre)
-                .map((s) => (
-                  <label
-                    key={s.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                  >
-                    <div
-                      className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
-                        form.servicioIds.includes(s.id)
-                          ? "bg-primary border-primary text-primary-foreground"
-                          : "border-muted-foreground/30"
-                      }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        toggleServicio(s.id);
-                      }}
-                    >
-                      {form.servicioIds.includes(s.id) && <Check className="h-3 w-3" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{s.nombre}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatCurrency(parseFloat(s.precio))}
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              {servicios.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No hay servicios disponibles
-                </p>
-              )}
-            </div>
+            <ServicioSelector
+              servicios={servicios}
+              selectedIds={form.servicioIds}
+              onToggle={toggleServicio}
+            />
           </div>
         </div>
 

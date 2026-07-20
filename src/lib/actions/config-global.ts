@@ -17,7 +17,7 @@ async function verifySuperAdminSession() {
   return session;
 }
 
-export async function getConfigGlobal() {
+async function _getConfigGlobal() {
   try {
     await verifySuperAdminSession();
 

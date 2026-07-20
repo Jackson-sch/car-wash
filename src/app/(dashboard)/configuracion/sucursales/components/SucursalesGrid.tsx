@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { switchActiveBranch } from "@/lib/actions/branch-switcher";
 import { toast } from "sonner";
-import { SucursalItem } from "./types";
+import type { SucursalItem } from "./types";
 
 interface SucursalesGridProps {
   data: SucursalItem[];
@@ -47,7 +47,7 @@ export function SucursalesGrid({
   if (data.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-20 bg-card border border-border rounded-2xl p-8 shadow-sm">
-        <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-bounce duration-1000" />
+        <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse duration-2000" />
         <p className="font-bold text-lg text-foreground">
           {searchQuery ? "Sin resultados para tu búsqueda" : "No hay sucursales registradas"}
         </p>

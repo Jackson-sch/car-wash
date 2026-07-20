@@ -4,7 +4,12 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { KpiGrid } from "./components/KpiGrid";
-import { SalesTrendChart } from "./components/SalesTrendChart";
+import dynamic from "next/dynamic";
+
+const SalesTrendChart = dynamic(
+  () => import("./components/SalesTrendChart").then((m) => ({ default: m.SalesTrendChart })),
+  { ssr: false }
+);
 import { OrdenesColaTable } from "./components/OrdenesColaTable";
 import { TurnoCajaPanel } from "./components/TurnoCajaPanel";
 import { DashboardViewSelector } from "./components/DashboardViewSelector";
@@ -60,6 +65,7 @@ interface DashboardClientProps {
   sucursalesResumen?: SucursalResumen[];
   sucursales?: SucursalInfo[];
   currentBranch?: SucursalInfo | null;
+  userRol?: string;
 }
 
 export function DashboardClient({
@@ -71,9 +77,10 @@ export function DashboardClient({
   sucursalesResumen,
   sucursales,
   currentBranch,
+  userRol: serverUserRol,
 }: DashboardClientProps) {
   const { data: session } = useSession();
-  const userRol = session?.user?.rol;
+  const userRol = serverUserRol || session?.user?.rol;
   const showSelector = userRol === "admin" || userRol === "superadmin";
 
   return (

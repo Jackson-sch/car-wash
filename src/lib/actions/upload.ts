@@ -3,6 +3,7 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { getSessionOrThrow } from "./servicios";
 
 function generateSignature(params: Record<string, string>, apiSecret: string) {
   const sortedKeys = Object.keys(params).sort();
@@ -12,6 +13,8 @@ function generateSignature(params: Record<string, string>, apiSecret: string) {
 
 export async function uploadLogoAction(formData: FormData) {
   try {
+    await getSessionOrThrow();
+
     const file = formData.get("file") as File;
     if (!file) {
       return { success: false, error: "No se proporcionó ningún archivo" };
@@ -24,7 +27,7 @@ export async function uploadLogoAction(formData: FormData) {
     const hasCloudinary = cloudName && apiKey && apiSecret;
 
     if (hasCloudinary) {
-      console.log("Subiendo archivo a Cloudinary...");
+
       const timestamp = Math.round(new Date().getTime() / 1000).toString();
       const params = {
         folder: "carwash_logos",
@@ -53,7 +56,7 @@ export async function uploadLogoAction(formData: FormData) {
       const result = await response.json();
       return { success: true, url: result.secure_url };
     } else {
-      console.log("Cloudinary no configurado. Guardando archivo localmente...");
+
       const uploadsDir = path.join(process.cwd(), "public", "uploads", "logo");
       await mkdir(uploadsDir, { recursive: true });
 
@@ -68,8 +71,8 @@ export async function uploadLogoAction(formData: FormData) {
       const url = `/uploads/logo/${fileName}`;
       return { success: true, url };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en uploadLogoAction:", error);
-    return { success: false, error: error.message || "Error al procesar el archivo" };
+    return { success: false, error: error instanceof Error ? error.message : "Error al procesar el archivo" };
   }
 }

@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import { planes } from "@/lib/db/schema";
 import { PlanesClient } from "./planes-client";
 
-export const dynamic = "force-dynamic";
 
 export default async function SuperAdminPlanesPage() {
   const raw = await db.select().from(planes).orderBy(planes.precio);

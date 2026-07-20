@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Save, Building, MapPin, Phone, Mail, Hash, Image } from "lucide-react";
+import { useReducer, useRef, useEffect } from "react";
+import { Save, Building, MapPin, Phone, Mail, Hash, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,18 +32,67 @@ interface GeneralPanelProps {
   }) => Promise<void>;
 }
 
+type FormState = {
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  email: string;
+  ruc: string;
+  logoUrl: string;
+};
+
+type FormAction =
+  | { type: "SET_FIELD"; field: keyof FormState; value: string }
+  | { type: "RESET"; payload: FormState };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "RESET":
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
 export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps) {
-  const [nombre, setNombre] = useState(sucursal.nombre);
-  const [direccion, setDireccion] = useState(sucursal.direccion || "");
-  const [telefono, setTelefono] = useState(sucursal.telefono || "");
-  const [email, setEmail] = useState(sucursal.email || "");
-  const [ruc, setRuc] = useState(sucursal.ruc || "");
-  const [logoUrl, setLogoUrl] = useState(sucursal.logoUrl || "");
+  const [state, dispatch] = useReducer(
+    formReducer,
+    sucursal,
+    (s): FormState => ({
+      nombre: s.nombre,
+      direccion: s.direccion || "",
+      telefono: s.telefono || "",
+      email: s.email || "",
+      ruc: s.ruc || "",
+      logoUrl: s.logoUrl || "",
+    })
+  );
+  const prevSucursalRef = useRef(sucursal.id);
+
+  // Sincronizar cuando cambia la sucursal (ej: navegar a otra sucursal)
+  useEffect(() => {
+    if (prevSucursalRef.current !== sucursal.id) {
+      dispatch({
+        type: "RESET",
+        payload: {
+          nombre: sucursal.nombre,
+          direccion: sucursal.direccion || "",
+          telefono: sucursal.telefono || "",
+          email: sucursal.email || "",
+          ruc: sucursal.ruc || "",
+          logoUrl: sucursal.logoUrl || "",
+        },
+      });
+      prevSucursalRef.current = sucursal.id;
+    }
+  }, [sucursal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre.trim()) return;
-    await onSave({ nombre, direccion, telefono, email, ruc, logoUrl });
+    if (!state.nombre.trim()) return;
+    await onSave(state);
   };
 
   return (
@@ -68,8 +117,8 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
             </Label>
             <Input
               id="nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              value={state.nombre}
+              onChange={(e) => dispatch({ type: "SET_FIELD", field: "nombre", value: e.target.value })}
               required
               className="bg-card border-border focus:border-secondary text-sm h-10 rounded-lg"
             />
@@ -82,8 +131,8 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
             <Input
               id="ruc"
               placeholder="Ej. 20123456789"
-              value={ruc}
-              onChange={(e) => setRuc(e.target.value)}
+              value={state.ruc}
+              onChange={(e) => dispatch({ type: "SET_FIELD", field: "ruc", value: e.target.value })}
               className="bg-card border-border focus:border-secondary text-sm h-10 rounded-lg"
             />
           </div>
@@ -96,8 +145,8 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
           </Label>
           <Input
             id="direccion"
-            value={direccion}
-            onChange={(e) => setDireccion(e.target.value)}
+            value={state.direccion}
+            onChange={(e) => dispatch({ type: "SET_FIELD", field: "direccion", value: e.target.value })}
             className="bg-card border-border focus:border-secondary text-sm h-10 rounded-lg"
           />
         </div>
@@ -110,8 +159,8 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
             </Label>
             <Input
               id="telefono"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
+              value={state.telefono}
+              onChange={(e) => dispatch({ type: "SET_FIELD", field: "telefono", value: e.target.value })}
               className="bg-card border-border focus:border-secondary text-sm h-10 rounded-lg"
             />
           </div>
@@ -123,8 +172,8 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
             <Input
               id="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={state.email}
+              onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
               className="bg-card border-border focus:border-secondary text-sm h-10 rounded-lg"
             />
           </div>
@@ -132,12 +181,12 @@ export function GeneralPanel({ sucursal, isPending, onSave }: GeneralPanelProps)
 
         <div className="space-y-2">
           <Label htmlFor="logo" className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
-            <Image className="h-3.5 w-3.5" />
+            <ImageIcon className="h-3.5 w-3.5" />
             Logotipo de la Sucursal
           </Label>
           <LogoUploader
-            value={logoUrl}
-            onChange={setLogoUrl}
+            value={state.logoUrl}
+            onChange={(url) => dispatch({ type: "SET_FIELD", field: "logoUrl", value: url })}
           />
         </div>
 

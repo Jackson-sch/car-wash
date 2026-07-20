@@ -101,11 +101,11 @@ export function EmpleadosGrid({
             className="pl-9 pr-9 bg-card border-zinc-300 hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-lg"
           />
           {searchQuery && (
-            <button
-              onClick={() => {
+            <button type="button" onClick={() => {
                 setSearchQuery("");
                 setPage(null);
               }}
+              aria-label="Limpiar búsqueda"
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-4 w-4" />
@@ -171,7 +171,7 @@ export function EmpleadosGrid({
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={
-                          <button className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center cursor-pointer shrink-0 transition-colors">
+                          <button type="button" aria-label="Acciones del empleado" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center cursor-pointer shrink-0 transition-colors">
                             <MoreVertical className="h-4 w-4" />
                           </button>
                         }

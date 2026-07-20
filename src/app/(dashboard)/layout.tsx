@@ -1,66 +1,60 @@
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
-import { auth } from "@/lib/auth/config";
-import { db } from "@/lib/db";
-import { empresas, configGlobal } from "@/lib/db/schema";
+import { Suspense } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AmbientBackground } from "@/components/ui/ambient-background";
+import AuthGate from "@/components/layout/AuthGate";
+import PageSkeleton from "@/components/ui/page-skeleton";
 
-export const dynamic = "force-dynamic";
+/*
+  Layout PPR (Partial Prerendering) — verano 2026.
 
-export default async function DashboardLayout({
+  Estrategia:
+  ┌──────────────────────────────────────────────────┐
+  │ 1. SidebarProvider (estático - prerenderizado)   │
+  │ 2. Suspense boundary ─────────────────────────── │
+  │    ├─ AuthGate (dinámico - conexión deferida)    │
+  │    └─ children (streaming vía Suspense)          │
+  └──────────────────────────────────────────────────┘
+
+  El shell (SidebarProvider, estructura HTML base) se sirve
+  desde CDN inmediatamente. La autenticación se verifica en
+  el request (connection() + headers()) y el contenido
+  fluye via Suspense.
+
+  NOTA: NO usar force-dynamic. El layout contiene Suspense
+  boundaries que Next.js usa para PPR. Los componentes que
+  necesitan headers()/cookies() se encargan de deferirse.
+*/
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Verificar modo mantenimiento global
-  const [globalConfig] = await db.select().from(configGlobal).limit(1);
-  if (globalConfig?.mantenimientoActivo && session.user.rol !== "superadmin") {
-    redirect("/mantenimiento");
-  }
-
-  // Verificar que la empresa del usuario esté activa
-  if (session.user.empresaId) {
-    const [empresa] = await db
-      .select({ activo: empresas.activo })
-      .from(empresas)
-      .where(eq(empresas.id, session.user.empresaId))
-      .limit(1);
-
-    if (!empresa?.activo) {
-      redirect("/suspendido");
-    }
-  }
-
   return (
     <SidebarProvider className="h-screen overflow-hidden font-sans relative">
-      {/* Sidebar Navigation */}
-      <Sidebar userRole={session.user.rol} />
+      {/* Sidebar — estático, prerenderizado */}
+      <Sidebar />
 
-      {/* Main Content Area (Floating Inset Card) */}
+      {/* Main Content Area */}
       <SidebarInset className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10 shadow-sm">
-        {/* Header Widget */}
-        <Header />
+        {/* Header — contenido dentro de AuthGate */}
+        <Suspense fallback={<div className="h-14 border-b border-border bg-card/50" />}>
+          <AuthGate>
+            <Header />
 
-        {/* Content Page wrapper */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {/* Background soft glows */}
-          <AmbientBackground />
-          <div className="max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {children}
-          </div>
-        </main>
+            {/* Content Page wrapper */}
+            <main className="flex-1 overflow-y-auto p-6">
+              <AmbientBackground />
+              <div className="max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <Suspense fallback={<PageSkeleton />}>
+                  {children}
+                </Suspense>
+              </div>
+            </main>
+          </AuthGate>
+        </Suspense>
       </SidebarInset>
     </SidebarProvider>
   );

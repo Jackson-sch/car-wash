@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { Bell, CheckCheck, Info, AlertTriangle, CheckCircle, ExternalLink } from "lucide-react";
+import { DynamicIcon } from "@/components/ui/dynamic-icon"
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,13 +26,13 @@ interface Notificacion {
   createdAt: Date | null;
 }
 
-const TIPO_ICON: Record<string, typeof Info> = {
-  info: Info,
-  exito: CheckCircle,
-  advertencia: AlertTriangle,
-  error: AlertTriangle,
-  orden: Info,
-  pago: CheckCircle,
+const TIPO_ICON_NAME: Record<string, string> = {
+  info: "Info",
+  exito: "CheckCircle",
+  advertencia: "AlertTriangle",
+  error: "AlertTriangle",
+  orden: "Info",
+  pago: "CheckCircle",
 };
 
 const TIPO_COLOR: Record<string, string> = {
@@ -48,20 +48,20 @@ export function NotificationDropdown() {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
-    loadNotificaciones();
+    getNotificacionesNoLeidas().then((data) => {
+      startTransition(() => setNotificaciones(data));
+    });
   }, []);
 
   // Refresh on path change (e.g. after redirect from creating an order)
   useEffect(() => {
-    loadNotificaciones();
+    getNotificacionesNoLeidas().then((data) => {
+      startTransition(() => setNotificaciones(data));
+    });
   }, [pathname]);
-
-  const loadNotificaciones = async () => {
-    const data = await getNotificacionesNoLeidas();
-    setNotificaciones(data);
-  };
 
   const handleMarkRead = async (id: string) => {
     await marcarNotificacionLeida(id);
@@ -84,7 +84,7 @@ export function NotificationDropdown() {
           className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-xl cursor-pointer"
         />
       }>
-        <Bell className="h-4.5 w-4.5" />
+        <DynamicIcon name="Bell" className="h-4.5 w-4.5" />
         {noLeidas > 0 && (
           <span className="absolute top-1.5 right-1.5 h-4 min-w-4 px-1 rounded-full bg-secondary text-secondary-foreground text-[8px] font-bold flex items-center justify-center shadow-sm shadow-secondary/30">
             {noLeidas > 9 ? "9+" : noLeidas}
@@ -98,11 +98,10 @@ export function NotificationDropdown() {
         <DropdownMenuLabel className="font-bold px-2.5 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground flex items-center justify-between">
           <span>Notificaciones</span>
           {noLeidas > 0 && (
-            <button
-              onClick={handleMarkAllRead}
+            <button type="button" onClick={handleMarkAllRead}
               className="text-primary hover:underline font-semibold flex items-center gap-1"
             >
-              <CheckCheck className="h-3 w-3" />
+              <DynamicIcon name="CheckCheck" className="h-3 w-3" />
               Leer todas
             </button>
           )}
@@ -111,12 +110,12 @@ export function NotificationDropdown() {
 
         {notificaciones.length === 0 ? (
           <div className="py-8 text-center">
-            <Bell className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+            <DynamicIcon name="Bell" className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
             <p className="text-xs text-muted-foreground">No hay notificaciones pendientes</p>
           </div>
         ) : (
           notificaciones.slice(0, 5).map((n) => {
-            const Icon = TIPO_ICON[n.tipo] || Info;
+            const iconName = TIPO_ICON_NAME[n.tipo] || "Info";
             const color = TIPO_COLOR[n.tipo] || "text-muted-foreground";
             return (
               <DropdownMenuItem
@@ -125,7 +124,7 @@ export function NotificationDropdown() {
                 onClick={() => handleMarkRead(n.id)}
               >
                 <div className={`mt-0.5 ${color}`}>
-                  <Icon className="h-4 w-4" />
+                  <DynamicIcon name={iconName} className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-foreground truncate">{n.titulo}</p>
@@ -144,7 +143,7 @@ export function NotificationDropdown() {
         <DropdownMenuSeparator className="bg-border/40 my-1" />
         <Link href="/notificaciones" onClick={() => setOpen(false)}>
           <DropdownMenuItem className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold text-primary flex items-center justify-center gap-1.5">
-            <ExternalLink className="h-3.5 w-3.5" />
+                  <DynamicIcon name="ExternalLink" className="h-3.5 w-3.5" />
             Ver todas las notificaciones
           </DropdownMenuItem>
         </Link>

@@ -1,0 +1,15 @@
+packages:
+  - '.'
+
+onlyBuiltDependencies:
+  - esbuild
+  - '@playwright/test'
+
+# Supply-chain hardening: Require packages to be at least 3 days old
+# before installing. Newly published malicious packages (typosquatting,
+# dependency confusion) are often caught and unpublished within hours.
+minimumReleaseAge: 3
+
+# Prevent trust downgrade: pnpm should reject packages whose trust signals
+# (provenance, signatures) weaken between updates.
+trustPolicy: no-downgrade

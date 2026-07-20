@@ -5,7 +5,7 @@ import { usuarios, sucursales } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function getSessionOrThrow() {
   const session = await auth.api.getSession({
@@ -97,6 +97,7 @@ export async function switchActiveBranch(sucursalId: string) {
       .set({ sucursalId: sucursal.id, updatedAt: new Date() })
       .where(eq(usuarios.id, userId));
 
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/");
     revalidatePath("/dashboard");
     return { success: true, sucursalNombre: sucursal.nombre };

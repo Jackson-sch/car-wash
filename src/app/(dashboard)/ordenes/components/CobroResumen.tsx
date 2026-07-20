@@ -1,6 +1,6 @@
 import { User, Car, Tag, Gift } from "lucide-react";
 import { formatCurrency } from "@/lib/formats";
-import { OrdenResumen } from "./CobrarModal";
+import type { OrdenResumen } from "./CobrarModal";
 
 interface CobroResumenProps {
   orden: OrdenResumen;

@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type {
+  CellContext,
+  HeaderContext,
+  SortingState} from "@tanstack/react-table";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
-  getSortedRowModel,
-  SortingState,
+  getSortedRowModel
 } from "@tanstack/react-table";
 import { ArrowUpDown, Gift, Coins, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,7 +64,7 @@ export function ClientesTable({
   const columns = useMemo(() => [
     {
       accessorKey: "nombre",
-      header: ({ column }: any) => (
+      header: ({ column }: HeaderContext<Cliente, unknown>) => (
         <Button
           type="button"
           variant="ghost"
@@ -72,7 +75,7 @@ export function ClientesTable({
           <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
-      cell: ({ row }: any) => {
+      cell: ({ row }: CellContext<Cliente, unknown>) => {
         const cli = row.original;
         return (
           <div>
@@ -89,14 +92,14 @@ export function ClientesTable({
     {
       accessorKey: "telefono",
       header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Celular</span>,
-      cell: ({ row }: any) => (
+      cell: ({ row }: CellContext<Cliente, unknown>) => (
         <span className="text-muted-foreground font-bold">{row.getValue("telefono") || "-"}</span>
       ),
     },
     {
       id: "documento",
       header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Documento</span>,
-      cell: ({ row }: any) => {
+      cell: ({ row }: CellContext<Cliente, unknown>) => {
         const cli = row.original;
         return (
           <span className="text-muted-foreground font-bold">
@@ -107,7 +110,7 @@ export function ClientesTable({
     },
     {
       accessorKey: "totalVehiculos",
-      header: ({ column }: any) => (
+      header: ({ column }: HeaderContext<Cliente, unknown>) => (
         <div className="text-center">
           <Button
             type="button"
@@ -120,7 +123,7 @@ export function ClientesTable({
           </Button>
         </div>
       ),
-      cell: ({ row }: any) => (
+      cell: ({ row }: CellContext<Cliente, unknown>) => (
         <div className="text-center text-foreground/80 font-bold">
           {row.getValue("totalVehiculos")}
         </div>
@@ -128,7 +131,7 @@ export function ClientesTable({
     },
     {
       accessorKey: "totalPuntos",
-      header: ({ column }: any) => (
+      header: ({ column }: HeaderContext<Cliente, unknown>) => (
         <div className="text-center">
           <Button
             type="button"
@@ -141,7 +144,7 @@ export function ClientesTable({
           </Button>
         </div>
       ),
-      cell: ({ row }: any) => (
+      cell: ({ row }: CellContext<Cliente, unknown>) => (
         <div className="flex justify-center">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-450 border border-amber-500/20">
             <Gift className="h-3.5 w-3.5" />
@@ -153,7 +156,7 @@ export function ClientesTable({
     {
       id: "acciones",
       header: () => <div className="text-right text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Acciones</div>,
-      cell: ({ row }: any) => {
+      cell: ({ row }: CellContext<Cliente, unknown>) => {
         const cli = row.original;
         return (
           <div className="flex justify-end gap-1.5">
@@ -179,6 +182,8 @@ export function ClientesTable({
     },
   ], [onViewDetails, onOpenAjuste]);
 
+  // @tanstack/react-table devuelve funciones que el React Compiler no puede memoizar automáticamente
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: clientes,
     columns,

@@ -1,25 +1,22 @@
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Printer, Lock, Wallet } from "lucide-react";
+import { ArrowLeft, Printer, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TurnoActivo, SystemStats } from "../types";
 
 interface CierreHeaderProps {
   turno: TurnoActivo;
   systemStats: SystemStats;
-  isPending: boolean;
-  onFinalize: () => void;
   onPrint: () => void;
 }
 
-export function CierreHeader({ turno, systemStats, isPending, onFinalize, onPrint }: CierreHeaderProps) {
+export function CierreHeader({ turno, systemStats, onPrint }: CierreHeaderProps) {
   const router = useRouter();
 
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-4 print:hidden">
         <div className="space-y-1">
-          <button 
-            onClick={() => router.push("/caja")}
+          <button type="button" onClick={() => router.push("/caja")}
             className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground font-medium mb-1 transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-3 w-3" /> Volver a Caja
@@ -40,14 +37,6 @@ export function CierreHeader({ turno, systemStats, isPending, onFinalize, onPrin
             className="flex-1 md:flex-none text-xs font-bold gap-1.5 h-9 rounded-lg"
           >
             <Printer className="h-4 w-4" /> Vista de Impresión
-          </Button>
-          <Button
-            onClick={onFinalize}
-            disabled={isPending}
-            className="flex-1 md:flex-none text-xs font-bold gap-1.5 h-9 rounded-lg"
-          >
-            <Lock className="h-4 w-4" /> 
-            {isPending ? "Procesando..." : "Finalizar y Cerrar Caja"}
           </Button>
         </div>
       </div>

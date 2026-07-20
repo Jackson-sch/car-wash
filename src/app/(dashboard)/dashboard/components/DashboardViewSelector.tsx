@@ -20,16 +20,14 @@ export function DashboardViewSelector({ currentView }: { currentView: "todas" | 
 
   return (
     <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/60 border border-border w-fit">
-      <button
-        onClick={() => switchView("sucursal")}
+      <button type="button" onClick={() => switchView("sucursal")}
         data-active={currentView === "sucursal"}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-sm text-muted-foreground hover:text-foreground"
       >
         <Store className="h-3.5 w-3.5" />
         Esta Sucursal
       </button>
-      <button
-        onClick={() => switchView("todas")}
+      <button type="button" onClick={() => switchView("todas")}
         data-active={currentView === "todas"}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer data-[active=true]:bg-background data-[active=true]:text-foreground data-[active=true]:shadow-sm text-muted-foreground hover:text-foreground"
       >

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { planes } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
@@ -19,7 +19,7 @@ async function verifySuperAdminSession() {
   return session;
 }
 
-export async function getPlanes() {
+async function _getPlanes() {
   try {
     await verifySuperAdminSession();
     return await db.select().from(planes).orderBy(planes.precio);

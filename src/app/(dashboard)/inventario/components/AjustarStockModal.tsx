@@ -5,7 +5,6 @@ import { X, Package, ArrowUpCircle, ArrowDownCircle, Settings2 } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatCurrency } from "@/lib/formats";
 
 interface Insumo {
   id: string;
@@ -77,9 +76,6 @@ export function AjustarStockModal({
 
   if (!isOpen || !selectedItem) return null;
 
-  const currentConfig = MOV_CONFIG[movTipo];
-  const CurrentIcon = currentConfig.icon;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!movCantidad.trim() || !movMotivo.trim()) return;
@@ -110,6 +106,7 @@ export function AjustarStockModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />

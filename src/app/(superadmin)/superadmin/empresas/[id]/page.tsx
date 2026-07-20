@@ -13,12 +13,10 @@ import {
   Check,
   X,
   Circle,
-  UserCog,
   Mail,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -41,26 +39,27 @@ export default async function EmpresaDetallePage({ params }: PageProps) {
 
   if (!empresa) notFound();
 
-  const branches = await db
-    .select()
-    .from(sucursales)
-    .where(eq(sucursales.empresaId, id))
-    .orderBy(sucursales.nombre);
-
-  const users = await db
-    .select({
-      id: usuarios.id,
-      nombre: usuarios.nombre,
-      apellido: usuarios.apellido,
-      email: usuarios.email,
-      rol: usuarios.rol,
-      activo: usuarios.activo,
-      sucursalId: usuarios.sucursalId,
-      createdAt: usuarios.createdAt,
-    })
-    .from(usuarios)
-    .where(eq(usuarios.empresaId, id))
-    .orderBy(usuarios.nombre);
+  const [branches, users] = await Promise.all([
+    db
+      .select()
+      .from(sucursales)
+      .where(eq(sucursales.empresaId, id))
+      .orderBy(sucursales.nombre),
+    db
+      .select({
+        id: usuarios.id,
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        email: usuarios.email,
+        rol: usuarios.rol,
+        activo: usuarios.activo,
+        sucursalId: usuarios.sucursalId,
+        createdAt: usuarios.createdAt,
+      })
+      .from(usuarios)
+      .where(eq(usuarios.empresaId, id))
+      .orderBy(usuarios.nombre),
+  ]);
 
   const planBadgeColor = planColors[empresa.plan] || planColors.free;
 

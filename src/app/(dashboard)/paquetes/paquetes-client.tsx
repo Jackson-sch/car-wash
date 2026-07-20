@@ -9,7 +9,7 @@ import { PaginationControls } from "@/components/shared/PaginationControls";
 import { togglePaqueteStatus, deletePaquete } from "@/lib/actions/paquetes";
 import { toast } from "sonner";
 
-import { PaqueteItem, ServicioOption } from "./components/types";
+import type { PaqueteItem, ServicioOption } from "./components/types";
 import { PaquetesKpis } from "./components/PaquetesKpis";
 import { PaquetesTable } from "./components/PaquetesTable";
 import { PaquetesGrid } from "./components/PaquetesGrid";
@@ -119,8 +119,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
         <div className="flex items-center gap-3">
           {/* Toggle Vista */}
           <div className="bg-background backdrop-blur-md p-1 rounded-lg border border-border flex items-center shadow-xs">
-            <button
-              onClick={() => setViewMode("grid")}
+            <button type="button" onClick={() => setViewMode("grid")}
               className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
                 viewMode === "grid"
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700"
@@ -130,8 +129,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
               <LayoutGrid className="size-4" />
               Cuadrícula
             </button>
-            <button
-              onClick={() => setViewMode("table")}
+            <button type="button" onClick={() => setViewMode("table")}
               className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
                 viewMode === "table"
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700"
@@ -169,11 +167,11 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
           className="pl-9 pr-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
         />
         {search && (
-          <button
-            onClick={() => {
+          <button type="button" onClick={() => {
               setSearch("");
               setPage(null);
             }}
+            aria-label="Limpiar búsqueda"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -216,6 +214,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
 
       {/* Create/Edit Form Sheet */}
       <PaqueteFormSheet
+        key={`paquete-${editingId ?? "new"}-${isSheetOpen ? "open" : "closed"}`}
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         editingId={editingId}

@@ -1,4 +1,4 @@
-import { ParsedCierreDetails } from "./types";
+import type { ParsedCierreDetails } from "./types";
 
 // Función para parsear la cadena estructurada de las observaciones de cierre
 export function parseObservaciones(obsText: string | null): ParsedCierreDetails | null {

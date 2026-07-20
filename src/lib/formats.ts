@@ -10,18 +10,20 @@ export function parseDate(dateInput: string | Date | number): Date {
   return parseISO(dateInput);
 }
 
+const _currencyFormatter = new Intl.NumberFormat("es-PE", {
+  style: "currency",
+  currency: "PEN",
+});
+
 /**
  * Format a number as Peruvian currency (PEN)
  * Nota: date-fns no maneja monedas, por lo que se mantiene Intl.NumberFormat
  */
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("es-PE", {
-    style: "currency",
-    currency: "PEN",
-  }).format(amount);
+  return _currencyFormatter.format(amount);
 }
 
-/* 
+/**
  * Formatea una fecha a una fecha (e.g., "16-12-2025")
  */
 export function formatDate(dateStr: string | Date, pattern = "dd-MM-yyyy"): string {
@@ -41,7 +43,7 @@ export function formatShortDate(dateStr: string | Date, pattern = "EEE d"): stri
 /**
  * Format a date string to long format (e.g., "lunes, 16 de diciembre")
  */
-export function formatLongDate(dateStr: string | Date, pattern = "EEEE, d 'de' MMMM"): string {
+function _formatLongDate(dateStr: string | Date, pattern = "EEEE, d 'de' MMMM"): string {
   const date = parseDate(dateStr);
   // 'EEEE' día completo, 'MMMM' mes completo. Se escapa 'de' con comillas simples.
   return format(date, pattern, { locale: es });
@@ -50,12 +52,12 @@ export function formatLongDate(dateStr: string | Date, pattern = "EEEE, d 'de' M
 /**
  * Format a date to month and year (e.g., "diciembre de 2025")
  */
-export function formatMonthYear(date: string | Date, pattern = "MMMM 'de' yyyy"): string {
+function _formatMonthYear(date: string | Date, pattern = "MMMM 'de' yyyy"): string {
   const dateObj = parseDate(date);
   return format(dateObj, pattern, { locale: es });
 }
 
-/* 
+/**
  * Formatea una fecha a una hora (e.g., "16:30")
  */
 export function formatTime(date: string | Date, pattern = "HH:mm:ss"): string {
@@ -69,7 +71,7 @@ export function formatTime(date: string | Date, pattern = "HH:mm:ss"): string {
  * Útil para nombres de estudiantes.
  * Ejemplo: "sebastián espinola" -> "Sebastián Espinola"
  */
-export function formatTitleCase(text: string): string {
+function _formatTitleCase(text: string): string {
   if (!text) return "";
   
   return text
@@ -96,7 +98,7 @@ export function getInitials(nombre: string, apellido: string): string {
 /**
  * Formatea un método de pago a su versión amigable
  */
-export function formatPaymentMethod(method: string): string {
+function _formatPaymentMethod(method: string): string {
   const map: Record<string, string> = {
     CASH: "Efectivo",
     CARD: "Tarjeta",

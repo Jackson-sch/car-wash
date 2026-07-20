@@ -1,6 +1,6 @@
 "use server";
 
-import { eq, and, desc, lte, gte, sql, count } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { cupones, cuponServicios, cuponesUsos, ordenes, vehiculos } from "@/lib/db/schema";
 import { getSessionOrThrow } from "@/lib/actions/servicios";
@@ -27,7 +27,7 @@ export async function getCupones() {
   return listaCupones;
 }
 
-export type CuponData = {
+export interface CuponData {
   codigo: string;
   tipoDescuento: "porcentaje" | "fijo";
   valorDescuento: number;
@@ -37,7 +37,7 @@ export type CuponData = {
   limiteTotal?: number | null;
   limitePorCliente?: number | null;
   servicios: string[]; // array de IDs de servicios
-};
+}
 
 export async function createCupon(data: CuponData) {
   try {
@@ -71,10 +71,10 @@ export async function createCupon(data: CuponData) {
 
     revalidatePath("/cupones");
     return { success: true, cupon: nuevoCupon };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al crear cupón:", error);
     // Verificar si es un error de código único
-    if (error.code === "23505") {
+    if (typeof error === "object" && error !== null && "code" in error && (error as { code: string }).code === "23505") {
       return { success: false, error: "El código del cupón ya existe en esta sucursal." };
     }
     return { success: false, error: "Error al crear el cupón." };
@@ -113,9 +113,9 @@ export async function updateCupon(id: string, data: CuponData) {
 
     revalidatePath("/cupones");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al actualizar cupón:", error);
-    if (error.code === "23505") {
+    if (typeof error === "object" && error !== null && "code" in error && (error as { code: string }).code === "23505") {
       return { success: false, error: "El código del cupón ya existe en esta sucursal." };
     }
     return { success: false, error: "Error al actualizar el cupón." };

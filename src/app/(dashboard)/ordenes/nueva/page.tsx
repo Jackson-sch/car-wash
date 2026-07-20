@@ -21,7 +21,7 @@ export default async function NuevaOrdenPage() {
     <NuevaOrdenClient
       servicios={servicios}
       lavadores={lavadores}
-      sucursalConfig={sucursal?.config as Record<string, any> || {}}
+      sucursalConfig={(sucursal?.config as { multipliers?: Record<string, number> }) || {}}
       cajaAbierta={!!turnoActivo}
     />
   );

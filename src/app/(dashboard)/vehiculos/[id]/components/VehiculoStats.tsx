@@ -2,7 +2,7 @@
 
 import { ClipboardList, DollarSign, Gauge, Calendar } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/formats";
-import { OrdenItem } from "../types";
+import type { OrdenItem } from "../types";
 
 interface VehiculoStatsProps {
   ordenes: OrdenItem[];

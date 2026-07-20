@@ -38,6 +38,7 @@ export function CategoriaModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="h-6 w-6 rounded-lg text-zinc-500 hover:text-zinc-800 flex items-center justify-center"
           >
             <X className="h-3.5 w-3.5" />

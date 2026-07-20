@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import Link from "next/link";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   ArrowUpDown,
   Car,
@@ -32,7 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Orden, Lavador } from "./OrdenesTable";
+import type { Orden, Lavador } from "./OrdenesTable";
 
 interface UseOrdenesColumnsProps {
   lavadores: Lavador[];
@@ -302,7 +302,7 @@ export function useOrdenesColumns({
             <Select
               value={ord.estado}
               disabled={ord.estado === "cancelado"}
-              onValueChange={(val: string | null) => val && onStatusChange(ord.id, val as any)}
+              onValueChange={(val: string | null) => val && onStatusChange(ord.id, val as Orden["estado"])}
             >
               <SelectTrigger
                 className={`text-[10px] font-extrabold h-7 rounded-full px-2.5 border outline-none cursor-pointer w-28 justify-between select-none shadow-xs transition-all duration-200 shrink-0 ${config.style}`}

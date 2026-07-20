@@ -9,8 +9,9 @@ import {
 } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/variants"
+import { DynamicIcon } from "@/components/ui/dynamic-icon"
 
 function Calendar({
   className,
@@ -39,8 +40,11 @@ function Calendar({
       captionLayout={captionLayout}
       locale={locale}
       formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString(locale?.code, { month: "short" }),
+        formatMonthDropdown: React.useCallback(
+          (date: Date) =>
+            new Intl.DateTimeFormat(locale?.code || "es", { month: "short" }).format(date),
+          [locale?.code]
+        ),
         ...formatters,
       }}
       classNames={{
@@ -146,18 +150,18 @@ function Calendar({
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
+              <DynamicIcon name="ChevronLeftIcon" className={cn("size-4", className)} {...props} />
             )
           }
 
           if (orientation === "right") {
             return (
-              <ChevronRightIcon className={cn("size-4", className)} {...props} />
+              <DynamicIcon name="ChevronRightIcon" className={cn("size-4", className)} {...props} />
             )
           }
 
           return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
+            <DynamicIcon name="ChevronDownIcon" className={cn("size-4", className)} {...props} />
           )
         },
         DayButton: ({ ...props }) => (
@@ -193,11 +197,27 @@ function CalendarDayButton({
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
 
+  // Defer Intl.DateTimeFormat to useMemo to avoid hydration mismatch
+  // between server (default locale) and client (user locale).
+  const intlFormatter = React.useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale?.code || "es", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
+    [locale?.code]
+  )
+  const formattedDay = React.useMemo(
+    () => intlFormatter.format(day.date),
+    [intlFormatter, day.date]
+  )
+
   return (
     <Button
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString(locale?.code)}
+      data-day={formattedDay || day.date.toISOString().slice(0, 10)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

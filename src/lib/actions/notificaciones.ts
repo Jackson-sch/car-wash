@@ -95,17 +95,19 @@ export async function marcarTodasLeidas() {
   }
 }
 
-export async function createNotificacion(
+async function _createNotificacion(
   usuarioId: string,
   data: {
     tipo: string;
     titulo: string;
     mensaje?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     enviarEmail?: boolean;
   }
 ) {
   try {
+    await getSessionOrThrow();
+
     await db.insert(notificaciones).values({
       usuarioId,
       tipo: data.tipo,

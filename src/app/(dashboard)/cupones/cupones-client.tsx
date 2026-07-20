@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { Tag, Gift, TrendingUp } from "lucide-react";
-import { StatsCard } from "@/components/shared/StatsCard";
 import { CuponForm } from "./components/CuponForm";
 import { CuponesSidebar } from "./components/CuponesSidebar";
 
@@ -13,23 +12,34 @@ interface ServicioType {
   categoriaNombre: string | null;
 }
 
+interface CuponBasic {
+  id: string;
+  codigo: string;
+  activo: boolean;
+  tipoDescuento: "porcentaje" | "fijo";
+  valorDescuento: number;
+  fechaFin: Date | null;
+  usos?: unknown[];
+  servicios?: { servicioId?: string | null; servicio?: { id: string } | null }[];
+}
+
 export function CuponesClient({
   initialCupones,
   servicios,
 }: {
-  initialCupones: any[];
+  initialCupones: CuponBasic[];
   servicios: ServicioType[];
 }) {
-  const [editingCupon, setEditingCupon] = useState<any | null>(null);
+  const [editingCupon, setEditingCupon] = useState<CuponBasic | null>(null);
 
   const totalCupones = initialCupones.length;
-  const activos = initialCupones.filter((c: any) => c.activo).length;
+  const activos = initialCupones.filter((c: CuponBasic) => c.activo).length;
   const totalUsos = useMemo(
-    () => initialCupones.reduce((acc: number, c: any) => acc + (c.usos?.length || 0), 0),
+    () => initialCupones.reduce((acc: number, c: CuponBasic) => acc + (c.usos?.length || 0), 0),
     [initialCupones]
   );
 
-  const handleEdit = (cupon: any) => {
+  const handleEdit = (cupon: CuponBasic) => {
     setEditingCupon(cupon);
   };
 

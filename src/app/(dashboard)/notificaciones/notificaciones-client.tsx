@@ -176,7 +176,7 @@ export function NotificacionesClient({ initialNotificaciones }: NotificacionesCl
                         </Button>
                       )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground/50 mt-2">
+                    <p className="text-[10px] text-muted-foreground/50 mt-2" suppressHydrationWarning>
                       {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
                     </p>
                   </div>

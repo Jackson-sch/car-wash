@@ -7,7 +7,7 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { formatCurrency } from "@/lib/formats";
-import { PaymentMethod } from "./CobrarModal";
+import type { PaymentMethod } from "./CobrarModal";
 
 interface MetodoPagoSelectorProps {
   paymentMethod: PaymentMethod;
@@ -97,9 +97,9 @@ export function MetodoPagoSelector({
   return (
     <>
       <div className="space-y-2.5">
-        <label className="text-xs font-black uppercase text-zinc-500 tracking-wider">
+        <span className="text-xs font-black uppercase text-zinc-500 tracking-wider">
           Método de Pago
-        </label>
+        </span>
         <div className="grid grid-cols-3 gap-2">
           {PAYMENT_METHODS.map((method) => {
             const Icon = method.icon;

@@ -4,14 +4,27 @@ import { db } from "@/lib/db";
 import { usuarios, sucursales } from "@/lib/db/schema";
 import { sql, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
+import { headers } from "next/headers";
 import { sendWelcomeEmail } from "@/lib/email";
 
 // Verifica si el sistema ya tiene algún usuario registrado
 export async function checkSystemStatus() {
   try {
+    // Si ya hay usuarios en el sistema, exigir autenticación
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(usuarios);
+    
+    if (count > 0) {
+      // Sistema ya inicializado — solo usuarios autenticados pueden consultar
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      if (!session) {
+        return { hasUsers: true }; // No revelar detalles a no autenticados
+      }
+    }
+
     return { hasUsers: count > 0 };
   } catch (error) {
     console.error("Error al verificar el estado del sistema:", error);
@@ -34,7 +47,13 @@ export async function bootstrapSystem(data: {
       .from(usuarios);
     
     if (count > 0) {
-      return { success: false, error: "El sistema ya cuenta con usuarios registrados." };
+      // Si ya hay usuarios, exigir autenticación de superadmin para reinicializar
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      if (!session || session.user.rol !== "superadmin") {
+        return { success: false, error: "El sistema ya cuenta con usuarios registrados." };
+      }
     }
 
     // 2. Crear la Sucursal Principal
@@ -76,8 +95,8 @@ export async function bootstrapSystem(data: {
     await sendWelcomeEmail(data.email, `${data.nombre} ${data.apellido || ""}`.trim());
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error durante la inicialización del sistema:", error);
-    return { success: false, error: error.message || "Error al inicializar el sistema." };
+    return { success: false, error: error instanceof Error ? error.message : "Error al inicializar el sistema." };
   }
 }

@@ -1,17 +1,17 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { usuarios, ordenes, turnosCaja, vehiculos, clientes, sucursales } from "@/lib/db/schema";
+import { usuarios, ordenes, turnosCaja, vehiculos, clientes, sucursales, liquidacionesComisiones } from "@/lib/db/schema";
 import { eq, and, sql, count, desc } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { canDo } from "@/lib/auth/permissions";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 import { auth } from "@/lib/auth/config";
 import { sendWelcomeEmail } from "@/lib/email";
 
 // Obtener lavadores y comisiones ganadas por órdenes completadas/cobradas
-export async function getEmpleadosComisiones() {
+async function getEmpleadosComisiones() {
   try {
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
@@ -33,44 +33,50 @@ export async function getEmpleadosComisiones() {
       .where(eq(usuarios.sucursalId, sucursalId))
       .orderBy(usuarios.nombre);
 
-    // 2. Para cada empleado, si es lavador, calcular comisiones
-    const result = [];
-    for (const emp of empleadosList) {
-      if (emp.rol === "lavador") {
-        // Buscar órdenes completadas o cobradas asociadas a él
-        const [stats] = await db
-          .select({
-            totalLavados: count(ordenes.id),
-            montoTotal: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
-          })
-          .from(ordenes)
-          .where(
-            and(
-              eq(ordenes.empleadoId, emp.id),
-              sql`${ordenes.estado} IN ('completado', 'cobrado')`
-            )
-          );
+    // 2. Obtener estadísticas de lavados en 1 sola consulta agrupada (GROUP BY)
+    const lavadorStats = await db
+      .select({
+        empleadoId: ordenes.empleadoId,
+        totalLavados: count(ordenes.id),
+        montoTotal: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
+      })
+      .from(ordenes)
+      .where(
+        and(
+          eq(ordenes.sucursalId, sucursalId),
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+        )
+      )
+      .groupBy(ordenes.empleadoId);
 
-        const totalLavadosVal = stats?.totalLavados || 0;
-        const montoTotalVal = parseFloat(stats?.montoTotal || "0");
-        // Asignar comisión del 30%
-        const comisionVal = montoTotalVal * 0.30;
-
-        result.push({
-          ...emp,
-          totalLavados: totalLavadosVal,
-          montoLavado: montoTotalVal,
-          comisionAcumulada: comisionVal,
-        });
-      } else {
-        result.push({
-          ...emp,
-          totalLavados: 0,
-          montoLavado: 0,
-          comisionAcumulada: 0,
+    const statsMap = new Map<string, { totalLavados: number; montoTotal: number }>();
+    for (const row of lavadorStats) {
+      if (row.empleadoId) {
+        statsMap.set(row.empleadoId, {
+          totalLavados: row.totalLavados,
+          montoTotal: parseFloat(row.montoTotal || "0"),
         });
       }
     }
+
+    const result = empleadosList.map((emp) => {
+      if (emp.rol === "lavador") {
+        const s = statsMap.get(emp.id) || { totalLavados: 0, montoTotal: 0 };
+        const comisionVal = s.montoTotal * 0.30;
+        return {
+          ...emp,
+          totalLavados: s.totalLavados,
+          montoLavado: s.montoTotal,
+          comisionAcumulada: comisionVal,
+        };
+      }
+      return {
+        ...emp,
+        totalLavados: 0,
+        montoLavado: 0,
+        comisionAcumulada: 0,
+      };
+    });
 
     return result;
   } catch (error) {
@@ -127,6 +133,7 @@ export async function registrarEmpleado(data: {
       .where(eq(sucursales.id, sucursalId))
       .limit(1);
 
+    revalidateTag("empleados", { expire: 600 });
     revalidatePath("/empleados");
     return {
       success: true,
@@ -190,6 +197,7 @@ export async function actualizarEmpleado(
       .where(eq(usuarios.id, id))
       .returning();
 
+    revalidateTag("empleados", { expire: 600 });
     revalidatePath("/empleados");
     return { success: true, data: updated };
   } catch (error: unknown) {
@@ -236,6 +244,7 @@ export async function cambiarEstadoEmpleado(id: string, activo: boolean) {
       .where(eq(usuarios.id, id))
       .returning();
 
+    revalidateTag("empleados", { expire: 600 });
     revalidatePath("/empleados");
     return { success: true, data: updated };
   } catch (error: unknown) {
@@ -381,5 +390,119 @@ export async function getEmpleadoRendimiento(id: string) {
   } catch (error) {
     console.error("Error al obtener rendimiento del empleado:", error);
     return null;
+  }
+}
+
+// Liquidar comisiones de órdenes completadas/cobradas para un lavador
+export async function liquidarComisionesEmpleado(data: {
+  empleadoId: string;
+  ordenIds: string[];
+  metodoPago: string;
+  referencia?: string;
+  notas?: string;
+}) {
+  try {
+    if (!data.ordenIds || data.ordenIds.length === 0) {
+      return { success: false, error: "Seleccione al menos una orden para liquidar." };
+    }
+
+    const session = await getSessionOrThrow({ modulo: "empleados", accion: "editar" });
+    const sucursalId = session.user.sucursalId!;
+
+    const ordenesPendientes = await db
+      .select({
+        id: ordenes.id,
+        total: ordenes.total,
+        createdAt: ordenes.createdAt,
+      })
+      .from(ordenes)
+      .where(
+        and(
+          eq(ordenes.empleadoId, data.empleadoId),
+          eq(ordenes.sucursalId, sucursalId),
+          sql`${ordenes.id} = ANY(${data.ordenIds})`,
+          sql`${ordenes.liquidacionId} IS NULL`,
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+        )
+      );
+
+    if (ordenesPendientes.length === 0) {
+      return { success: false, error: "Las órdenes seleccionadas ya fueron liquidadas o no existen." };
+    }
+
+    const montoVentas = ordenesPendientes.reduce(
+      (sum, o) => sum + (parseFloat(o.total || "0") || 0),
+      0
+    );
+    const montoComisionTotal = (montoVentas * 0.30).toFixed(2);
+
+    const fechas = ordenesPendientes.map((o) => o.createdAt ? new Date(o.createdAt).getTime() : Date.now());
+    const fechaDesde = new Date(Math.min(...fechas));
+    const fechaHasta = new Date(Math.max(...fechas));
+
+    const [nuevaLiq] = await db
+      .insert(liquidacionesComisiones)
+      .values({
+        sucursalId,
+        empleadoId: data.empleadoId,
+        fechaDesde,
+        fechaHasta,
+        totalOrdenes: ordenesPendientes.length,
+        montoTotal: montoComisionTotal,
+        metodoPago: data.metodoPago || "efectivo",
+        referencia: data.referencia?.trim() || null,
+        notas: data.notas?.trim() || null,
+        pagadoPorId: session.user.id,
+      })
+      .returning();
+
+    const ordenIdsFound = ordenesPendientes.map((o) => o.id);
+    await db
+      .update(ordenes)
+      .set({ liquidacionId: nuevaLiq.id })
+      .where(sql`${ordenes.id} = ANY(${ordenIdsFound})`);
+
+    revalidatePath("/empleados");
+    revalidatePath(`/empleados/${data.empleadoId}`);
+    revalidateTag("empleados", { expire: 600 });
+
+    return { success: true, data: nuevaLiq };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+export async function getHistorialLiquidaciones(empleadoId: string) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
+    const sucursalId = session.user.sucursalId!;
+
+    const result = await db
+      .select({
+        id: liquidacionesComisiones.id,
+        fechaDesde: liquidacionesComisiones.fechaDesde,
+        fechaHasta: liquidacionesComisiones.fechaHasta,
+        totalOrdenes: liquidacionesComisiones.totalOrdenes,
+        montoTotal: liquidacionesComisiones.montoTotal,
+        metodoPago: liquidacionesComisiones.metodoPago,
+        referencia: liquidacionesComisiones.referencia,
+        notas: liquidacionesComisiones.notas,
+        createdAt: liquidacionesComisiones.createdAt,
+        pagadoPorNombre: usuarios.nombre,
+      })
+      .from(liquidacionesComisiones)
+      .leftJoin(usuarios, eq(liquidacionesComisiones.pagadoPorId, usuarios.id))
+      .where(
+        and(
+          eq(liquidacionesComisiones.empleadoId, empleadoId),
+          eq(liquidacionesComisiones.sucursalId, sucursalId)
+        )
+      )
+      .orderBy(desc(liquidacionesComisiones.createdAt));
+
+    return result;
+  } catch (error) {
+    console.error("Error al obtener historial de liquidaciones:", error);
+    return [];
   }
 }

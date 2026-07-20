@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import crypto from "crypto";
 import { logAudit } from "@/lib/actions/auditoria";
 import { eq, inArray } from "drizzle-orm";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +36,9 @@ export async function GET(request: NextRequest) {
     const data = `${userId}:${empresaId}:${expiresAt}`;
     const expectedSignature = crypto.createHmac("sha256", secret).update(data).digest("hex");
 
-    if (signature !== expectedSignature) {
+    const sigBuf = Buffer.from(signature, "hex");
+    const expectedBuf = Buffer.from(expectedSignature, "hex");
+    if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
       return new NextResponse("Token inválido", { status: 401 });
     }
 
@@ -96,8 +98,7 @@ export async function GET(request: NextRequest) {
     const servicios = hasSucursales
       ? await db.select().from(schema.servicios).where(inArray(schema.servicios.sucursalId, sucursalesIds))
       : [];
-    const serviciosIds = servicios.map((s) => s.id);
-    const hasServicios = serviciosIds.length > 0;
+    const _serviciosIds = servicios.map((s) => s.id);
 
     // 10. Paquetes
     const paquetes = hasSucursales
@@ -236,7 +237,7 @@ export async function GET(request: NextRequest) {
         "Content-Disposition": `attachment; filename="washmaster-${empresaSlug}-backup-${dateStr}.json"`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en API de Exportación de Empresa:", error);
     return new NextResponse("Error al generar copia de seguridad", { status: 500 });
   }

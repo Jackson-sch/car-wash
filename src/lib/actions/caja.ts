@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad } from "@/lib/db/schema";
+import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad, egresosCaja } from "@/lib/db/schema";
 import { eq, and, desc, sql, or } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 // Obtener el turno de caja abierto actual de la sucursal
@@ -92,7 +92,7 @@ export async function getTurnoActivo() {
       .innerJoin(ordenes, eq(pagos.ordenId, ordenes.id))
       .leftJoin(ordenServicios, eq(ordenes.id, ordenServicios.ordenId))
       .where(eq(pagos.turnoId, activeTurno.id))
-      .groupBy(pagos.id, ordenes.nroTicket)
+      .groupBy(pagos.id, pagos.monto, pagos.metodo, pagos.createdAt, ordenes.nroTicket)
       .orderBy(desc(pagos.createdAt));
 
     const transaccionesDetalladas = txns.map((t) => ({
@@ -104,6 +104,27 @@ export async function getTurnoActivo() {
       servicios: t.serviciosConcat || "Servicio General",
     }));
 
+    // Obtener egresos registrados en este turno
+    const egresosList = await db
+      .select({
+        id: egresosCaja.id,
+        monto: egresosCaja.monto,
+        motivo: egresosCaja.motivo,
+        categoria: egresosCaja.categoria,
+        comprobanteNum: egresosCaja.comprobanteNum,
+        createdAt: egresosCaja.createdAt,
+        registradoPor: usuarios.nombre,
+      })
+      .from(egresosCaja)
+      .leftJoin(usuarios, eq(egresosCaja.registradoPorId, usuarios.id))
+      .where(eq(egresosCaja.turnoId, activeTurno.id))
+      .orderBy(desc(egresosCaja.createdAt));
+
+    const totalEgresos = egresosList.reduce(
+      (sum, e) => sum + (parseFloat(e.monto) || 0),
+      0
+    );
+
     return {
       ...activeTurno,
       pagos: pagosTurno.map((p) => ({
@@ -113,6 +134,11 @@ export async function getTurnoActivo() {
       ventasPorCategoria,
       ventasPorHora,
       transaccionesDetalladas,
+      totalEgresos,
+      egresosList: egresosList.map((e) => ({
+        ...e,
+        monto: parseFloat(e.monto) || 0,
+      })),
     };
   } catch (error) {
     console.error("Error al obtener turno activo:", error);
@@ -123,8 +149,7 @@ export async function getTurnoActivo() {
 // Obtener detalles detallados para el cierre de caja
 export async function getDetalleCierreCaja() {
   try {
-    const session = await getSessionOrThrow({ modulo: "caja", accion: "cerrar" });
-    const sucursalId = session.user.sucursalId!;
+    await getSessionOrThrow({ modulo: "caja", accion: "cerrar" });
 
     // 1. Obtener turno activo
     const turno = await getTurnoActivo();
@@ -215,6 +240,8 @@ export async function abrirTurnoCaja(montoInicial: string) {
       })
       .returning();
 
+    revalidateTag("caja", { expire: 300 });
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/caja");
     revalidatePath("/dashboard");
     return { success: true, data: newTurno };
@@ -225,7 +252,7 @@ export async function abrirTurnoCaja(montoInicial: string) {
 }
 
 // Registrar un pago asociado al turno de caja actual
-export async function registrarPago(ordenId: string, metodo: "efectivo" | "tarjeta" | "yape" | "plin" | "transferencia" | "otro", monto: string, referencia?: string) {
+async function _registrarPago(ordenId: string, metodo: "efectivo" | "tarjeta" | "yape" | "plin" | "transferencia" | "otro", monto: string, referencia?: string) {
   try {
     const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
     const sucursalId = session.user.sucursalId!;
@@ -391,6 +418,8 @@ export async function cobrarOrden(data: {
       });
     }
 
+    revalidateTag("caja", { expire: 300 });
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/caja");
     revalidatePath("/ordenes");
     revalidatePath("/dashboard");
@@ -432,6 +461,8 @@ export async function cerrarTurnoCaja(data: {
       .where(eq(turnosCaja.id, activeTurno.id))
       .returning();
 
+    revalidateTag("caja", { expire: 300 });
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/caja");
     revalidatePath("/dashboard");
     return { success: true, data: updated };
@@ -471,6 +502,9 @@ export async function getTurnosHistorial() {
 // Verificar autorización de supervisor para cierres descuadrados
 export async function verificarAutorizacionSupervisor(email: string, contrasena: string) {
   try {
+    // Validar sesión antes de proceder
+    await getSessionOrThrow();
+
     // 1. Buscar al usuario por email
     const [user] = await db
       .select({
@@ -544,6 +578,54 @@ export async function verificarAutorizacionSupervisor(email: string, contrasena:
     };
   } catch (error) {
     console.error("Error al verificar autorización de supervisor:", error);
-    return { success: false, error: "Ocurrió un error al validar la autorización." };
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+// Registrar salida de dinero / egreso de caja chica
+export async function registrarEgresoCaja(data: {
+  monto: string;
+  motivo: string;
+  categoria?: string;
+  comprobanteNum?: string;
+}) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
+    const sucursalId = session.user.sucursalId!;
+    const montoNum = parseFloat(data.monto);
+
+    if (isNaN(montoNum) || montoNum <= 0) {
+      return { success: false, error: "El monto del egreso debe ser mayor a S/ 0.00" };
+    }
+    if (!data.motivo.trim()) {
+      return { success: false, error: "Por favor especifique el motivo del egreso." };
+    }
+
+    const turno = await getTurnoActivo();
+    if (!turno) {
+      return { success: false, error: "No hay un turno de caja abierto en esta sucursal." };
+    }
+
+    const [nuevoEgreso] = await db
+      .insert(egresosCaja)
+      .values({
+        sucursalId,
+        turnoId: turno.id,
+        monto: data.monto,
+        motivo: data.motivo.trim(),
+        categoria: data.categoria || "otro",
+        comprobanteNum: data.comprobanteNum?.trim() || null,
+        registradoPorId: session.user.id,
+      })
+      .returning();
+
+    revalidatePath("/caja");
+    revalidatePath("/caja/cierre");
+    revalidatePath("/dashboard");
+    revalidateTag("caja", { expire: 300 });
+
+    return { success: true, data: nuevoEgreso };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 }

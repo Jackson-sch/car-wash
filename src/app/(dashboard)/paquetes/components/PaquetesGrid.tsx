@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formats";
-import { PaqueteItem } from "./types";
+import type { PaqueteItem } from "./types";
 
 interface PaquetesGridProps {
   data: PaqueteItem[];
@@ -25,7 +25,7 @@ export function PaquetesGrid({
   if (data.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-20 bg-card border border-border rounded-2xl p-8 shadow-sm">
-        <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-bounce duration-1000" />
+        <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse duration-2000" />
         <p className="font-bold text-lg text-foreground">
           {searchQuery ? "Sin resultados para tu búsqueda" : "No hay paquetes registrados"}
         </p>

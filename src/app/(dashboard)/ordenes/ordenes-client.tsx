@@ -1,22 +1,27 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import Link from "next/link";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ClipboardList, Search, Plus, LayoutGrid, List } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
-import { updateOrdenEstado, asignarLavadorAOrden, getOrdenById } from "@/lib/actions/ordenes";
-import { createClient } from "@/lib/client";
+import { updateOrdenEstado, asignarLavadorAOrden } from "@/lib/actions/ordenes";
 import { cobrarOrden } from "@/lib/actions/caja";
+import { useOrdenesRealtime } from "./hooks/useOrdenesRealtime";
 import { toast } from "sonner";
+import { OrdenesToolbar } from "./components/OrdenesToolbar";
 import { OrdenesKpiCards } from "./components/OrdenesKpiCards";
 import { StaffAvailabilityCard } from "./components/StaffAvailabilityCard";
-import { OperationalFlowChart } from "./components/OperationalFlowChart";
-import { OrdenesTable, Orden, Lavador } from "./components/OrdenesTable";
+import dynamic from "next/dynamic";
+
+const OperationalFlowChart = dynamic(
+  () => import("./components/OperationalFlowChart").then((m) => ({ default: m.OperationalFlowChart })),
+  { ssr: false }
+);
+import type { Orden, Lavador } from "./components/OrdenesTable";
+import { OrdenesTable } from "./components/OrdenesTable";
 import { OrdenesBoard } from "./components/OrdenesBoard";
-import { CobrarModal, PaymentMethod } from "./components/CobrarModal";
+import type { PaymentMethod } from "./components/CobrarModal";
+import { CobrarModal } from "./components/CobrarModal";
 
 interface OrdenesClientProps {
   initialOrdenes: Orden[];
@@ -27,86 +32,9 @@ interface OrdenesClientProps {
 export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: OrdenesClientProps) {
   const router = useRouter();
   const [ordenes, setOrdenes] = useState<Orden[]>(initialOrdenes);
-  const [cajaAbiertaLocal, setCajaAbiertaLocal] = useState(cajaAbierta);
-
-  useEffect(() => {
-    setCajaAbiertaLocal(cajaAbierta);
-  }, [cajaAbierta]);
-
-  // Sync state when server-side initialOrdenes changes
-  useEffect(() => {
-    setOrdenes(initialOrdenes);
-  }, [initialOrdenes]);
 
   // Subscribe to real-time changes in the database
-  useEffect(() => {
-    const supabase = createClient();
-
-    const channel = supabase
-      .channel("ordenes-realtime")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ordenes",
-        },
-        async (payload) => {
-          console.log("Realtime event received:", payload.eventType, payload);
-
-          if (payload.eventType === "DELETE") {
-            const deletedId = payload.old.id;
-            setOrdenes((prev) => prev.filter((o) => o.id !== deletedId));
-            return;
-          }
-
-          // For INSERT and UPDATE, fetch the full details with joins
-          const orderId = payload.new.id;
-          try {
-            const detail = await getOrdenById(orderId);
-            if (detail) {
-              const updatedOrden: Orden = {
-                id: detail.id,
-                nroTicket: detail.nroTicket,
-                estado: detail.estado as any,
-                prioridad: detail.prioridad,
-                total: detail.total,
-                notas: detail.notas,
-                createdAt: detail.createdAt ? new Date(detail.createdAt) : null,
-                updatedAt: detail.createdAt ? new Date(detail.createdAt) : null,
-                placa: detail.placa,
-                vehiculoMarca: detail.vehiculoMarca,
-                vehiculoModelo: detail.vehiculoModelo,
-                vehiculoTipo: detail.vehiculoTipo as any,
-                clienteNombre: detail.clienteNombre,
-                clienteApellido: detail.clienteApellido,
-                lavadorNombre: detail.lavadorNombre,
-                lavadorApellido: detail.lavadorApellido,
-                comprobanteTipo: detail.comprobanteTipo,
-                comprobanteSerie: detail.comprobanteSerie,
-                comprobanteNumero: detail.comprobanteNumero,
-              };
-
-              setOrdenes((prev) => {
-                const exists = prev.some((o) => o.id === orderId);
-                if (exists) {
-                  return prev.map((o) => (o.id === orderId ? updatedOrden : o));
-                } else {
-                  return [updatedOrden, ...prev];
-                }
-              });
-            }
-          } catch (err) {
-            console.error("Error fetching realtime order detail:", err);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  useOrdenesRealtime(setOrdenes);
   
   // nuqs States
   const [searchQuery, setSearchQuery] = useQueryState("search", {
@@ -277,92 +205,19 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
 
   return (
     <div className="space-y-8 text-foreground">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 flex items-center gap-2.5">
-            <ClipboardList className="h-7 w-7 text-secondary" />
-            Bandeja de Órdenes
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Monitorea el progreso de lavado, asigna personal y gestiona cobros de ticket en tiempo real.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* Toggle Vista */}
-          <div className="bg-background backdrop-blur-md p-1 rounded-lg border border-border flex items-center shadow-sm">
-            <button
-              onClick={() => setViewMode("patio")}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
-                viewMode === "patio"
-                  ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-              }`}
-            >
-              <LayoutGrid className="size-4" />
-              Patio
-            </button>
-            <button
-              onClick={() => setViewMode("lista")}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
-                viewMode === "lista"
-                  ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-700"
-                  : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-              }`}
-            >
-              <List className="size-4" />
-              Lista
-            </button>
-          </div>
-
-          <Link href="/ordenes/nueva" passHref>
-            <Button variant="secondary" className="font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm px-4">
-              <Plus className="size-4.5" />
-              Nueva Orden
-            </Button>
-          </Link>
-        </div>
-      </div>
+      {/* Header & Controls */}
+      <OrdenesToolbar
+        searchQuery={searchQuery || ""}
+        onSearchChange={(value) => setSearchQuery(value)}
+        activeFilter={activeFilter || "todos"}
+        onFilterChange={(value) => setActiveFilter(value)}
+        viewMode={viewMode || "patio"}
+        onViewModeChange={(mode) => setViewMode(mode)}
+        onPageReset={() => setPage(null)}
+      />
 
       {/* KPI Stats Bento Grid (Stitch design) */}
       <OrdenesKpiCards ordenes={ordenes} />
-
-      {/* Controls Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por placa, ticket o cliente..."
-              value={searchQuery || ""}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(null);
-              }}
-              className="pl-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
-            />
-          </div>
-
-          {/* Status Dropdown Selector - from Stitch design */}
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-card/45 border border-border hover:border-zinc-400 dark:hover:border-zinc-700 rounded-lg text-xs font-bold shadow-xs h-9">
-            <span className="text-muted-foreground">Estado:</span>
-            <select
-              value={activeFilter || "todos"}
-              onChange={(e) => {
-                setActiveFilter(e.target.value);
-                setPage(null);
-              }}
-              className="bg-transparent border-none focus:ring-0 font-bold text-foreground py-0 pl-1 pr-6 cursor-pointer focus:outline-none"
-            >
-              <option value="todos" className="bg-card text-foreground font-bold">Todos</option>
-              <option value="pendiente" className="bg-card text-foreground font-bold">En Espera</option>
-              <option value="en_proceso" className="bg-card text-foreground font-bold">En Proceso</option>
-              <option value="completado" className="bg-card text-foreground font-bold">Completados</option>
-              <option value="cobrado" className="bg-card text-foreground font-bold">Cobrados</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
       {/* Rendering views conditionally */}
       {viewMode === "patio" ? (
@@ -371,7 +226,7 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
           lavadores={lavadores}
           onStatusChange={handleStatusChange}
           onAssignLavador={handleAssignLavador}
-          onEdit={(orden) => toast.info("Editar orden próximamente")}
+          onEdit={(_orden) => toast.info("Editar orden próximamente")}
         />
       ) : (
         <OrdenesTable
@@ -405,8 +260,8 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
           orden={payingOrden}
           isPending={isPending}
           onConfirm={handleConfirmPay}
-          cajaAbierta={cajaAbiertaLocal}
-          onOpenCajaSuccess={() => setCajaAbiertaLocal(true)}
+          cajaAbierta={cajaAbierta}
+          onOpenCajaSuccess={() => router.refresh()}
         />
       )}
     </div>

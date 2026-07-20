@@ -5,7 +5,13 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
-export const dynamic = "force-dynamic";
+/*
+  NOTA: NO usar force-dynamic aquí.
+  Next.js detecta automáticamente que este layout es dinámico porque usa
+  headers() y auth.api.getSession(). Al eliminar force-dynamic,
+  las páginas hijas pueden usar ISR, 'use cache' y PPR para cachear
+  datos que no cambian en cada request.
+*/
 
 export default async function SuperAdminLayout({
   children,

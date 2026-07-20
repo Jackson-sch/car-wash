@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { getPaquetes } from "@/lib/actions/paquetes";
-import { getServicios } from "@/lib/actions/servicios";
+import { getSessionOrThrow } from "@/lib/actions/servicios";
+import { getCachedPaquetes, getCachedServicios } from "@/lib/data";
 import { PaquetesClient } from "./paquetes-client";
 
 export const metadata = {
@@ -9,9 +9,12 @@ export const metadata = {
 };
 
 export default async function PaquetesPage() {
+  const session = await getSessionOrThrow({ modulo: "paquetes", accion: "ver" });
+  const sucursalId = session.user.sucursalId!;
+
   const [paquetes, servicios] = await Promise.all([
-    getPaquetes(),
-    getServicios(),
+    getCachedPaquetes(sucursalId),
+    getCachedServicios(sucursalId),
   ]);
 
   return (

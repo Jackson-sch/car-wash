@@ -145,6 +145,7 @@ export async function updateVehiculo(
         ...(data.modelo !== undefined && { modelo: data.modelo || null }),
         ...(data.anio !== undefined && { anio: data.anio }),
         ...(data.color !== undefined && { color: data.color || null }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(data.tipo !== undefined && { tipo: data.tipo as any }),
         ...(data.notas !== undefined && { notas: data.notas || null }),
       })

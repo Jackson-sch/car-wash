@@ -6,17 +6,16 @@ interface StepperHeaderProps {
   step: number;
 }
 
+const STEPS = [
+  { step: 1, label: "Cliente y Vehículo", icon: User },
+  { step: 2, label: "Servicios y Costo", icon: Layers },
+  { step: 3, label: "Operación & Notas", icon: Sparkles },
+] as const;
+
 export function StepperHeader({ step }: StepperHeaderProps) {
-  const steps = [
-    { step: 1, label: "Cliente y Vehículo", icon: User },
-    { step: 2, label: "Servicios y Costo", icon: Layers },
-    { step: 3, label: "Operación & Notas", icon: Sparkles },
-  ];
 
   return (
-    <div className="flex items-center justify-between border-b border-zinc-200 pb-6">
-      {steps.map((item) => {
-        const Icon = item.icon;
+    <div className="flex items-center justify-between border-b border-zinc-200 pb-6">        {STEPS.map((item) => {
         const isActive = step === item.step;
         const isDone = step > item.step;
 

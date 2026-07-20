@@ -9,6 +9,8 @@ import { getErrorMessage } from "./action-utils";
 
 export async function getActiveSucursales() {
   try {
+    await getSessionOrThrow();
+
     return await db
       .select({
         id: sucursales.id,
@@ -241,18 +243,19 @@ export async function setMainSucursalAction(id: string) {
         .from(sucursales)
         .where(eq(sucursales.empresaId, empresaId));
 
-      for (const branch of branches) {
-        const currentConfig = (branch.config || {}) as Record<string, any>;
-        const isMain = branch.id === id;
-        
-        await tx
-          .update(sucursales)
-          .set({
-            config: { ...currentConfig, esPrincipal: isMain },
-            updatedAt: new Date(),
-          })
-          .where(eq(sucursales.id, branch.id));
-      }
+      await Promise.all(
+        branches.map(branch => {
+          const currentConfig = (branch.config || {}) as Record<string, unknown>;
+          const isMain = branch.id === id;
+          return tx
+            .update(sucursales)
+            .set({
+              config: { ...currentConfig, esPrincipal: isMain },
+              updatedAt: new Date(),
+            })
+            .where(eq(sucursales.id, branch.id));
+        })
+      );
     });
 
     revalidatePath("/configuracion/sucursales");

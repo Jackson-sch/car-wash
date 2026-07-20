@@ -3,9 +3,9 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react"
 import { cn } from "@/lib/utils"
-import { CheckIcon, ChevronDownIcon } from "lucide-react"
+import { DynamicIcon } from "@/components/ui/dynamic-icon"
 
-function Select<Value = any, Multiple extends boolean | undefined = false>({
+function Select<Value = string, Multiple extends boolean | undefined = false>({
   ...props
 }: SelectPrimitive.Root.Props<Value, Multiple>) {
   return <SelectPrimitive.Root {...props} />
@@ -37,7 +37,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon>
-        <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
+        <DynamicIcon name="ChevronDownIcon" className="size-4 shrink-0 text-muted-foreground" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -111,7 +111,7 @@ function SelectItem({
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
+          <DynamicIcon name="CheckIcon" className="size-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

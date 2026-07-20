@@ -2,7 +2,7 @@
 
 import { useTheme } from "@/components/shared/theme-provider"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { DynamicIcon } from "@/components/ui/dynamic-icon"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme } = useTheme()
@@ -13,19 +13,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       icons={{
         success: (
-          <CircleCheckIcon className="size-4" />
+          <DynamicIcon name="CircleCheckIcon" className="size-4" />
         ),
         info: (
-          <InfoIcon className="size-4" />
+          <DynamicIcon name="InfoIcon" className="size-4" />
         ),
         warning: (
-          <TriangleAlertIcon className="size-4" />
+          <DynamicIcon name="TriangleAlertIcon" className="size-4" />
         ),
         error: (
-          <OctagonXIcon className="size-4" />
+          <DynamicIcon name="OctagonXIcon" className="size-4" />
         ),
         loading: (
-          <Loader2Icon className="size-4 animate-spin" />
+          <DynamicIcon name="Loader2Icon" className="size-4 animate-spin" />
         ),
       }}
       style={

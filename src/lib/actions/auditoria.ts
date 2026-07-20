@@ -20,13 +20,13 @@ export async function logAudit(data: {
       entidad: data.entidad || null,
       entidadId: data.entidadId || null,
       metadata: data.metadata || {},
-    } as any);
+    });
   } catch (error) {
     console.error("Error logging audit:", error);
   }
 }
 
-export async function getAuditLogs(page = 1, limit = 50) {
+async function _getAuditLogs(page = 1, limit = 50) {
   try {
     const offset = (page - 1) * limit;
 

@@ -7,6 +7,7 @@ import { formatCurrency } from "@/lib/formats";
 interface CierreAlertsProps {
   reconciliado: boolean;
   onReconciliar: () => void;
+  isReconciling?: boolean;
   tieneDescuadre: boolean;
   totalDiferencia: number;
   obsCierre: string;
@@ -20,6 +21,7 @@ interface CierreAlertsProps {
 export function CierreAlerts({ 
   reconciliado,
   onReconciliar,
+  isReconciling = false,
   tieneDescuadre, 
   totalDiferencia, 
   obsCierre, 
@@ -30,7 +32,7 @@ export function CierreAlerts({
   onSolicitarAprobacion
 }: CierreAlertsProps) {
   return (
-    <Card className="p-5 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4">
+    <Card className="p-5 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4 print:shadow-none print:bg-white">
       <h2 className="text-xs uppercase font-black text-zinc-700 tracking-wider border-b border-border pb-1">
         Estado de Caja y Justificación
       </h2>
@@ -50,9 +52,17 @@ export function CierreAlerts({
           <Button
             type="button"
             onClick={onReconciliar}
-            className="w-full h-10 text-xs font-bold gap-2 rounded-lg bg-secondary hover:bg-secondary/90 text-white cursor-pointer shadow-xs"
+            disabled={isReconciling}
+            className="w-full h-10 text-xs font-bold gap-2 rounded-lg bg-secondary hover:bg-secondary/90 text-white cursor-pointer shadow-xs disabled:opacity-60"
           >
-            Verificar y Conciliar Saldos
+            {isReconciling ? (
+              <>
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                Conciliando...
+              </>
+            ) : (
+              'Verificar y Conciliar Saldos'
+            )}
           </Button>
         </div>
       ) : (
@@ -114,7 +124,7 @@ export function CierreAlerts({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="obs" className="text-xs font-bold text-zinc-750 flex items-center gap-0.5">
+            <Label htmlFor="obs" className="text-xs font-bold text-zinc-750 flex items-center gap-0.5 print:hidden">
               <FileText className="size-3.5 text-zinc-400" /> Observaciones del Cierre
               {tieneDescuadre && <span className="text-rose-600 font-bold ml-0.5">*</span>}
             </Label>
@@ -129,8 +139,13 @@ export function CierreAlerts({
               }
               value={obsCierre}
               onChange={(e) => onObsChange(e.target.value)}
-              className="w-full bg-card border border-zinc-350 focus:border-secondary focus:ring-0 rounded-lg text-xs p-2.5 text-zinc-800 outline-none resize-none font-medium placeholder:text-muted-foreground/60"
+              className="w-full bg-card border border-zinc-350 focus:border-secondary focus:ring-0 rounded-lg text-xs p-2.5 text-zinc-800 outline-none resize-none font-medium placeholder:text-muted-foreground/60 print:hidden"
             />
+            {obsCierre && (
+              <p className="hidden print:block text-xs text-zinc-800 leading-relaxed whitespace-pre-wrap">
+                {obsCierre}
+              </p>
+            )}
           </div>
 
           <Button

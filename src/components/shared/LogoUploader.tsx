@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useRef, DragEvent } from "react";
-import { Upload, X, Loader2 } from "lucide-react";
+import type { DragEvent } from "react";
+import { useState, useRef } from "react";
+import Image from "next/image";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { uploadLogoAction } from "@/lib/actions/upload";
@@ -94,10 +96,12 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
 
       {value ? (
         <div className="relative group flex items-center justify-center p-4 border border-border bg-card rounded-xl overflow-hidden aspect-video max-w-xs transition-all shadow-sm">
-          <img
+          <Image
             src={value}
             alt="Logo Preview"
-            className="max-h-24 w-auto object-contain transition-all group-hover:scale-[1.02]"
+            fill
+            className="object-contain transition-all group-hover:scale-[1.02]"
+            sizes="(max-width: 320px) 100vw, 320px"
           />
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
             <Button
@@ -107,16 +111,25 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
               onClick={handleRemove}
               className="size-8 rounded-full shadow-lg"
             >
-              <X className="size-4" />
+              <DynamicIcon name="X" className="size-4" />
             </Button>
           </div>
         </div>
       ) : (
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Cargar logo"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all aspect-video max-w-xs text-center ${
             isDragging
               ? "border-secondary bg-secondary/5"
@@ -125,7 +138,7 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
         >
           {isUploading ? (
             <div className="space-y-2 flex flex-col items-center">
-              <Loader2 className="size-8 text-secondary animate-spin" />
+              <DynamicIcon name="Loader2" className="size-8 text-secondary animate-spin" />
               <span className="text-xs font-bold text-muted-foreground animate-pulse">
                 Subiendo imagen...
               </span>
@@ -133,7 +146,7 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
           ) : (
             <div className="space-y-2 flex flex-col items-center">
               <div className="p-2.5 rounded-lg bg-muted text-muted-foreground group-hover:bg-background transition-all">
-                <Upload className="size-5" />
+                <DynamicIcon name="Upload" className="size-5" />
               </div>
               <div className="text-xs">
                 <span className="font-bold text-secondary">Haga clic para cargar</span> o arrastre y suelte

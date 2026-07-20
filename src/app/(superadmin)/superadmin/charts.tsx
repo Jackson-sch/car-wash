@@ -1,31 +1,66 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import * as d3 from "d3";
+import { useRef, useEffect, useId } from "react";
+import { useD3 } from "@/lib/hooks/useD3";
 import { formatCurrency } from "@/lib/formats";
 
-interface RevenueItem { mes: string; total: string }
-interface GrowthItem { mes: string; total: number }
+export interface RevenueItem {
+  mes: string;
+  total: string;
+}
+
+export interface GrowthItem {
+  mes: string;
+  total: number;
+}
+
+interface DataPoint {
+  mes: string;
+  value: number;
+}
+
+function ChartSkeleton({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="bg-card border border-border p-6 rounded-2xl shadow-sm relative overflow-hidden">
+      <h3 className="text-sm font-bold text-foreground mb-1">{title}</h3>
+      <p className="text-[10px] text-muted-foreground mb-3">{subtitle}</p>
+      <div className="h-[200px] flex items-center justify-center">
+        <div className="flex gap-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-8 bg-muted animate-pulse rounded-t-md"
+              style={{ height: `${Math.sin(i + 1) * 40 + 80}px` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Revenue Chart ────────────────────────────────────────────────────────────
 export function RevenueChart({ data }: { data: RevenueItem[] }) {
+  const d3 = useD3();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const gradientId = useId().replace(/[:]/g, "-");
 
   useEffect(() => {
-    if (!svgRef.current || !containerRef.current || data.length === 0) return;
+    if (!d3 || !containerRef.current || !svgRef.current || data.length === 0) {
+      return () => {};
+    }
 
-    const style = getComputedStyle(containerRef.current);
+    const container = containerRef.current;
+    const svgEl = svgRef.current;
 
-    // ── Colores desde tu sistema de diseño ──────────────────────────────────
-    // Usa --chart-1 (#0ea5e9 sky-500) y --chart-2 (#0284c7 sky-600)
-    // que ya están definidos en tu globals.css para ambos modos.
+    const style = getComputedStyle(container);
+
     const colorTop    = style.getPropertyValue("--chart-1").trim()   || "#0ea5e9";
     const colorBot    = style.getPropertyValue("--chart-2").trim()   || "#0284c7";
     const colorMuted  = style.getPropertyValue("--muted-foreground").trim() || "#5e5f65";
     const colorBorder = style.getPropertyValue("--border").trim()    || "#d4d4db";
 
-    // Resuelve valores oklch/hsl a hex si es necesario usando el propio browser
     const resolveColor = (raw: string) => {
       if (!raw || raw === "") return "#0ea5e9";
       const tmp = document.createElement("div");
@@ -41,50 +76,44 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
     const cMuted  = resolveColor(colorMuted);
     const cBorder = resolveColor(colorBorder);
 
-    // ── Setup SVG ────────────────────────────────────────────────────────────
-    const svg = d3.select(svgRef.current);
+    const svg = d3.select(svgEl);
     svg.selectAll("*").remove();
 
     const margin = { top: 20, right: 16, bottom: 28, left: 52 };
-    const rect   = containerRef.current.getBoundingClientRect();
+    const rect   = container.getBoundingClientRect();
     const width  = rect.width;
     const height = 200;
     const innerW = width  - margin.left - margin.right;
     const innerH = height - margin.top  - margin.bottom;
 
-    const chartData = data.map((d) => ({ mes: d.mes, value: parseFloat(d.total) }));
+    const chartData: DataPoint[] = data.map((d: RevenueItem) => ({ mes: d.mes, value: parseFloat(d.total) }));
 
-    // ── Escalas ──────────────────────────────────────────────────────────────
     const xScale = d3.scaleBand()
-      .domain(chartData.map((d) => d.mes))
+      .domain(chartData.map((d: DataPoint) => d.mes))
       .range([0, innerW])
       .padding(0.38);
 
-    const maxVal = d3.max(chartData, (d) => d.value) || 1;
+    const maxVal = d3.max(chartData, (d: DataPoint) => d.value) || 1;
     const yScale = d3.scaleLinear()
       .domain([0, maxVal * 1.14])
       .range([innerH, 0]);
 
-    // ── Gradientes ───────────────────────────────────────────────────────────
     const defs = svg.append("defs");
 
-    // Gradiente normal: sky-500 arriba → sky-600 con 55% opacidad abajo
     const barGrad = defs.append("linearGradient")
-      .attr("id", "barGrad")
+      .attr("id", `barGrad-${gradientId}`)
       .attr("x1", "0").attr("y1", "0")
       .attr("x2", "0").attr("y2", "1");
     barGrad.append("stop").attr("offset", "0%").attr("stop-color", c1).attr("stop-opacity", "1");
     barGrad.append("stop").attr("offset", "100%").attr("stop-color", c2).attr("stop-opacity", "0.05");
 
-    // Gradiente hover: sky-500 sólido
     const barGradHover = defs.append("linearGradient")
-      .attr("id", "barGradHover")
+      .attr("id", `barGradHover-${gradientId}`)
       .attr("x1", "0").attr("y1", "0")
       .attr("x2", "0").attr("y2", "1");
     barGradHover.append("stop").attr("offset", "0%").attr("stop-color", c1).attr("stop-opacity", "1");
     barGradHover.append("stop").attr("offset", "100%").attr("stop-color", c1).attr("stop-opacity", "0.05");
 
-    // ── Grupo principal ──────────────────────────────────────────────────────
     svg
       .attr("width", width)
       .attr("height", height);
@@ -92,7 +121,6 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
     const g = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // ── Grid lines ───────────────────────────────────────────────────────────
     g.append("g")
       .call(d3.axisLeft(yScale).ticks(5).tickSize(-innerW).tickFormat(() => ""))
       .selectAll(".tick line")
@@ -101,12 +129,11 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
       .attr("opacity", 0.5);
     g.selectAll(".domain").remove();
 
-    // ── Eje Y (labels) ───────────────────────────────────────────────────────
     g.append("g")
       .call(
         d3.axisLeft(yScale)
           .ticks(5)
-          .tickFormat((d) => `S/${d3.format("~s")(d as number)}`)
+          .tickFormat((d: any) => `S/${d3.format("~s")(d)}`)
       )
       .selectAll("text")
       .attr("fill", cMuted)
@@ -114,42 +141,37 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
       .attr("font-weight", "500");
     g.selectAll(".domain").attr("stroke", "none");
 
-    // ── Eje X ────────────────────────────────────────────────────────────────
     g.append("g")
       .attr("transform", `translate(0,${innerH})`)
       .call(d3.axisBottom(xScale).tickSize(0))
-      .call((ax) => ax.select(".domain").attr("stroke", cBorder).attr("opacity", 0.5))
+      .call((ax: any) => ax.select(".domain").attr("stroke", cBorder).attr("opacity", 0.5))
       .selectAll("text")
       .attr("fill", cMuted)
       .attr("font-size", "9.5px")
       .attr("dy", "1.2em");
 
-    // ── Barras con animación ─────────────────────────────────────────────────
-    const bars = g.selectAll(".bar")
-      .data(chartData)
+    const bars = g.selectAll<SVGRectElement, DataPoint>(".bar")
+      .data<DataPoint>(chartData)
       .enter()
       .append("rect")
       .attr("class", "bar")
-      .attr("x",      (d) => xScale(d.mes)!)
+      .attr("x",      (d: DataPoint) => xScale(d.mes)!)
       .attr("y",      innerH)
       .attr("width",  xScale.bandwidth())
       .attr("height", 0)
-      .attr("fill",   "url(#barGrad)")
+      .attr("fill",   `url(#barGrad-${gradientId})`)
       .attr("rx",     5)
       .attr("ry",     5);
 
     bars
       .transition()
       .duration(700)
-      .delay((_, i) => i * 65)
+      .delay((_: unknown, i: number) => i * 65)
       .ease(d3.easeCubicOut)
-      .attr("y",      (d) => yScale(d.value))
-      .attr("height", (d) => innerH - yScale(d.value));
+      .attr("y",      (d: DataPoint) => yScale(d.value))
+      .attr("height", (d: DataPoint) => innerH - yScale(d.value));
 
-    // ── Tooltip ──────────────────────────────────────────────────────────────
-    // Usamos var(--card) directamente (no hsl()) porque --card ya contiene
-    // el valor completo (hex en light, oklch en dark).
-    const tooltip = d3.select(containerRef.current)
+    const tooltip = d3.select(container)
       .append("div")
       .style("position",        "absolute")
       .style("background",      "var(--card)")
@@ -164,49 +186,70 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
       .style("transition",      "opacity 0.12s")
       .style("color",           "var(--foreground)");
 
-    // Área de hit transparente sobre las barras
-    g.selectAll(".bar-hit")
-      .data(chartData)
-      .enter()
-      .append("rect")
-      .attr("class",  "bar-hit")
-      .attr("x",      (d) => xScale(d.mes)!)
-      .attr("y",      0)
-      .attr("width",  xScale.bandwidth())
+    const overlayNode = g.append("rect")
+      .attr("width",  innerW)
       .attr("height", innerH)
       .attr("fill",   "transparent")
-      .on("mouseenter", (_, d) => {
-        // Highlight la barra correspondiente
-        g.selectAll<SVGRectElement, typeof d>(".bar")
-          .filter((b) => b.mes === d.mes)
-          .attr("fill", "url(#barGradHover)");
+      .node();
+
+    const onMouseMove = (event: Event) => {
+      const me = event as MouseEvent;
+      const [mx, my] = d3.pointer(me, container);
+      const [gX] = d3.pointer(me, g.node()!);
+
+      const hovered = chartData.find((d) => {
+        const x = xScale(d.mes);
+        return x !== undefined && gX >= x && gX <= x + xScale.bandwidth();
+      });
+
+      if (hovered) {
+        g.selectAll<SVGRectElement, DataPoint>(".bar")
+          .attr("fill", (b: DataPoint) => b.mes === hovered.mes ? `url(#barGradHover-${gradientId})` : `url(#barGrad-${gradientId})`);
 
         tooltip
           .style("opacity", "1")
-          .html(
-            `<div style="font-weight:600;color:hsl(var(--foreground));margin-bottom:2px">${d.mes}</div>` +
-            `<div style="color:var(--chart-1);font-weight:700;font-size:13px">${formatCurrency(d.value)}</div>`
-          );
-      })
-      .on("mousemove", (event) => {
-        const [mx, my] = d3.pointer(event, containerRef.current);
-        tooltip
           .style("left", `${Math.min(mx + 14, rect.width - 120)}px`)
-          .style("top",  `${my - 52}px`);
-      })
-      .on("mouseleave", (_, d) => {
-        g.selectAll<SVGRectElement, typeof d>(".bar")
-          .filter((b) => b.mes === d.mes)
-          .attr("fill", "url(#barGrad)");
+          .style("top",  `${my - 52}px`)
+          .html(
+            `<div style="font-weight:600;color:hsl(var(--foreground));margin-bottom:2px">${hovered.mes}</div>` +
+            `<div style="color:var(--chart-1);font-weight:700;font-size:13px">${formatCurrency(hovered.value)}</div>`
+          );
+      } else {
+        g.selectAll<SVGRectElement, DataPoint>(".bar")
+          .attr("fill", (b: DataPoint) => `url(#barGrad-${gradientId})`);
         tooltip.style("opacity", "0");
-      });
-
-    return () => {
-      if (svgRef.current) {
-        d3.select(svgRef.current).selectAll("*").remove();
       }
     };
-  }, [data]);
+
+    const onMouseLeave = () => {
+      g.selectAll<SVGRectElement, DataPoint>(".bar")
+        .attr("fill", () => `url(#barGrad-${gradientId})`);
+      tooltip.style("opacity", "0");
+    };
+
+    if (overlayNode) {
+      overlayNode.addEventListener("mousemove", onMouseMove);
+      overlayNode.addEventListener("mouseleave", onMouseLeave);
+    }
+
+    return () => {
+      if (overlayNode) {
+        overlayNode.removeEventListener("mousemove", onMouseMove);
+        overlayNode.removeEventListener("mouseleave", onMouseLeave);
+      }
+      d3.select(svgEl).selectAll("*").interrupt().remove();
+      tooltip.remove();
+    };
+  }, [data, d3, gradientId]);
+
+  if (!d3) {
+    return (
+      <ChartSkeleton
+        title="Ingresos Mensuales"
+        subtitle="Facturación total del sistema"
+      />
+    );
+  }
 
   return (
     <div className="bg-card border border-border p-6 rounded-2xl shadow-sm relative overflow-hidden">
@@ -221,17 +264,20 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
 
 // ─── Growth Chart ─────────────────────────────────────────────────────────────
 export function GrowthChart({ data }: { data: GrowthItem[] }) {
+  const d3 = useD3();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!svgRef.current || !containerRef.current || data.length === 0) return;
+    if (!d3 || !containerRef.current || !svgRef.current || data.length === 0) {
+      return () => {};
+    }
 
-    const style = getComputedStyle(containerRef.current);
+    const container = containerRef.current;
+    const svgEl = svgRef.current;
 
-    // ── Colores ──────────────────────────────────────────────────────────────
-    // Usa --chart-growth y --chart-growth-light que debes agregar en globals.css
-    // (ver comentario al final del archivo)
+    const style = getComputedStyle(container);
+
     const colorLineRaw  = style.getPropertyValue("--chart-growth").trim()       || "#10b981";
     const colorAreaRaw  = style.getPropertyValue("--chart-growth-light").trim() || "#34d399";
     const colorMuted    = style.getPropertyValue("--muted-foreground").trim()   || "#5e5f65";
@@ -252,30 +298,27 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
     const cMuted  = resolveColor(colorMuted);
     const cBorder = resolveColor(colorBorder);
 
-    // ── Setup SVG ────────────────────────────────────────────────────────────
-    const svg = d3.select(svgRef.current);
+    const svg = d3.select(svgEl);
     svg.selectAll("*").remove();
 
     const margin = { top: 20, right: 16, bottom: 28, left: 44 };
-    const rect   = containerRef.current.getBoundingClientRect();
+    const rect   = container.getBoundingClientRect();
     const width  = rect.width;
     const height = 200;
     const innerW = width  - margin.left - margin.right;
     const innerH = height - margin.top  - margin.bottom;
 
-    const chartData = data.map((d) => ({ mes: d.mes, value: d.total }));
+    const chartData: DataPoint[] = data.map((d: GrowthItem) => ({ mes: d.mes, value: d.total }));
 
-    // ── Escalas ──────────────────────────────────────────────────────────────
     const xScale = d3.scalePoint()
-      .domain(chartData.map((d) => d.mes))
+      .domain(chartData.map((d: DataPoint) => d.mes))
       .range([0, innerW]);
 
-    const maxVal = d3.max(chartData, (d) => d.value) || 1;
+    const maxVal = d3.max(chartData, (d: DataPoint) => d.value) || 1;
     const yScale = d3.scaleLinear()
       .domain([0, maxVal * 1.22])
       .range([innerH, 0]);
 
-    // ── Gradiente área ────────────────────────────────────────────────────────
     const defs = svg.append("defs");
 
     const areaGrad = defs.append("linearGradient")
@@ -285,7 +328,6 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
     areaGrad.append("stop").attr("offset", "0%").attr("stop-color", cArea).attr("stop-opacity", "0.3");
     areaGrad.append("stop").attr("offset", "80%").attr("stop-color", cLine).attr("stop-opacity", "0.03");
 
-    // ── Grupo principal ──────────────────────────────────────────────────────
     svg
       .attr("width", width)
       .attr("height", height);
@@ -293,7 +335,6 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
     const g = svg.append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // ── Grid lines ───────────────────────────────────────────────────────────
     g.append("g")
       .call(d3.axisLeft(yScale).ticks(5).tickSize(-innerW).tickFormat(() => ""))
       .selectAll(".tick line")
@@ -302,7 +343,6 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
       .attr("opacity", 0.5);
     g.selectAll(".domain").remove();
 
-    // ── Eje Y ────────────────────────────────────────────────────────────────
     g.append("g")
       .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format("d")))
       .selectAll("text")
@@ -311,21 +351,19 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
       .attr("font-weight", "500");
     g.selectAll(".domain").attr("stroke", "none");
 
-    // ── Eje X ────────────────────────────────────────────────────────────────
     g.append("g")
       .attr("transform", `translate(0,${innerH})`)
       .call(d3.axisBottom(xScale).tickSize(0))
-      .call((ax) => ax.select(".domain").attr("stroke", cBorder).attr("opacity", 0.5))
+      .call((ax: any) => ax.select(".domain").attr("stroke", cBorder).attr("opacity", 0.5))
       .selectAll("text")
       .attr("fill", cMuted)
       .attr("font-size", "9.5px")
       .attr("dy", "1.2em");
 
-    // ── Área rellena ──────────────────────────────────────────────────────────
-    const areaGen = d3.area<{ mes: string; value: number }>()
-      .x((d) => xScale(d.mes)!)
+    const areaGen = d3.area<DataPoint>()
+      .x((d: DataPoint) => xScale(d.mes)!)
       .y0(innerH)
-      .y1((d) => yScale(d.value))
+      .y1((d: DataPoint) => yScale(d.value))
       .curve(d3.curveMonotoneX);
 
     g.append("path")
@@ -333,10 +371,9 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
       .attr("fill", "url(#areaGrad)")
       .attr("d", areaGen);
 
-    // ── Línea con animación ───────────────────────────────────────────────────
-    const lineGen = d3.line<{ mes: string; value: number }>()
-      .x((d) => xScale(d.mes)!)
-      .y((d) => yScale(d.value))
+    const lineGen = d3.line<DataPoint>()
+      .x((d: DataPoint) => xScale(d.mes)!)
+      .y((d: DataPoint) => yScale(d.value))
       .curve(d3.curveMonotoneX);
 
     const path = g.append("path")
@@ -355,25 +392,23 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
       .ease(d3.easeCubicOut)
       .attr("stroke-dashoffset", 0);
 
-    // ── Dots ─────────────────────────────────────────────────────────────────
-    g.selectAll(".dot")
-      .data(chartData)
+    g.selectAll<SVGCircleElement, DataPoint>(".dot")
+      .data<DataPoint>(chartData)
       .enter()
       .append("circle")
       .attr("class",        "dot")
-      .attr("cx",           (d) => xScale(d.mes)!)
-      .attr("cy",           (d) => yScale(d.value))
+      .attr("cx",           (d: DataPoint) => xScale(d.mes)!)
+      .attr("cy",           (d: DataPoint) => yScale(d.value))
       .attr("r",            0)
       .attr("fill",         cLine)
       .attr("stroke",       "hsl(var(--card))")
       .attr("stroke-width", 2.5)
       .transition()
       .duration(380)
-      .delay((_, i) => 700 + i * 70)
+      .delay((_: unknown, i: number) => 700 + i * 70)
       .attr("r", 4.5);
 
-    // ── Tooltip ──────────────────────────────────────────────────────────────
-    const tooltip = d3.select(containerRef.current)
+    const tooltip = d3.select(container)
       .append("div")
       .style("position",        "absolute")
       .style("background",      "var(--card)")
@@ -388,7 +423,6 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
       .style("transition",      "opacity 0.12s")
       .style("color",           "var(--foreground)");
 
-    // Línea vertical de hover
     const hoverLine = g.append("line")
       .attr("y1",                0)
       .attr("y2",                innerH)
@@ -397,52 +431,71 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
       .attr("stroke-width",      1.5)
       .attr("opacity",           0);
 
-    // Área de hit
-    g.append("rect")
+    const overlayNode = g.append("rect")
       .attr("width",  innerW)
       .attr("height", innerH)
       .attr("fill",   "transparent")
-      .on("mousemove", (event) => {
-        const [mx] = d3.pointer(event, g.node()!);
-        const bisect = d3.bisector((d: { mes: string }) => xScale(d.mes)!).center;
-        const idx    = Math.max(0, Math.min(bisect(chartData, mx), chartData.length - 1));
-        const d      = chartData[idx];
-        if (!d) return;
+      .node();
 
-        const cx = xScale(d.mes)!;
-        hoverLine.attr("x1", cx).attr("x2", cx).attr("opacity", 0.45);
+    const onMouseMove = (event: Event) => {
+      const [mx] = d3.pointer(event as MouseEvent, g.node()!);
+      const bisect = d3.bisector((d: { mes: string }) => xScale(d.mes)!).center;
+      const idx    = Math.max(0, Math.min(bisect(chartData, mx), chartData.length - 1));
+      const d      = chartData[idx];
+      if (!d) return;
 
-        g.selectAll(".dot-hover").remove();
-        g.append("circle")
-          .attr("class",   "dot-hover")
-          .attr("cx",      cx)
-          .attr("cy",      yScale(d.value))
-          .attr("r",       8)
-          .attr("fill",    cLine)
-          .attr("opacity", 0.15);
+      const cx = xScale(d.mes)!;
+      hoverLine.attr("x1", cx).attr("x2", cx).attr("opacity", 0.45);
 
-        const [pmx, pmy] = d3.pointer(event, containerRef.current);
-        tooltip
-          .style("opacity", "1")
-          .style("left",    `${Math.min(pmx + 14, rect.width - 130)}px`)
-          .style("top",     `${pmy - 52}px`)
-          .html(
-            `<div style="font-weight:600;color:hsl(var(--foreground));margin-bottom:2px">${d.mes}</div>` +
-            `<div style="color:var(--chart-growth);font-weight:700;font-size:13px">${d.value} empresa${d.value !== 1 ? "s" : ""}</div>`
-          );
-      })
-      .on("mouseleave", () => {
-        hoverLine.attr("opacity", 0);
-        g.selectAll(".dot-hover").remove();
-        tooltip.style("opacity", "0");
-      });
+      g.selectAll(".dot-hover").remove();
+      g.append("circle")
+        .attr("class",   "dot-hover")
+        .attr("cx",      cx)
+        .attr("cy",      yScale(d.value))
+        .attr("r",       8)
+        .attr("fill",    cLine)
+        .attr("opacity", 0.15);
+
+      const [pmx, pmy] = d3.pointer(event as MouseEvent, container);
+      tooltip
+        .style("opacity", "1")
+        .style("left",    `${Math.min(pmx + 14, rect.width - 130)}px`)
+        .style("top",     `${pmy - 52}px`)
+        .html(
+          `<div style="font-weight:600;color:hsl(var(--foreground));margin-bottom:2px">${d.mes}</div>` +
+          `<div style="color:var(--chart-growth);font-weight:700;font-size:13px">${d.value} empresa${d.value !== 1 ? "s" : ""}</div>`
+        );
+    };
+
+    const onMouseLeave = () => {
+      hoverLine.attr("opacity", 0);
+      g.selectAll(".dot-hover").remove();
+      tooltip.style("opacity", "0");
+    };
+
+    if (overlayNode) {
+      overlayNode.addEventListener("mousemove", onMouseMove);
+      overlayNode.addEventListener("mouseleave", onMouseLeave);
+    }
 
     return () => {
-      if (svgRef.current) {
-        d3.select(svgRef.current).selectAll("*").remove();
+      if (overlayNode) {
+        overlayNode.removeEventListener("mousemove", onMouseMove);
+        overlayNode.removeEventListener("mouseleave", onMouseLeave);
       }
+      d3.select(svgEl).selectAll("*").interrupt().remove();
+      tooltip.remove();
     };
-  }, [data]);
+  }, [data, d3]);
+
+  if (!d3) {
+    return (
+      <ChartSkeleton
+        title="Crecimiento de Empresas"
+        subtitle="Nuevos inquilinos por mes"
+      />
+    );
+  }
 
   return (
     <div className="bg-card border border-border p-6 rounded-2xl shadow-sm relative overflow-hidden">

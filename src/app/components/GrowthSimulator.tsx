@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp, Gift, Sparkles, DollarSign, ArrowUpRight } from "lucide-react";
+import { TrendingUp, Gift, Sparkles, ArrowUpRight } from "lucide-react";
 
 export function GrowthSimulator() {
   const [lavadosDiarios, setLavadosDiarios] = useState(40);
@@ -49,6 +49,7 @@ export function GrowthSimulator() {
                 step="5"
                 value={lavadosDiarios}
                 onChange={(e) => setLavadosDiarios(Number(e.target.value))}
+                aria-label="Lavados por día"
                 className="w-full h-2 rounded-lg bg-white/10 appearance-none cursor-pointer accent-secondary"
               />
               <div className="flex justify-between text-xs text-gray-500">
@@ -73,6 +74,7 @@ export function GrowthSimulator() {
                 step="5"
                 value={precioPromedio}
                 onChange={(e) => setPrecioPromedio(Number(e.target.value))}
+                aria-label="Ticket promedio"
                 className="w-full h-2 rounded-lg bg-white/10 appearance-none cursor-pointer accent-secondary"
               />
               <div className="flex justify-between text-xs text-gray-500">

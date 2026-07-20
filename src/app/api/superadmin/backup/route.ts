@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import crypto from "crypto";
 import { logAudit } from "@/lib/actions/auditoria";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,7 +35,9 @@ export async function GET(request: NextRequest) {
     const data = `${userId}:${expiresAt}`;
     const expectedSignature = crypto.createHmac("sha256", secret).update(data).digest("hex");
 
-    if (signature !== expectedSignature) {
+    const sigBuf = Buffer.from(signature, "hex");
+    const expectedBuf = Buffer.from(expectedSignature, "hex");
+    if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
       return new NextResponse("Token inválido", { status: 401 });
     }
 
@@ -108,7 +110,7 @@ export async function GET(request: NextRequest) {
         "Content-Disposition": `attachment; filename="washmaster-backup-${dateStr}.json"`,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en API de Backup:", error);
     return new NextResponse("Error al generar copia de seguridad", { status: 500 });
   }

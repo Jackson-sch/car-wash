@@ -8,9 +8,9 @@ export const metadata = {
   description: "Visualización e impresión de ticket de trabajo.",
 };
 
-type Props = {
+interface Props {
   params: Promise<{ id: string }>;
-};
+}
 
 export default async function TicketPage({ params }: Props) {
   const { id } = await params;

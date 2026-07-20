@@ -80,7 +80,10 @@ export const usuarios = pgTable('usuarios', {
   activo: boolean('activo').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (t) => ({
+  idxSucursal: index('idx_usuarios_sucursal').on(t.sucursalId),
+  idxEmpresa: index('idx_usuarios_empresa').on(t.empresaId),
+}));
 
 export const sesiones = pgTable('sesiones', {
   id: text('id').primaryKey(),
@@ -180,6 +183,17 @@ export const servicios = pgTable('servicios', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
+export const servicioRecetas = pgTable('servicio_recetas', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  servicioId: uuid('servicio_id').notNull().references(() => servicios.id, { onDelete: 'cascade' }),
+  itemId: uuid('item_id').notNull().references(() => inventario.id, { onDelete: 'cascade' }),
+  cantidadConsumo: numeric('cantidad_consumo', { precision: 10, scale: 3 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (t) => ({
+  uniqueItem: unique().on(t.servicioId, t.itemId),
+  idxServicio: index('idx_servicio_recetas_servicio').on(t.servicioId),
+}));
+
 export const paquetes = pgTable('paquetes', {
   id: uuid('id').primaryKey().defaultRandom(),
   sucursalId: uuid('sucursal_id').notNull().references(() => sucursales.id),
@@ -207,7 +221,43 @@ export const turnosCaja = pgTable('turnos_caja', {
   montoFinal: numeric('monto_final', { precision: 10, scale: 2 }),
   observaciones: text('observaciones'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (t) => ({
+  idxSucursal: index('idx_turnos_caja_sucursal').on(t.sucursalId),
+  idxEmpleado: index('idx_turnos_caja_empleado').on(t.empleadoId),
+}));
+
+export const liquidacionesComisiones = pgTable('liquidaciones_comisiones', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sucursalId: uuid('sucursal_id').notNull().references(() => sucursales.id),
+  empleadoId: text('empleado_id').notNull().references(() => usuarios.id),
+  fechaDesde: timestamp('fecha_desde', { withTimezone: true }).notNull(),
+  fechaHasta: timestamp('fecha_hasta', { withTimezone: true }).notNull(),
+  totalOrdenes: integer('total_ordenes').notNull().default(0),
+  montoTotal: numeric('monto_total', { precision: 10, scale: 2 }).notNull().default('0'),
+  metodoPago: text('metodo_pago').notNull().default('efectivo'),
+  referencia: text('referencia'),
+  notas: text('notas'),
+  pagadoPorId: text('pagado_por_id').references(() => usuarios.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  idxSucursal: index('idx_liq_comisiones_sucursal').on(t.sucursalId),
+  idxEmpleado: index('idx_liq_comisiones_empleado').on(t.empleadoId),
+}));
+
+export const egresosCaja = pgTable('egresos_caja', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sucursalId: uuid('sucursal_id').notNull().references(() => sucursales.id),
+  turnoId: uuid('turno_id').notNull().references(() => turnosCaja.id),
+  monto: numeric('monto', { precision: 10, scale: 2 }).notNull(),
+  motivo: text('motivo').notNull(),
+  categoria: text('categoria').notNull().default('otro'),
+  comprobanteNum: text('comprobante_num'),
+  registradoPorId: text('registrado_por_id').references(() => usuarios.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  idxTurno: index('idx_egresos_caja_turno').on(t.turnoId),
+  idxSucursal: index('idx_egresos_caja_sucursal').on(t.sucursalId),
+}));
 
 export const ordenes = pgTable('ordenes', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -216,6 +266,7 @@ export const ordenes = pgTable('ordenes', {
   vehiculoId: uuid('vehiculo_id').notNull().references(() => vehiculos.id),
   empleadoId: text('empleado_id').references(() => usuarios.id), // lavador
   cajeroId: text('cajero_id').references(() => usuarios.id),     // cajero que abre la orden
+  liquidacionId: uuid('liquidacion_id').references(() => liquidacionesComisiones.id),
   estado: estadoOrdenEnum('estado').notNull().default('pendiente'),
   prioridad: integer('prioridad').default(0),
   subtotal: numeric('subtotal', { precision: 10, scale: 2 }).default('0'),
@@ -235,6 +286,7 @@ export const ordenes = pgTable('ordenes', {
   idxCre: index('idx_ordenes_created_at').on(t.createdAt),
   idxSuc: index('idx_ordenes_sucursal').on(t.sucursalId, t.createdAt),
   idxVeh: index('idx_ordenes_vehiculo').on(t.vehiculoId),
+  idxEmp: index('idx_ordenes_empleado').on(t.empleadoId),
 }));
 
 export const ordenServicios = pgTable('orden_servicios', {
@@ -246,7 +298,9 @@ export const ordenServicios = pgTable('orden_servicios', {
   cantidad: integer('cantidad').default(1),
   subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (t) => ({
+  idxOrden: index('idx_orden_servicios_orden').on(t.ordenId),
+}));
 
 export const pagos = pgTable('pagos', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -257,7 +311,10 @@ export const pagos = pgTable('pagos', {
   referencia: text('referencia'),
   cajeroId: text('cajero_id').references(() => usuarios.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (t) => ({
+  idxOrden: index('idx_pagos_orden').on(t.ordenId),
+  idxTurno: index('idx_pagos_turno').on(t.turnoId),
+}));
 
 export const puntosFidelidad = pgTable('puntos_fidelidad', {
   id: uuid('id').primaryKey().defaultRandom(),

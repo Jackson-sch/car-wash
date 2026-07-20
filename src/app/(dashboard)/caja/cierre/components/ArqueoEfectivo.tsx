@@ -2,25 +2,7 @@ import { Coins } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/formats";
-
-export const BILLETES = [
-  { id: "b200", label: "Billete S/ 200.00", val: 200 },
-  { id: "b100", label: "Billete S/ 100.00", val: 100 },
-  { id: "b50", label: "Billete S/ 50.00", val: 50 },
-  { id: "b20", label: "Billete S/ 20.00", val: 20 },
-  { id: "b10", label: "Billete S/ 10.00", val: 10 },
-];
-
-export const MONEDAS = [
-  { id: "m5", label: "Moneda S/ 5.00", val: 5 },
-  { id: "m2", label: "Moneda S/ 2.00", val: 2 },
-  { id: "m1", label: "Moneda S/ 1.00", val: 1 },
-  { id: "m05", label: "Moneda S/ 0.50", val: 0.5 },
-  { id: "m02", label: "Moneda S/ 0.20", val: 0.2 },
-  { id: "m01", label: "Moneda S/ 0.10", val: 0.1 },
-];
-
-export const DENOMINACIONES = [...BILLETES, ...MONEDAS];
+import { BILLETES, MONEDAS } from "../types";
 
 interface ArqueoEfectivoProps {
   cantidades: Record<string, string>;
@@ -30,7 +12,7 @@ interface ArqueoEfectivoProps {
 
 export function ArqueoEfectivo({ cantidades, onCantidadesChange, totalEfectivoContado }: ArqueoEfectivoProps) {
   return (
-    <Card className="border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
+    <Card className="border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden print:shadow-none print:bg-white">
       <div className="p-4 border-b border-border bg-zinc-50/50 flex items-center justify-between">
         <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
           <Coins className="h-4.5 w-4.5 text-secondary" />
@@ -46,7 +28,7 @@ export function ArqueoEfectivo({ cantidades, onCantidadesChange, totalEfectivoCo
             Billetes
           </h3>
           <div className="space-y-2">
-            {BILLETES.map((b) => (
+            {BILLETES.map((b, idx) => (
               <div key={b.id} className="flex items-center justify-between p-2 rounded-lg bg-zinc-50/55 border border-zinc-200 text-xs">
                 <span className="font-bold text-zinc-700">{b.label}</span>
                 <div className="flex items-center gap-2">
@@ -57,6 +39,7 @@ export function ArqueoEfectivo({ cantidades, onCantidadesChange, totalEfectivoCo
                     value={cantidades[b.id] || ""}
                     onChange={(e) => onCantidadesChange(b.id, e.target.value)}
                     className="w-16 h-8 text-center text-xs p-1 font-bold border-zinc-300 focus:border-secondary focus:ring-0 text-zinc-900"
+                    autoFocus={idx === 0}
                   />
                   <span className="w-16 text-right font-extrabold text-zinc-650">
                     {formatCurrency((parseInt(cantidades[b.id] || "0") || 0) * b.val)}

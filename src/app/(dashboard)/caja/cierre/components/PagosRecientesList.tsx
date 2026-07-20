@@ -8,7 +8,7 @@ interface PagosRecientesListProps {
 
 export function PagosRecientesList({ pagos }: PagosRecientesListProps) {
   return (
-    <Card className="border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden">
+    <Card className="border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] overflow-hidden print:shadow-none print:bg-white">
       <div className="p-4 border-b border-border bg-zinc-50/50 flex justify-between items-center">
         <h2 className="text-xs uppercase font-black text-zinc-700 tracking-wider">
           Últimos Cobros Realizados

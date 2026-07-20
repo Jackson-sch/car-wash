@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { getInventario } from "@/lib/actions/inventario";
+import { getSessionOrThrow } from "@/lib/actions/servicios";
+import { getCachedInventario } from "@/lib/data";
 import { InventarioClient } from "./inventario-client";
 
 export const metadata = {
@@ -8,7 +9,8 @@ export const metadata = {
 };
 
 export default async function InventarioPage() {
-  const inventarioList = await getInventario();
+  const session = await getSessionOrThrow({ modulo: "inventario", accion: "ver" });
+  const inventarioList = await getCachedInventario(session.user.sucursalId!);
 
   return (
     <Suspense fallback={<div className="p-8 text-center text-xs text-zinc-500">Cargando inventario...</div>}>

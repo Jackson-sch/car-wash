@@ -227,11 +227,11 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
           className="pl-9 pr-9 bg-card border-border hover:border-zinc-350 dark:hover:border-zinc-750 focus-visible:ring-secondary/30 text-xs h-9 rounded-xl shadow-xs"
         />
         {search && (
-          <button
-            onClick={() => {
+          <button type="button" onClick={() => {
               setSearch("");
               setPage(null);
             }}
+            aria-label="Limpiar búsqueda"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer animate-in fade-in zoom-in duration-200"
           >
             <X className="h-4 w-4" />

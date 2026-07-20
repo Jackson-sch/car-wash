@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Cliente } from "./ClientesTable";
+import type { Cliente } from "./ClientesTable";
 
 interface AjustarPuntosModalProps {
   isOpen: boolean;
@@ -50,6 +50,7 @@ export function AjustarPuntosModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="h-6 w-6 text-zinc-500 hover:text-zinc-900 flex items-center justify-center"
           >
             <X className="h-3.5 w-3.5" />
@@ -66,7 +67,7 @@ export function AjustarPuntosModal({
               </Label>
               <Select
                 value={ajusteTipo}
-                onValueChange={(val: string | null) => val && setAjusteTipo(val as any)}
+                onValueChange={(val: string | null) => val && setAjusteTipo(val as "ganado" | "canjeado" | "ajuste")}
               >
                 <SelectTrigger id="ajTipo" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-8 px-2">
                   <SelectValue>

@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+"use client";
+
+import { useState, useMemo } from "react";
 import {
   Lock,
   TrendingUp,
@@ -6,18 +8,24 @@ import {
   Wallet,
   Coins,
   ArrowUpRight,
+  MinusCircle,
+  PlusCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/formats";
-import { TurnoActivo } from "./types";
+import type { TurnoActivo } from "./types";
+import { RegistrarEgresoModal } from "./RegistrarEgresoModal";
 
 interface CajaSummaryCardProps {
   turno: TurnoActivo;
 }
 
 export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
+  const [showEgresoModal, setShowEgresoModal] = useState(false);
+
   // Cálculos de ventas
   const stats = useMemo(() => {
     const openingCash = parseFloat(turno.montoInicial) || 0;
@@ -30,10 +38,11 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
     const yapePlinVentas = yapeVentas + plinVentas;
     const transferenciasVentas =
       turno.pagos.find((p) => p.metodo === "transferencia")?.total || 0;
+    const totalEgresos = (turno as any).totalEgresos || 0;
 
     const totalVentas =
       turno.pagos.reduce((acc, curr) => acc + curr.total, 0) || 0;
-    const totalBalance = openingCash + totalVentas;
+    const totalBalance = Math.max(0, openingCash + totalVentas - totalEgresos);
 
     return {
       openingCash,
@@ -41,6 +50,7 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
       tarjetaVentas,
       yapePlinVentas,
       transferenciasVentas,
+      totalEgresos,
       totalVentas,
       totalBalance,
     };
@@ -89,6 +99,16 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
               {formatCurrency(stats.efectivoVentas)}
             </span>
           </div>
+          {stats.totalEgresos > 0 && (
+            <div className="flex justify-between items-center py-2 border-b border-border/40 bg-red-500/5 px-2 rounded-lg text-red-600">
+              <span className="flex items-center gap-1.5 font-bold">
+                <MinusCircle className="size-4 text-red-500" /> Egresos (- Salidas)
+              </span>
+              <span className="font-extrabold text-red-600">
+                -{formatCurrency(stats.totalEgresos)}
+              </span>
+            </div>
+          )}
           <div className="flex justify-between items-center py-2 border-b border-border/40">
             <span className="text-muted-foreground flex items-center gap-1.5">
               <CreditCard className="size-4 text-muted-foreground" /> Cobros Tarjeta
@@ -117,15 +137,32 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
         </div>
       </div>
 
-      <Link
-        href="/caja/cierre"
-        className={cn(
-          "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm flex items-center justify-center mt-4 transition-all duration-200 hover:scale-[1.01]",
-        )}
-      >
-        <Lock className="size-4" />
-        Cerrar Turno (Corte de Caja)
-      </Link>
+      <div className="space-y-2 mt-4">
+        <Button
+          type="button"
+          onClick={() => setShowEgresoModal(true)}
+          variant="outline"
+          className="w-full font-bold text-xs h-9 gap-1.5 cursor-pointer border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+        >
+          <PlusCircle className="size-4 text-red-500" />
+          Registrar Egreso (Salida de Dinero)
+        </Button>
+
+        <Link
+          href="/caja/cierre"
+          className={cn(
+            "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-[1.01]",
+          )}
+        >
+          <Lock className="size-4" />
+          Cerrar Turno (Corte de Caja)
+        </Link>
+      </div>
+
+      <RegistrarEgresoModal
+        open={showEgresoModal}
+        onOpenChange={setShowEgresoModal}
+      />
     </Card>
   );
 }

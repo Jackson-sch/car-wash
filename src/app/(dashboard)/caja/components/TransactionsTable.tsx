@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { PaginationControls } from "@/components/shared/PaginationControls";
-import { TransaccionDetallada } from "./types";
+import type { TransaccionDetallada } from "./types";
 
 interface TransactionsTableProps {
   transacciones: TransaccionDetallada[];
@@ -72,11 +72,11 @@ export function TransactionsTable({ transacciones }: TransactionsTableProps) {
             className="pl-8 pr-8 h-8 text-xs w-full bg-card border-border focus:border-secondary"
           />
           {searchQuery && (
-            <button
-              onClick={() => {
+            <button type="button" onClick={() => {
                 setSearchQuery("");
                 setCurrentPage(null);
               }}
+              aria-label="Limpiar búsqueda"
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-3.5 w-3.5" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { createSucursalAction, updateSucursalAction } from "@/lib/actions/sucursales";
 import { toast } from "sonner";
-import { SucursalItem, SucursalFormData } from "./types";
+import type { SucursalItem, SucursalFormData } from "./types";
 
 interface SucursalFormSheetProps {
   isOpen: boolean;
@@ -38,24 +38,20 @@ export function SucursalFormSheet({
   initialData,
   onSuccess,
 }: SucursalFormSheetProps) {
-  const [form, setForm] = useState<SucursalFormData>(emptyForm);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (editingId && initialData) {
-        setForm({
-          nombre: initialData.nombre,
-          direccion: initialData.direccion || "",
-          telefono: initialData.telefono || "",
-          email: initialData.email || "",
-          ruc: initialData.ruc || "",
-        });
-      } else {
-        setForm(emptyForm);
-      }
+  // La inicialización se maneja con key en el padre, forzando remount
+  const [form, setForm] = useState<SucursalFormData>(() => {
+    if (editingId && initialData) {
+      return {
+        nombre: initialData.nombre,
+        direccion: initialData.direccion || "",
+        telefono: initialData.telefono || "",
+        email: initialData.email || "",
+        ruc: initialData.ruc || "",
+      };
     }
-  }, [isOpen, editingId, initialData]);
+    return emptyForm;
+  });
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!form.nombre.trim()) {

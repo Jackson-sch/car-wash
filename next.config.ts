@@ -1,6 +1,12 @@
-import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const isDev = process.env.NODE_ENV === "development";
+
+const analyzeBundles = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+  openAnalyzer: false,
+  analyzerMode: "static",
+});
 
 const contentSecurityPolicy = `
   default-src 'self';
@@ -16,7 +22,19 @@ const contentSecurityPolicy = `
   ${isDev ? "" : "upgrade-insecure-requests;"}
 `;
 
-const nextConfig: NextConfig = {
+const nextConfig = analyzeBundles({
+  experimental: {
+    optimizePackageImports: ["lucide-react", "recharts", "nuqs"],
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   async headers() {
     return [
       {
@@ -46,6 +64,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-};
+});
 
 export default nextConfig;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useReducer, useTransition, useMemo } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -12,7 +12,8 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { createCupon, updateCupon, CuponData } from "@/lib/actions/cupones";
+import type { CuponData } from "@/lib/actions/cupones";
+import { createCupon, updateCupon } from "@/lib/actions/cupones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,58 +40,94 @@ interface CuponFormProps {
 interface EditingCupon extends Omit<CuponData, "servicios"> {
   id: string;
   codigo: string;
-  servicios?: Array<{ servicioId?: string | null; servicio?: { id: string } | null }>;
+  servicios?: { servicioId?: string | null; servicio?: { id: string } | null }[];
+}
+
+interface CuponFormState {
+  codigo: string;
+  tipoDescuento: "porcentaje" | "fijo";
+  valorDescuento: string;
+  compraMinima: string;
+  fechaInicio: Date | undefined;
+  fechaFin: Date | undefined;
+  limiteTotal: string;
+  limitePorCliente: string;
+  serviciosSeleccionados: string[];
+}
+
+type Action =
+  | { type: "SET_FIELD"; field: keyof CuponFormState; value: unknown }
+  | { type: "TOGGLE_SERVICIO"; id: string }
+  | { type: "RESET" };
+
+const INITIAL_FORM: CuponFormState = {
+  codigo: "",
+  tipoDescuento: "porcentaje",
+  valorDescuento: "",
+  compraMinima: "",
+  fechaInicio: undefined,
+  fechaFin: undefined,
+  limiteTotal: "",
+  limitePorCliente: "1",
+  serviciosSeleccionados: [],
+};
+
+function formReducer(state: CuponFormState, action: Action): CuponFormState {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "TOGGLE_SERVICIO":
+      return {
+        ...state,
+        serviciosSeleccionados: state.serviciosSeleccionados.includes(action.id)
+          ? state.serviciosSeleccionados.filter((sId) => sId !== action.id)
+          : [...state.serviciosSeleccionados, action.id],
+      };
+    case "RESET":
+      return { ...INITIAL_FORM };
+    default:
+      return state;
+  }
+}
+
+function editingToState(cupon: EditingCupon): CuponFormState {
+  return {
+    codigo: cupon.codigo || "",
+    tipoDescuento: cupon.tipoDescuento || "porcentaje",
+    valorDescuento: cupon.valorDescuento?.toString() || "",
+    compraMinima: cupon.compraMinima?.toString() || "",
+    fechaInicio: cupon.fechaInicio ? new Date(cupon.fechaInicio) : undefined,
+    fechaFin: cupon.fechaFin ? new Date(cupon.fechaFin) : undefined,
+    limiteTotal: cupon.limiteTotal?.toString() || "",
+    limitePorCliente: cupon.limitePorCliente?.toString() || "1",
+    serviciosSeleccionados:
+      cupon.servicios
+        ?.map((s) => s.servicioId || s.servicio?.id)
+        .filter((id): id is string => Boolean(id)) || [],
+  };
 }
 
 export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormProps) {
+  // key={editingCupon?.id || 'nuevo'} fuerza remonte con estado fresco
+  return <CuponFormContent key={editingCupon?.id || "nuevo"} servicios={servicios} editingCupon={editingCupon} onCancelEdit={onCancelEdit} />;
+}
+
+function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormProps) {
   const [isPending, startTransition] = useTransition();
+  const initialForm = editingCupon ? editingToState(editingCupon) : { ...INITIAL_FORM };
+  const [form, dispatch] = useReducer(formReducer, initialForm);
 
-  const [codigo, setCodigo] = useState("");
-  const [tipoDescuento, setTipoDescuento] = useState<"porcentaje" | "fijo">("porcentaje");
-  const [valorDescuento, setValorDescuento] = useState("");
-  const [compraMinima, setCompraMinima] = useState("");
-  const [fechaInicio, setFechaInicio] = useState<Date | undefined>(undefined);
-  const [fechaFin, setFechaFin] = useState<Date | undefined>(undefined);
-  const [limiteTotal, setLimiteTotal] = useState("");
-  const [limitePorCliente, setLimitePorCliente] = useState("1");
-  const [serviciosSeleccionados, setServiciosSeleccionados] = useState<string[]>([]);
+  const { codigo, tipoDescuento, valorDescuento, compraMinima, fechaInicio, fechaFin, limiteTotal, limitePorCliente, serviciosSeleccionados } = form;
+  const selectedServiciosSet = useMemo(() => new Set(serviciosSeleccionados), [serviciosSeleccionados]);
 
-  useEffect(() => {
-    if (editingCupon) {
-      setCodigo(editingCupon.codigo || "");
-      setTipoDescuento(editingCupon.tipoDescuento || "porcentaje");
-      setValorDescuento(editingCupon.valorDescuento?.toString() || "");
-      setCompraMinima(editingCupon.compraMinima?.toString() || "");
-      setFechaInicio(editingCupon.fechaInicio ? new Date(editingCupon.fechaInicio) : undefined);
-      setFechaFin(editingCupon.fechaFin ? new Date(editingCupon.fechaFin) : undefined);
-      setLimiteTotal(editingCupon.limiteTotal?.toString() || "");
-      setLimitePorCliente(editingCupon.limitePorCliente?.toString() || "1");
-      setServiciosSeleccionados(
-        editingCupon.servicios
-          ?.map((s) => s.servicioId || s.servicio?.id)
-          .filter((id): id is string => Boolean(id)) || []
-      );
-    }
-  }, [editingCupon]);
-
-  const resetForm = () => {
-    setCodigo("");
-    setTipoDescuento("porcentaje");
-    setValorDescuento("");
-    setCompraMinima("");
-    setFechaInicio(undefined);
-    setFechaFin(undefined);
-    setLimiteTotal("");
-    setLimitePorCliente("1");
-    setServiciosSeleccionados([]);
-  };
+  const sf = (field: keyof CuponFormState, value: unknown) =>
+    dispatch({ type: "SET_FIELD", field, value });
 
   const generateRandomCode = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const values = new Uint8Array(8);
     let code = "";
     let index = 0;
-
     while (index < values.length) {
       crypto.getRandomValues(values);
       for (const value of values) {
@@ -100,18 +137,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
         if (index === values.length) break;
       }
     }
-    setCodigo(code);
-  };
-
-  const handleToggleServicio = (id: string) => {
-    setServiciosSeleccionados((prev) =>
-      prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
-    );
-  };
-
-  const handleCancel = () => {
-    resetForm();
-    onCancelEdit?.();
+    sf("codigo", code);
   };
 
   const handleSubmit = async () => {
@@ -139,7 +165,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
 
       if (res.success) {
         toast.success(editingCupon ? "Cupón actualizado exitosamente" : "Cupón creado exitosamente");
-        resetForm();
+        dispatch({ type: "RESET" });
         onCancelEdit?.();
       } else {
         toast.error(res.error || "Error al guardar cupón");
@@ -147,6 +173,9 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
     });
   };
 
+  const resetForm = () => dispatch({ type: "RESET" });
+  const handleCancel = () => { resetForm(); onCancelEdit?.(); };
+  const handleToggleServicio = (id: string) => dispatch({ type: "TOGGLE_SERVICIO", id });
   const isEditing = !!editingCupon;
 
   return (
@@ -179,7 +208,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                   className="uppercase font-mono"
                   placeholder="EJ: VERANO20"
                   value={codigo}
-                  onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                  onChange={(e) => sf("codigo", e.target.value.toUpperCase())}
                 />
                 <Button variant="outline" onClick={generateRandomCode} title="Generar Aleatorio" className="px-3">
                   <RefreshCw className="h-4 w-4" />
@@ -192,7 +221,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                 type="number"
                 placeholder="Ej. 50"
                 value={compraMinima}
-                onChange={(e) => setCompraMinima(e.target.value)}
+                onChange={(e) => sf("compraMinima", e.target.value)}
               />
             </div>
           </div>
@@ -201,8 +230,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase text-muted-foreground">Tipo de Descuento</Label>
               <div className="flex p-1 bg-muted/50 rounded-lg border border-border">
-                <button
-                  onClick={() => setTipoDescuento("porcentaje")}
+                <button type="button" onClick={() => sf("tipoDescuento", "porcentaje")}
                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
                     tipoDescuento === "porcentaje"
                       ? "bg-background shadow-sm border border-border text-foreground"
@@ -211,8 +239,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                 >
                   Porcentaje (%)
                 </button>
-                <button
-                  onClick={() => setTipoDescuento("fijo")}
+                <button type="button" onClick={() => sf("tipoDescuento", "fijo")}
                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
                     tipoDescuento === "fijo"
                       ? "bg-background shadow-sm border border-border text-foreground"
@@ -230,7 +257,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                 className="h-11!"
                 placeholder={tipoDescuento === "porcentaje" ? "15" : "10.00"}
                 value={valorDescuento}
-                onChange={(e) => setValorDescuento(e.target.value)}
+                onChange={(e) => sf("valorDescuento", e.target.value)}
               />
             </div>
           </div>
@@ -262,7 +289,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                   <Calendar
                     mode="single"
                     selected={fechaInicio}
-                    onSelect={setFechaInicio}
+                    onSelect={(d) => sf("fechaInicio", d)}
                     locale={es}
                   />
                 </PopoverContent>
@@ -284,7 +311,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                   <Calendar
                     mode="single"
                     selected={fechaFin}
-                    onSelect={setFechaFin}
+                    onSelect={(d) => sf("fechaFin", d)}
                     locale={es}
                   />
                 </PopoverContent>
@@ -298,7 +325,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                 type="number"
                 placeholder="Ilimitado si está en blanco"
                 value={limiteTotal}
-                onChange={(e) => setLimiteTotal(e.target.value)}
+                onChange={(e) => sf("limiteTotal", e.target.value)}
               />
               <p className="text-xs text-muted-foreground">Veces que puede ser usado globalmente.</p>
             </div>
@@ -307,7 +334,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
               <Input
                 type="number"
                 value={limitePorCliente}
-                onChange={(e) => setLimitePorCliente(e.target.value)}
+                onChange={(e) => sf("limitePorCliente", e.target.value)}
               />
             </div>
           </div>
@@ -332,7 +359,7 @@ export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                 className="flex items-center gap-3 p-3 rounded-lg border border-transparent hover:border-border hover:bg-muted/30 cursor-pointer transition-colors"
               >
                 <Checkbox
-                  checked={serviciosSeleccionados.includes(s.id)}
+                  checked={selectedServiciosSet.has(s.id)}
                   onCheckedChange={() => handleToggleServicio(s.id)}
                 />
                 <div className="flex-1">

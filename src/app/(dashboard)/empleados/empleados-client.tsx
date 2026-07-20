@@ -8,7 +8,6 @@ import {
   actualizarEmpleado,
   cambiarEstadoEmpleado,
 } from "@/lib/actions/empleados";
-import { StatsCard } from "@/components/shared/StatsCard";
 import { toast } from "sonner";
 import { EmpleadosGrid } from "./components/EmpleadosGrid";
 import { CrearEmpleadoModal } from "./components/CrearEmpleadoModal";
@@ -100,7 +99,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
                     nombre: res.data.nombre,
                     apellido: res.data.apellido,
                     telefono: res.data.telefono,
-                    rol: res.data.rol as any,
+                    rol: res.data.rol as Empleado["rol"],
                   }
                 : emp
             )

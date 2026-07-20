@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { clientes, vehiculos, puntosFidelidad, ordenes } from "@/lib/db/schema";
 import { eq, and, desc, sql, inArray, ilike } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 // Buscar vehículo por placa y devolver datos del cliente asociado
@@ -47,7 +47,7 @@ export async function buscarVehiculoPorPlaca(placa: string) {
 }
 
 // Obtener todos los clientes con su total de puntos y cantidad de vehículos
-export async function getClientes() {
+async function getClientes() {
   try {
     const session = await getSessionOrThrow({ modulo: "clientes", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
@@ -114,6 +114,7 @@ export async function createCliente(data: {
       })
       .returning();
 
+    revalidateTag("clientes", { expire: 600 });
     revalidatePath("/clientes");
     return { success: true, data: newCliente };
   } catch (error: unknown) {
@@ -222,6 +223,7 @@ export async function ajustarPuntosCliente(data: {
       })
       .returning();
 
+    revalidateTag("clientes", { expire: 600 });
     revalidatePath("/clientes");
     return { success: true, data: newLog };
   } catch (error: unknown) {

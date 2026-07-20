@@ -122,7 +122,7 @@ export function PasoOperacionNotas({
         <div className="space-y-1">
           <h4 className="text-xs font-bold text-amber-900 dark:text-amber-300">Validación de Datos</h4>
           <p className="text-[10px] text-amber-800 dark:text-amber-400 leading-relaxed font-bold">
-            Por favor, confirma que la placa <span className="text-muted-foreground font-extrabold">{placa.toUpperCase()}</span> y los datos del cliente son correctos antes de enviar. Al guardar, se generará el ticket de servicio en estado "En Espera".
+            Por favor, confirma que la placa <span className="text-muted-foreground font-extrabold">{placa.toUpperCase()}</span> y los datos del cliente son correctos antes de enviar. Al guardar, se generará el ticket de servicio en estado &ldquo;En Espera&rdquo;.
           </p>
         </div>
       </Card>

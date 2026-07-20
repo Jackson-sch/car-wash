@@ -3,18 +3,11 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "@/lib/auth-client";
-import {
-  MapPin,
-  ChevronRight,
-  ChevronDown,
-  User,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { DynamicIcon } from "@/components/ui/dynamic-icon"
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/shared/theme-provider";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, startTransition, useSyncExternalStore } from "react";
 import {
   getEmpresaSucursales,
   switchActiveBranch,
@@ -33,6 +26,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
 
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 type TurnoActivo = Awaited<ReturnType<typeof getTurnoActivo>>;
 
 export function Header() {
@@ -40,6 +37,7 @@ export function Header() {
   const router = useRouter();
   const { data: session } = useSession();
   const { theme, toggleTheme } = useTheme();
+  const mounted = useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot);
 
   const [branches, setBranches] = useState<{ id: string; nombre: string }[]>(
     [],
@@ -52,8 +50,12 @@ export function Header() {
   const [turnoActivo, setTurnoActivo] = useState<TurnoActivo>(null);
   const [loadingCaja, setLoadingCaja] = useState(true);
 
+  const userId = session?.user?.id;
+  const sucursalId = session?.user?.sucursalId;
+  const userRol = session?.user?.rol;
+
   const fetchCajaStatus = useCallback(async () => {
-    if (session?.user && session.user.rol !== "superadmin") {
+    if (session?.user && userRol !== "superadmin") {
       try {
         const turno = await getTurnoActivo();
         setTurnoActivo(turno);
@@ -65,13 +67,13 @@ export function Header() {
     } else {
       setLoadingCaja(false);
     }
-  }, [session]);
+  }, [session, userRol]);
 
   useEffect(() => {
-    if (session?.user && session.user.rol !== "superadmin") {
+    if (userId && userRol !== "superadmin") {
       getEmpresaSucursales().then((data) => {
         setBranches(data);
-        const active = data.find((b) => b.id === session.user.sucursalId);
+        const active = data.find((b) => b.id === sucursalId);
         if (active) {
           setActiveBranch(active);
         } else if (data.length > 0) {
@@ -79,11 +81,15 @@ export function Header() {
         }
       });
     }
-  }, [session]);
+  }, [userId, sucursalId, userRol]);
 
   useEffect(() => {
-    fetchCajaStatus();
-  }, [fetchCajaStatus, pathname]);
+    if (userId && userRol !== "superadmin") {
+      startTransition(() => {
+        fetchCajaStatus();
+      });
+    }
+  }, [userId, sucursalId, userRol, fetchCajaStatus]);
 
   useEffect(() => {
     const handleCajaChange = () => {
@@ -96,7 +102,7 @@ export function Header() {
     };
   }, [fetchCajaStatus]);
 
-  const handleBranchChange = async (sucursalId: string) => {
+  const handleBranchChange = useCallback(async (sucursalId: string) => {
     const res = await switchActiveBranch(sucursalId);
     if (res.success) {
       toast.success(`Cambiado a: ${res.sucursalNombre}`);
@@ -106,7 +112,7 @@ export function Header() {
     } else {
       toast.error(res.error || "No se pudo cambiar de sucursal.");
     }
-  };
+  }, []);
 
   // Generate Breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -149,7 +155,7 @@ export function Header() {
           </Link>
           {breadcrumbs.map((crumb, index) => (
             <div key={crumb.href} className="flex items-center gap-1.5">
-              <ChevronRight className="h-3 w-3" />
+              <DynamicIcon name="ChevronRight" className="h-3 w-3" />
               {index === breadcrumbs.length - 1 ? (
                 <span
                   className="text-secondary font-extrabold"
@@ -192,9 +198,9 @@ export function Header() {
                   />
                 }
               >
-                <MapPin className="h-3.5 w-3.5 text-secondary" />
+                <DynamicIcon name="MapPin" className="h-3.5 w-3.5 text-secondary" />
                 <span>{activeBranch?.nombre || "Cargando sucursal..."}</span>
-                <ChevronDown className="h-3 w-3 opacity-60" />
+                <DynamicIcon name="ChevronDown" className="h-3 w-3 opacity-60" />
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
@@ -224,7 +230,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 border border-border text-xs font-semibold text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 text-secondary" />
+              <DynamicIcon name="MapPin" className="h-3.5 w-3.5 text-secondary" />
               <span>
                 {activeBranch ? activeBranch.nombre : "Cargando..."}
               </span>
@@ -284,7 +290,9 @@ export function Header() {
                 size="icon-lg"
                 className="h-9 w-9 p-0 rounded-full bg-linear-to-tr from-blue-600 to-sky-400 hover:scale-105 text-zinc-950 flex items-center justify-center font-bold text-xs border border-sky-400/25 shadow-md shadow-secondary/10 cursor-pointer transition-all duration-300"
               >
-                {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                <span suppressHydrationWarning>
+                  {mounted ? (session?.user?.name?.charAt(0).toUpperCase() || "U") : "U"}
+                </span>
               </Button>
             }
           />
@@ -300,14 +308,14 @@ export function Header() {
               onClick={() => router.push("/perfil")}
               className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground"
             >
-              <User className="mr-2 h-4 w-4 text-muted-foreground" />
+              <DynamicIcon name="User" className="mr-2 h-4 w-4 text-muted-foreground" />
               <span>Ver Perfil</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => router.push("/configuracion")}
               className="focus:bg-muted cursor-pointer py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 text-foreground"
             >
-              <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
+              <DynamicIcon name="Settings" className="mr-2 h-4 w-4 text-muted-foreground" />
               <span>Configuración</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border/40 my-1" />
@@ -315,7 +323,7 @@ export function Header() {
               onClick={handleSignOut}
               className="focus:bg-rose-500/10 focus:text-rose-600 dark:focus:text-rose-450 cursor-pointer text-foreground py-2 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-2"
             >
-              <LogOut className="mr-2 h-4 w-4 text-rose-500/70" />
+              <DynamicIcon name="LogOut" className="mr-2 h-4 w-4 text-rose-500/70" />
               <span>Cerrar Sesión</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

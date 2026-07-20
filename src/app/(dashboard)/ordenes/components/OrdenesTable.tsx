@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import type {
+  SortingState} from "@tanstack/react-table";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
-  getSortedRowModel,
-  SortingState,
+  getSortedRowModel
 } from "@tanstack/react-table";
 import { ClipboardList } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -81,6 +82,8 @@ export function OrdenesTable({
     onAssignLavador,
   });
 
+  // @tanstack/react-table devuelve funciones que el React Compiler no puede memoizar automáticamente
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: ordenes,
     columns,

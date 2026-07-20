@@ -1,10 +1,12 @@
 "use client";
 
+import { useCallback } from "react";
 import { Car, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatShortDate } from "@/lib/formats";
 import { TipoIcon } from "./TipoIcon";
-import { TIPO_LABELS, VehiculoData } from "../types";
+import type { VehiculoData } from "../types";
+import { TIPO_LABELS } from "../types";
 
 interface EspecificacionesCardProps {
   vehiculo: VehiculoData;
@@ -12,7 +14,7 @@ interface EspecificacionesCardProps {
 
 export function EspecificacionesCard({ vehiculo }: EspecificacionesCardProps) {
   // Helper to resolve CSS hex color from color names
-  const getColorHex = (colorName: string | null) => {
+  const getColorHex = useCallback((colorName: string | null) => {
     if (!colorName) return null;
     const name = colorName.toLowerCase().trim();
     switch (name) {
@@ -38,7 +40,7 @@ export function EspecificacionesCard({ vehiculo }: EspecificacionesCardProps) {
       default:
         return null;
     }
-  };
+  }, []);
 
   const swatchColor = getColorHex(vehiculo.color);
 

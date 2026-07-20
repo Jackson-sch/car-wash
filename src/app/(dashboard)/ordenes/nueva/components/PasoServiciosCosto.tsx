@@ -29,7 +29,7 @@ interface PasoServiciosCostoProps {
   setDescuento: (v: string) => void;
   subtotal: number;
   total: number;
-  sucursalConfig: Record<string, any>;
+  sucursalConfig: { multipliers?: Record<string, number> };
 }
 
 const defaultMultipliers: Record<string, number> = {
@@ -41,6 +41,8 @@ const defaultMultipliers: Record<string, number> = {
   furgon: 1.8,
   otro: 1.0,
 };
+
+const EMPTY_MULTIPLIERS: Record<string, number> = {};
 
 export function PasoServiciosCosto({
   servicios,
@@ -54,7 +56,9 @@ export function PasoServiciosCosto({
   sucursalConfig,
 }: PasoServiciosCostoProps) {
 
-  const dbMultipliers = sucursalConfig.multipliers || {};
+  const selectedSet = useMemo(() => new Set(serviciosSeleccionados), [serviciosSeleccionados]);
+
+  const dbMultipliers = sucursalConfig.multipliers || EMPTY_MULTIPLIERS;
   const multiplier = useMemo(() => {
     return dbMultipliers[vehiculoTipo] ?? defaultMultipliers[vehiculoTipo] ?? 1.0;
   }, [dbMultipliers, vehiculoTipo]);
@@ -107,8 +111,8 @@ export function PasoServiciosCosto({
               className="pl-8 pr-8 h-8 text-xs"
             />
             {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
+              <button type="button" onClick={() => setSearchQuery("")}
+                aria-label="Limpiar búsqueda"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
@@ -130,7 +134,7 @@ export function PasoServiciosCosto({
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {items.map((serv) => {
-                    const isSelected = serviciosSeleccionados.includes(serv.id);
+                    const isSelected = selectedSet.has(serv.id);
                     const calculatedPrice = calculateServicePrice(serv.precio);
 
                     return (

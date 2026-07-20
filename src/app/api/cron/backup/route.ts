@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
-export const dynamic = "force-dynamic";
 
 const ALGORITHM = "aes-256-cbc";
 
@@ -123,10 +123,10 @@ export async function GET(request: NextRequest) {
       path: uploadData.path,
       fileName,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error en API de Cron Backup:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Error interno al generar backup" },
+      { success: false, error: error instanceof Error ? error.message : "Error interno al generar backup" },
       { status: 500 }
     );
   }

@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -92,6 +91,32 @@
 
   --color-rose-450: var(--rose-450);
 
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height, var(--accordion-panel-height, auto)); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height, var(--accordion-panel-height, auto)); }
+  to { height: 0; }
+}
+
+@custom-variant data-open (&:is([data-state=open] *));
+@custom-variant data-closed (&:is([data-state=closed] *));
+@custom-variant data-checked (&:is([data-state=checked] *));
+@custom-variant data-unchecked (&:is([data-state=unchecked] *));
+@custom-variant data-selected (&:is([data-selected] *));
+@custom-variant data-disabled (&:is([data-disabled] *));
+@custom-variant data-active (&:is([data-active] *));
+@custom-variant data-horizontal (&:is([data-orientation=horizontal] *));
+@custom-variant data-vertical (&:is([data-orientation=vertical] *));
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
 :root {
@@ -337,8 +362,34 @@
   }
 }
 
+/* ── Print Styles ─────────────────────────────────────────────────────── */
+@media print {
+  body {
+    background: white !important;
+  }
+  /* Ocultar navegación y UI de la app al imprimir */
+  aside,
+  header,
+  button,
+  a {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  #print-area {
+    display: block !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+
 ::view-transition-old(root), ::view-transition-new(root) {
     animation: none;
     mix-blend-mode: normal;
-
 }

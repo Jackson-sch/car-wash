@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { db } from "@/lib/db";
 import { configGlobal } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+
 
 let transporter: nodemailer.Transporter | null = null;
 let cachedConfig: { host: string; port: number; user: string; pass: string; fromEmail: string; fromName: string } | null = null;

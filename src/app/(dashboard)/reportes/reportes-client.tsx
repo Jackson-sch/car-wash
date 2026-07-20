@@ -1,16 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQueryState } from "nuqs";
 import { BarChart3, Sparkles, Download } from "lucide-react";
-import { ReportData } from "./components/types";
+import type { ReportData } from "./components/types";
 import { exportarVentasCSV, exportarServiciosCSV, exportarPagosCSV } from "@/lib/actions/exportar-reportes";
 import { toast } from "sonner";
 import { ReportesSummaryCards } from "./components/ReportesSummaryCards";
-import { VentasChart } from "./components/VentasChart";
-import { MetodosPagoChart } from "./components/MetodosPagoChart";
-import { ServiciosTopChart } from "./components/ServiciosTopChart";
-import { HorasPicoChart } from "./components/HorasPicoChart";
+import dynamic from "next/dynamic";
+
+const VentasChart = dynamic(
+  () => import("./components/VentasChart").then((m) => ({ default: m.VentasChart })),
+  { ssr: false }
+);
+const MetodosPagoChart = dynamic(
+  () => import("./components/MetodosPagoChart").then((m) => ({ default: m.MetodosPagoChart })),
+  { ssr: false }
+);
+const ServiciosTopChart = dynamic(
+  () => import("./components/ServiciosTopChart").then((m) => ({ default: m.ServiciosTopChart })),
+  { ssr: false }
+);
+const HorasPicoChart = dynamic(
+  () => import("./components/HorasPicoChart").then((m) => ({ default: m.HorasPicoChart })),
+  { ssr: false }
+);
 import { PredictiveInsights } from "./components/PredictiveInsights";
 
 interface ReportesClientProps {
@@ -60,9 +74,10 @@ const DEMO_HORAS_PICO = [
 ];
 
 export function ReportesClient({ initialData }: ReportesClientProps) {
-  const [mounted, setMounted] = useState(false);
+  // Auto-activar demo si no hay datos reales
+  const demoAuto = initialData.kpis.totalVentas === 0 && initialData.kpis.ordenesCompletadas === 0;
   const [useDemo, setUseDemo] = useQueryState("demo", {
-    defaultValue: false,
+    defaultValue: demoAuto,
     parse: (v) => v === "true" || v === "1",
     serialize: (v) => (v ? "true" : "false"),
     shallow: true,
@@ -89,22 +104,8 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
     setExporting(false);
   };
 
-  // Evitar desajustes de hidratación de Recharts
-  useEffect(() => {
-    setMounted(true);
-    // Si no hay ventas registradas en absoluto en los KPIs generales, activar demo automáticamente
-    if (initialData.kpis.totalVentas === 0 && initialData.kpis.ordenesCompletadas === 0) {
-      setUseDemo(true);
-    }
-  }, [initialData]);
-
-  if (!mounted) {
-    return (
-      <div className="h-96 flex items-center justify-center text-zinc-500 text-xs">
-        Cargando visualizaciones estadísticas...
-      </div>
-    );
-  }
+  // Nota: No se necesita guard de hidratación — todos los charts se importan
+  // con dynamic(..., { ssr: false }), y el layout estático no tiene discrepancias.
 
   // Decidir qué datos usar
   const kpis = useDemo
@@ -131,28 +132,24 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="relative group">
-              <button
-                disabled={exporting}
+              <button type="button" disabled={exporting}
                 className="text-[10px] font-bold bg-card border border-zinc-350 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
               >
                 <Download className="h-3.5 w-3.5 text-secondary" />
                 {exporting ? "Exportando..." : "Exportar"}
               </button>
               <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                <button
-                  onClick={() => handleExport("ventas")}
+                <button type="button" onClick={() => handleExport("ventas")}
                   className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
                 >
                   Ventas CSV
                 </button>
-                <button
-                  onClick={() => handleExport("servicios")}
+                <button type="button" onClick={() => handleExport("servicios")}
                   className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
                 >
                   Servicios CSV
                 </button>
-                <button
-                  onClick={() => handleExport("pagos")}
+                <button type="button" onClick={() => handleExport("pagos")}
                   className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
                 >
                   Pagos CSV
@@ -160,8 +157,7 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
               </div>
             </div>
 
-            <button
-              onClick={() => setUseDemo(!useDemo)}
+            <button type="button" onClick={() => setUseDemo(!useDemo)}
               className="text-[10px] font-bold bg-card border border-zinc-350 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               <Sparkles className="h-3.5 w-3.5 text-secondary" />

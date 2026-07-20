@@ -26,7 +26,7 @@ interface BackupPanelProps {
   sucursal: Sucursal;
 }
 
-export function BackupPanel({ sucursal }: BackupPanelProps) {
+export function BackupPanel({ sucursal: _sucursal }: BackupPanelProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [verifying, setVerifying] = useState(false);

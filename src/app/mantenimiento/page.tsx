@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import { configGlobal } from "@/lib/db/schema";
 import { Wrench } from "lucide-react";
 
-export const dynamic = "force-dynamic";
 
 export default async function MantenimientoPage() {
   const [config] = await db.select().from(configGlobal).limit(1);

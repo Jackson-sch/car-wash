@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Moon, Sun } from "lucide-react"
+import { DynamicIcon } from "@/components/ui/dynamic-icon"
 import { flushSync } from "react-dom"
 
 import { cn } from "@/lib/utils"
@@ -267,7 +267,7 @@ export const AnimatedThemeToggler = ({
       className={cn(className)}
       {...props}
     >
-      {isDark ? <Sun className="size-4.5 text-amber-500" /> : <Moon className="size-4.5 text-zinc-950" />}
+      {isDark ? <DynamicIcon name="Sun" className="size-4.5 text-amber-500" /> : <DynamicIcon name="Moon" className="size-4.5 text-zinc-950" />}
       <span className="sr-only">Toggle theme</span>
     </button>
   )

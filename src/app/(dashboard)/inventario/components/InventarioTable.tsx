@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Search,
   Package,
@@ -65,14 +65,14 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
   const [sortBy, setSortBy] = useState<"nombre" | "stock" | "precio">("nombre");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  const getStatus = (st: number, min: number): StatusFilter => {
+  const getStatus = useCallback((st: number, min: number): StatusFilter => {
     if (st === 0) return "agotado";
     if (st <= min) return "bajo";
     return "suficiente";
-  };
+  }, []);
 
   const filtered = useMemo(() => {
-    let result = insumos.filter((item) => {
+    const result = insumos.filter((item) => {
       const q = (searchQuery || "").toLowerCase();
       const matchesSearch =
         !q ||
@@ -102,7 +102,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
     });
 
     return result;
-  }, [insumos, searchQuery, statusFilter, sortBy, sortDir]);
+  }, [insumos, searchQuery, statusFilter, sortBy, sortDir, getStatus]);
 
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -121,14 +121,14 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
     }
   };
 
-  const renderSortIcon = (field: "nombre" | "stock" | "precio") => {
+  const renderSortIcon = useCallback((field: "nombre" | "stock" | "precio") => {
     if (sortBy !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-30" />;
     return (
       <ChevronDown
         className={`h-3 w-3 ml-1 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`}
       />
     );
-  };
+  }, [sortBy, sortDir]);
 
   const statsBarLow = filtered.filter((i) => {
     const st = parseFloat(i.stock || "0");
@@ -210,8 +210,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
               <TableHeader>
                 <TableRow className="bg-muted/40 border-b border-border">
                   <TableHead className="py-3.5 px-4">
-                    <button
-                      onClick={() => toggleSort("nombre")}
+                    <button type="button" onClick={() => toggleSort("nombre")}
                       className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       Insumo
@@ -219,8 +218,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
                     </button>
                   </TableHead>
                   <TableHead className="py-3.5 px-4">
-                    <button
-                      onClick={() => toggleSort("stock")}
+                    <button type="button" onClick={() => toggleSort("stock")}
                       className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       Stock Actual
@@ -237,8 +235,7 @@ export function InventarioTable({ insumos, onAdjustStock }: InventarioTableProps
                     Proveedor
                   </TableHead>
                   <TableHead className="py-3.5 px-4">
-                    <button
-                      onClick={() => toggleSort("precio")}
+                    <button type="button" onClick={() => toggleSort("precio")}
                       className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       Costo

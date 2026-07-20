@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useReducer } from "react";
 import { X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Servicio, Categoria } from "./ServiciosGrid";
+import type { Servicio, Categoria } from "./ServiciosGrid";
 
 const VEHICULO_OPCIONES = [
   { id: "sedan", label: "Sedán" },
@@ -41,7 +41,67 @@ interface ServicioModalProps {
   onOpenNewCategoria: () => void;
 }
 
-export function ServicioModal({
+interface ServicioFormState {
+  nombre: string;
+  descripcion: string;
+  precio: string;
+  duracionMin: string;
+  categoriaId: string;
+  aplicaA: string[];
+}
+
+type ServicioAction =
+  | { type: "SET_FIELD"; field: keyof ServicioFormState; value: unknown }
+  | { type: "TOGGLE_VEHICULO"; id: string }
+  | { type: "RESET"; categoriaDefault?: string };
+
+const INITIAL_SERVICIO: ServicioFormState = {
+  nombre: "",
+  descripcion: "",
+  precio: "",
+  duracionMin: "30",
+  categoriaId: "",
+  aplicaA: ["sedan", "suv"],
+};
+
+function servReducer(state: ServicioFormState, action: ServicioAction): ServicioFormState {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "TOGGLE_VEHICULO":
+      return {
+        ...state,
+        aplicaA: state.aplicaA.includes(action.id)
+          ? state.aplicaA.filter((item) => item !== action.id)
+          : [...state.aplicaA, action.id],
+      };
+    case "RESET":
+      return { ...INITIAL_SERVICIO, categoriaId: action.categoriaDefault || "" };
+    default:
+      return state;
+  }
+}
+
+export function ServicioModal(props: ServicioModalProps) {
+  const { isOpen, servicio } = props;
+  if (!isOpen) return null;
+
+  // key={servicio?.id || 'nuevo'} fuerza remonte con estado fresco
+  return (
+    <ServicioFormContent
+      key={servicio?.id || "nuevo"}
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      servicio={servicio}
+      categorias={props.categorias}
+      isPending={props.isPending}
+      onSave={props.onSave}
+      onOpenNewCategoria={props.onOpenNewCategoria}
+    />
+  );
+}
+
+function ServicioFormContent({
   isOpen,
   onClose,
   servicio,
@@ -50,38 +110,27 @@ export function ServicioModal({
   onSave,
   onOpenNewCategoria,
 }: ServicioModalProps) {
-  const [nombre, setNombre] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [precio, setPrecio] = useState("");
-  const [duracionMin, setDuracionMin] = useState("30");
-  const [categoriaId, setCategoriaId] = useState("");
-  const [aplicaA, setAplicaA] = useState<string[]>(["sedan", "suv"]);
+  const initial = servicio
+    ? {
+        nombre: servicio.nombre,
+        descripcion: servicio.descripcion || "",
+        precio: servicio.precio,
+        duracionMin: servicio.duracionMin?.toString() || "30",
+        categoriaId: servicio.categoriaId || categorias[0]?.id || "",
+        aplicaA: servicio.aplicaA || ["sedan", "suv"],
+      }
+    : { ...INITIAL_SERVICIO, categoriaId: categorias[0]?.id || "" };
 
-  // Sync state with selected service when editing
-  useEffect(() => {
-    if (servicio) {
-      setNombre(servicio.nombre);
-      setDescripcion(servicio.descripcion || "");
-      setPrecio(servicio.precio);
-      setDuracionMin(servicio.duracionMin?.toString() || "30");
-      setCategoriaId(servicio.categoriaId || "");
-      setAplicaA(servicio.aplicaA || []);
-    } else {
-      setNombre("");
-      setDescripcion("");
-      setPrecio("");
-      setDuracionMin("30");
-      setCategoriaId(categorias[0]?.id || "");
-      setAplicaA(["sedan", "suv"]);
-    }
-  }, [servicio, categorias, isOpen]);
+  const [form, dispatch] = useReducer(servReducer, initial);
+
+  const { nombre, descripcion, precio, duracionMin, categoriaId, aplicaA } = form;
+  const sf = (field: keyof ServicioFormState, value: unknown) => dispatch({ type: "SET_FIELD", field, value });
+  const toggleVehiculo = (id: string) => dispatch({ type: "TOGGLE_VEHICULO", id });
 
   if (!isOpen) return null;
 
   const handleVehiculoToggle = (id: string) => {
-    setAplicaA((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+    toggleVehiculo(id);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,6 +162,7 @@ export function ServicioModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 flex items-center justify-center transition-colors"
           >
             <X className="h-4 w-4" />
@@ -129,7 +179,7 @@ export function ServicioModal({
               id="nombre"
               placeholder="Ej. Lavado Premium, Detallado de Motor..."
               value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              onChange={(e) => sf("nombre", e.target.value)}
               required
               className="bg-card border-zinc-300 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
             />
@@ -146,7 +196,7 @@ export function ServicioModal({
                 step="0.01"
                 placeholder="0.00"
                 value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
+                onChange={(e) => sf("precio", e.target.value)}
                 required
                 className="bg-card border-zinc-300 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
               />
@@ -161,7 +211,7 @@ export function ServicioModal({
                 type="number"
                 placeholder="30"
                 value={duracionMin}
-                onChange={(e) => setDuracionMin(e.target.value)}
+                onChange={(e) => sf("duracionMin", e.target.value)}
                 className="bg-card border-zinc-300 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
               />
             </div>
@@ -183,7 +233,7 @@ export function ServicioModal({
             </div>
             <Select
               value={categoriaId || "unassigned"}
-              onValueChange={(val: string | null) => setCategoriaId(!val || val === "unassigned" ? "" : val)}
+              onValueChange={(val: string | null) => sf("categoriaId", !val || val === "unassigned" ? "" : val)}
             >
               <SelectTrigger id="categoria" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-9 px-3">
                 <SelectValue placeholder="Selecciona una categoría">
@@ -213,7 +263,7 @@ export function ServicioModal({
               id="descripcion"
               placeholder="Describe las tareas incluidas en el servicio..."
               value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
+              onChange={(e) => sf("descripcion", e.target.value)}
               rows={3}
               className="w-full bg-card border border-zinc-300 focus:border-secondary rounded-lg text-xs p-3 text-zinc-800 outline-none resize-none"
             />

@@ -27,20 +27,40 @@ export function SortableItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: orden.id });
+  } = useSortable({
+    id: orden.id,
+    transition: {
+      duration: 300,
+      easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+    },
+  });
 
+  const baseTransform = CSS.Transform.toString(transform);
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: isDragging && baseTransform
+      ? `${baseTransform} scale(0.95)`
+      : baseTransform || undefined,
+    transition: transition ?? "transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease",
+    opacity: isDragging ? 0.4 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="w-full touch-none">
-      <OrderCard 
-        orden={orden} 
-        lavadores={lavadores} 
-        onStatusChange={onStatusChange} 
-        onAssignLavador={onAssignLavador} 
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`w-full touch-none transition-[opacity,transform,box-shadow] duration-200 ${
+        isDragging
+          ? "[&>div]:shadow-lg [&>div]:ring-2 [&>div]:ring-secondary/50"
+          : ""
+      }`}
+    >
+      <OrderCard
+        orden={orden}
+        lavadores={lavadores}
+        onStatusChange={onStatusChange}
+        onAssignLavador={onAssignLavador}
         onEdit={onEdit}
         isDragging={isDragging}
       />

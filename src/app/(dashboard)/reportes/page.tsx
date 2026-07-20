@@ -1,4 +1,5 @@
-import { getReportesVentas } from "@/lib/actions/reportes";
+import { getSessionOrThrow } from "@/lib/actions/servicios";
+import { getCachedReportesVentas } from "@/lib/data";
 import { ReportesClient } from "./reportes-client";
 
 export const metadata = {
@@ -7,7 +8,10 @@ export const metadata = {
 };
 
 export default async function ReportesPage() {
-  const reportesData = await getReportesVentas();
+  const session = await getSessionOrThrow();
+
+  // Reportes se cachean 2 minutos (datos históricos, no crítica la frescura)
+  const reportesData = await getCachedReportesVentas(session.user.sucursalId!);
 
   return <ReportesClient initialData={reportesData} />;
 }

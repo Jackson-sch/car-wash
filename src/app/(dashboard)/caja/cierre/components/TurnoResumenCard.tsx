@@ -12,7 +12,7 @@ interface TurnoResumenCardProps {
 
 export function TurnoResumenCard({ resumen }: TurnoResumenCardProps) {
   return (
-    <Card className="p-5 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4">
+    <Card className="p-5 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4 print:shadow-none print:bg-white">
       <h2 className="text-xs uppercase font-black text-zinc-700 tracking-wider border-b border-border pb-1">
         Resumen Operativo del Turno
       </h2>

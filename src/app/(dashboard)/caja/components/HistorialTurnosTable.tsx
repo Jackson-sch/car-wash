@@ -10,7 +10,7 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
-import { TurnoHistorial } from "./types";
+import type { TurnoHistorial } from "./types";
 import { formatCurrency, formatDate } from "@/lib/formats";
 import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/shared/PaginationControls";

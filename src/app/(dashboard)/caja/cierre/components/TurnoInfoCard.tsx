@@ -9,7 +9,7 @@ interface TurnoInfoCardProps {
 
 export function TurnoInfoCard({ turno, systemStats }: TurnoInfoCardProps) {
   return (
-    <Card className="p-4 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+    <Card className="p-4 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center print:shadow-none print:bg-white">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center border border-border text-zinc-500">
           <User className="h-5 w-5" />

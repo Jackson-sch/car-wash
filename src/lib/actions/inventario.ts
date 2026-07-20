@@ -4,11 +4,11 @@ import { db } from "@/lib/db";
 import { inventario, inventarioMovimientos } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 // Obtener catálogo de insumos de inventario
-export async function getInventario() {
+async function getInventario() {
   try {
     const session = await getSessionOrThrow({ modulo: "inventario", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
@@ -52,6 +52,8 @@ export async function registrarItemInventario(data: {
       })
       .returning();
 
+    revalidateTag("inventario", { expire: 600 });
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/inventario");
     return { success: true, data: newItem };
   } catch (error: unknown) {
@@ -112,6 +114,8 @@ export async function registrarMovimientoStock(data: {
       .where(and(eq(inventario.id, data.itemId), eq(inventario.sucursalId, sucursalId)))
       .returning();
 
+    revalidateTag("inventario", { expire: 600 });
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/inventario");
     return { success: true, data: updated };
   } catch (error: unknown) {

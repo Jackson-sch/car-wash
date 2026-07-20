@@ -17,12 +17,14 @@ interface KpiGridProps {
   };
 }
 
+import type { LucideIcon } from "lucide-react";
+
 interface KPI {
   title: string;
   value: string;
   change: string;
   trend: "up" | "down" | "neutral";
-  icon: any;
+  icon: LucideIcon;
   iconColor: string;
   iconBg: string;
 }
@@ -69,11 +71,11 @@ export function KpiGrid({ kpis }: KpiGridProps) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpiList.map((kpi, i) => {
+      {kpiList.map((kpi) => {
         const Icon = kpi.icon;
         return (
           <div
-            key={i}
+            key={kpi.title}
             className="p-6 rounded-lg border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:border-secondary transition-all duration-300 flex flex-col justify-between h-32 group"
           >
             <div className="flex items-center justify-between">

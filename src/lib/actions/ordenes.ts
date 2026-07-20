@@ -11,10 +11,14 @@ import {
   turnosCaja,
   pagos,
   sucursales,
+  servicioRecetas,
+  inventario,
+  inventarioMovimientos,
 } from "@/lib/db/schema";
-import { eq, and, desc, sql, count, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+
 import { getErrorMessage } from "./action-utils";
 
 // Obtener todas las órdenes de la sucursal actual
@@ -62,7 +66,7 @@ export async function getOrdenes() {
 // Obtener lista de lavadores activos de la sucursal para asignar
 export async function getEmpleadosLavadores() {
   try {
-    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "asignar" });
+    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
 
     return await db
@@ -346,21 +350,27 @@ export async function createOrden(data: {
       })
       .returning();
 
-    // 7. Insertar Servicios Detallados de la Orden
-    for (const servicioId of selectedServiceIds) {
-      const servicio = serviciosPorId.get(servicioId);
-      if (!servicio) continue;
+    // 7. Insertar Servicios Detallados de la Orden (en 1 solo bulk insert)
+    const servicesToInsert = selectedServiceIds
+      .map((servicioId) => {
+        const servicio = serviciosPorId.get(servicioId);
+        if (!servicio) return null;
+        return {
+          ordenId: newOrden.id,
+          servicioId,
+          nombreServicio: servicio.nombre,
+          precioUnitario: servicio.precio,
+          cantidad: 1,
+          subtotal: servicio.precio,
+        };
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null);
 
-      await db.insert(ordenServicios).values({
-        ordenId: newOrden.id,
-        servicioId,
-        nombreServicio: servicio.nombre,
-        precioUnitario: servicio.precio,
-        cantidad: 1,
-        subtotal: servicio.precio,
-      });
+    if (servicesToInsert.length > 0) {
+      await db.insert(ordenServicios).values(servicesToInsert);
     }
 
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/ordenes");
     revalidatePath("/dashboard");
     return { success: true, data: newOrden };
@@ -388,7 +398,50 @@ export async function updateOrdenEstado(id: string, nuevoEstado: "pendiente" | "
     if (existing && existing.estado === "cobrado" && nuevoEstado === "cancelado") {
       // Reconciliar en caja: borrar transacciones de pago asociadas
       await db.delete(pagos).where(eq(pagos.ordenId, id));
-      console.log(`Reconciliación de caja: se eliminaron los pagos asociados a la orden cancelada ${id}`);
+    }
+
+    // 2. Descuento automático de Kardex de Insumos al marcar como 'completado'
+    if (existing && nuevoEstado === "completado" && existing.estado !== "completado") {
+      const serviciosOrden = await db
+        .select({ servicioId: ordenServicios.servicioId })
+        .from(ordenServicios)
+        .where(eq(ordenServicios.ordenId, id));
+
+      const servicioIds = serviciosOrden.map((s) => s.servicioId);
+
+      if (servicioIds.length > 0) {
+        const recetas = await db
+          .select({
+            itemId: servicioRecetas.itemId,
+            cantidadConsumo: servicioRecetas.cantidadConsumo,
+          })
+          .from(servicioRecetas)
+          .where(inArray(servicioRecetas.servicioId, servicioIds));
+
+        await Promise.all(
+          recetas.map(async (receta) => {
+            const cantidad = parseFloat(receta.cantidadConsumo) || 0;
+            if (cantidad > 0) {
+              await db
+                .update(inventario)
+                .set({
+                  stock: sql`${inventario.stock} - ${cantidad}`,
+                  updatedAt: new Date(),
+                })
+                .where(eq(inventario.id, receta.itemId));
+
+              await db.insert(inventarioMovimientos).values({
+                itemId: receta.itemId,
+                tipo: "salida",
+                cantidad: receta.cantidadConsumo,
+                motivo: `Consumo automático por Orden #${id.substring(0, 8).toUpperCase()}`,
+                usuarioId: session.user.id,
+              });
+            }
+          })
+        );
+        revalidateTag("inventario", { expire: 600 });
+      }
     }
 
     const [updated] = await db
@@ -402,8 +455,10 @@ export async function updateOrdenEstado(id: string, nuevoEstado: "pendiente" | "
       .where(and(eq(ordenes.id, id), eq(ordenes.sucursalId, sucursalId)))
       .returning();
 
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/ordenes");
     revalidatePath("/caja");
+    revalidatePath("/inventario");
     revalidatePath("/dashboard");
     return { success: true, data: updated };
   } catch (error: unknown) {
@@ -445,6 +500,7 @@ export async function asignarLavadorAOrden(id: string, empleadoId: string | null
       .where(and(eq(ordenes.id, id), eq(ordenes.sucursalId, sucursalId)))
       .returning();
 
+    revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/ordenes");
     return { success: true, data: updated };
   } catch (error: unknown) {

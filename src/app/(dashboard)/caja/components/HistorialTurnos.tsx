@@ -4,7 +4,7 @@ import { useState } from "react";
 import { History } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useQueryState, parseAsInteger } from "nuqs";
-import { TurnoHistorial } from "./types";
+import type { TurnoHistorial } from "./types";
 import { HistorialTurnosTable } from "./HistorialTurnosTable";
 import { TurnoCierreDetailSheet } from "./TurnoCierreDetailSheet";
 

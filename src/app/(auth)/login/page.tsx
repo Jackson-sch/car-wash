@@ -7,12 +7,13 @@ import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Car, Lock, Mail, Loader2, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, TrendingUp, Users, ShieldCheck } from "lucide-react";
+import { Lock, Mail, Loader2, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, TrendingUp, Users, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import { signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 
 const loginSchema = z.object({
-  email: z.string().email("Por favor ingresa un correo electrónico válido"),
+  email: z.email({ message: "Por favor ingresa un correo electrónico válido" }),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
@@ -52,7 +53,7 @@ export default function LoginPage() {
         setAuthError(null);
         const redirectTo = data.user.rol === "superadmin" ? "/superadmin" : "/dashboard";
         toast.success("Sesión iniciada con éxito");
-        window.location.href = redirectTo;
+        router.push(redirectTo);
       }
     } catch (err) {
       setAuthError("Ocurrió un error inesperado al iniciar sesión.");
@@ -82,7 +83,7 @@ export default function LoginPage() {
         <div className="flex items-center justify-between mb-8 lg:mb-0">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="h-10 w-10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
+              <Image src="/logo-shield.png" alt="WashMaster Logo" width={40} height={40} className="h-full w-full object-contain" />
             </div>
             <div>
               <span className="font-extrabold text-xl tracking-tight text-foreground">
@@ -147,6 +148,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

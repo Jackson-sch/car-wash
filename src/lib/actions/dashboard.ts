@@ -84,7 +84,7 @@ async function getEmpresaBranches(empresaId: string): Promise<{ id: string; nomb
 
 // ─── Main fetcher ───────────────────────────────────────────────────────────────
 
-export async function getDashboardData(
+async function getDashboardData(
   vistaInput: "todas" | "sucursal" = "sucursal"
 ): Promise<DashboardData> {
   const session = await getSessionOrThrow();
@@ -376,17 +376,18 @@ export async function getDashboardData(
 
   let turnoActivo: TurnoActivoData | null = null;
   if (activeShift) {
-    const [cashVentasResult] = await db
-      .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
-      .from(pagos)
-      .where(
-        and(eq(pagos.turnoId, activeShift.id), eq(pagos.metodo, "efectivo"))
-      );
-
-    const [totalVentasResult] = await db
-      .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
-      .from(pagos)
-      .where(eq(pagos.turnoId, activeShift.id));
+    const [[cashVentasResult], [totalVentasResult]] = await Promise.all([
+      db
+        .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
+        .from(pagos)
+        .where(
+          and(eq(pagos.turnoId, activeShift.id), eq(pagos.metodo, "efectivo"))
+        ),
+      db
+        .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
+        .from(pagos)
+        .where(eq(pagos.turnoId, activeShift.id)),
+    ]);
 
     turnoActivo = {
       id: activeShift.id,
@@ -406,37 +407,40 @@ export async function getDashboardData(
       sucursalesInfo.map(async (b) => {
         const branchFilter = eq(ordenes.sucursalId, b.id);
 
-        const [branchVentas] = await db
-          .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
-          .from(pagos)
-          .innerJoin(ordenes, eq(pagos.ordenId, ordenes.id))
-          .where(
-            and(
-              branchFilter,
-              gte(pagos.createdAt, todayStart),
-              lte(pagos.createdAt, todayEnd)
-            )
-          );
-
-        const [branchActive] = await db
-          .select({ total: sql<number>`count(*)` })
-          .from(ordenes)
-          .where(
-            and(
-              branchFilter,
-              or(eq(ordenes.estado, "pendiente"), eq(ordenes.estado, "en_proceso"))
-            )
-          );
-
-        const [branchAvg] = await db
-          .select({ avg: sql<number>`COALESCE(AVG(${ordenes.total}), 0)` })
-          .from(ordenes)
-          .where(
-            and(
-              branchFilter,
-              or(eq(ordenes.estado, "cobrado"), eq(ordenes.estado, "completado"))
-            )
-          );
+        const [ventasResult, activeResult, avgResult] = await Promise.all([
+          db
+            .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
+            .from(pagos)
+            .innerJoin(ordenes, eq(pagos.ordenId, ordenes.id))
+            .where(
+              and(
+                branchFilter,
+                gte(pagos.createdAt, todayStart),
+                lte(pagos.createdAt, todayEnd)
+              )
+            ),
+          db
+            .select({ total: sql<number>`count(*)` })
+            .from(ordenes)
+            .where(
+              and(
+                branchFilter,
+                or(eq(ordenes.estado, "pendiente"), eq(ordenes.estado, "en_proceso"))
+              )
+            ),
+          db
+            .select({ avg: sql<number>`COALESCE(AVG(${ordenes.total}), 0)` })
+            .from(ordenes)
+            .where(
+              and(
+                branchFilter,
+                or(eq(ordenes.estado, "cobrado"), eq(ordenes.estado, "completado"))
+              )
+            ),
+        ]);
+        const [branchVentas] = ventasResult;
+        const [branchActive] = activeResult;
+        const [branchAvg] = avgResult;
 
         return {
           id: b.id,

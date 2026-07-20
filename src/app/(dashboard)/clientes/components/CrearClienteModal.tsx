@@ -81,6 +81,7 @@ export function CrearClienteModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 flex items-center justify-center"
           >
             <X className="h-4 w-4" />

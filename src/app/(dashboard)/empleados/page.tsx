@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { getEmpleadosComisiones } from "@/lib/actions/empleados";
+import { getSessionOrThrow } from "@/lib/actions/servicios";
+import { getCachedEmpleados } from "@/lib/data";
 import { EmpleadosClient } from "./empleados-client";
 
 export const metadata = {
@@ -8,7 +9,8 @@ export const metadata = {
 };
 
 export default async function EmpleadosPage() {
-  const empleadosList = await getEmpleadosComisiones();
+  const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
+  const empleadosList = await getCachedEmpleados(session.user.sucursalId!);
 
   return (
     <Suspense fallback={<div className="p-8 text-center text-xs text-zinc-500">Cargando empleados...</div>}>

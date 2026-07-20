@@ -5,7 +5,8 @@ import { PlusCircle, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TipoIcon } from "./TipoIcon";
-import { TIPO_LABELS, VehiculoData } from "../types";
+import type { VehiculoData } from "../types";
+import { TIPO_LABELS } from "../types";
 
 interface VehiculoHeroProps {
   vehiculo: VehiculoData;

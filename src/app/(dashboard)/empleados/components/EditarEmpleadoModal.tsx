@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -40,31 +40,44 @@ interface EditarEmpleadoModalProps {
   ) => Promise<boolean>;
 }
 
-export function EditarEmpleadoModal({
-  isOpen,
+export function EditarEmpleadoModal(props: EditarEmpleadoModalProps) {
+  const { isOpen, empleado } = props;
+  if (!isOpen || !empleado) return null;
+
+  // Usamos key={empleado.id} para que React remonte el formulario
+  // con estado fresco cuando se selecciona un empleado distinto,
+  // evitando así el patrón useEffect + setState que el linter rechaza.
+  return (
+    <EditarEmpleadoForm
+      key={empleado.id}
+      empleado={empleado}
+      onClose={props.onClose}
+      isPending={props.isPending}
+      currentUserId={props.currentUserId}
+      onSave={props.onSave}
+    />
+  );
+}
+
+// Tipo separado para el subcomponente: omite `isOpen` (solo la usa el padre)
+// y exige `empleado` no-null (el padre ya validó que existe).
+type EditarEmpleadoFormProps = Omit<EditarEmpleadoModalProps, 'isOpen'> & {
+  empleado: NonNullable<EditarEmpleadoModalProps['empleado']>;
+};
+
+function EditarEmpleadoForm({
   onClose,
   isPending,
   empleado,
   currentUserId,
   onSave,
-}: EditarEmpleadoModalProps) {
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [rol, setRol] = useState<"admin" | "supervisor" | "cajero" | "lavador">("lavador");
-
-  // Sync state when employee is selected or opened
-  useEffect(() => {
-    if (empleado) {
-      setNombre(empleado.nombre);
-      setApellido(empleado.apellido || "");
-      setTelefono(empleado.telefono || "");
-      // Filter out superadmin role for standard employee update form
-      setRol(empleado.rol === "superadmin" ? "admin" : (empleado.rol as any));
-    }
-  }, [empleado, isOpen]);
-
-  if (!isOpen || !empleado) return null;
+}: EditarEmpleadoFormProps) {
+  const [nombre, setNombre] = useState(empleado.nombre);
+  const [apellido, setApellido] = useState(empleado.apellido || "");
+  const [telefono, setTelefono] = useState(empleado.telefono || "");
+  const [rol, setRol] = useState<"admin" | "supervisor" | "cajero" | "lavador">(
+    empleado.rol === "superadmin" ? "admin" : (empleado.rol as "admin" | "supervisor" | "cajero" | "lavador")
+  );
 
   const isSelf = currentUserId === empleado.id;
   const isSuperAdmin = empleado.rol === "superadmin";
@@ -93,8 +106,8 @@ export function EditarEmpleadoModal({
             <h3 className="text-base font-bold text-foreground">Modificar Ficha de Personal</h3>
             <p className="text-xs text-muted-foreground mt-1">Actualiza la información laboral del empleado.</p>
           </div>
-          <button
-            onClick={onClose}
+          <button type="button" onClick={onClose}
+            aria-label="Cerrar"
             className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center"
           >
             <X className="h-4 w-4" />
@@ -155,7 +168,7 @@ export function EditarEmpleadoModal({
               <Label htmlFor="editRol" className="text-xs font-bold text-muted-foreground">Rol Asignado</Label>
               <Select
                 value={rol}
-                onValueChange={(val: string | null) => val && setRol(val as any)}
+                onValueChange={(val: string | null) => val && setRol(val as "admin" | "supervisor" | "cajero" | "lavador")}
                 disabled={isSelf || isSuperAdmin}
               >
                 <SelectTrigger id="editRol" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-9 px-3 disabled:cursor-not-allowed disabled:opacity-65">

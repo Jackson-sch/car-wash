@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Sparkles, Car, ArrowRight, LayoutDashboard, Coins, Users, CheckCircle2, Clock, Star } from "lucide-react";
+import Image from "next/image";
+import { Sparkles, Car, ArrowRight, LayoutDashboard, Coins, Users, Clock } from "lucide-react";
 import { FeaturesGrid } from "./components/FeaturesGrid";
 import { GrowthSimulator } from "./components/GrowthSimulator";
 
@@ -39,7 +40,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="h-10 w-10 flex items-center justify-center shrink-0">
-              <img src="/logo-shield.png" alt="WashMaster Logo" className="h-full w-full object-contain" />
+              <Image src="/logo-shield.png" alt="WashMaster Logo" width={40} height={40} className="h-full w-full object-contain" />
             </div>
             <div>
               <span

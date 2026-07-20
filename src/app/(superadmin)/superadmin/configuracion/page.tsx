@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import { configGlobal } from "@/lib/db/schema";
 import { ConfigForm } from "./config-form";
 
-export const dynamic = "force-dynamic";
 
 export default async function ConfiguracionPage() {
   let [config] = await db.select().from(configGlobal).limit(1);

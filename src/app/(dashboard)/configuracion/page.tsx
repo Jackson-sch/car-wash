@@ -1,6 +1,5 @@
 import { getSucursalConfig } from "@/lib/actions/configuracion";
 import { ConfiguracionClient } from "./configuracion-client";
-import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Configuración del Sistema - WashMaster Pro",

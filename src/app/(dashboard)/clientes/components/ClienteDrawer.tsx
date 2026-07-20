@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Car, History, Gift, Phone, Mail, FileText, CreditCard, Clock } from "lucide-react";
-import { Cliente } from "./ClientesTable";
+import type { Cliente } from "./ClientesTable";
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 
 export interface Vehiculo {
@@ -89,6 +89,7 @@ export function ClienteDrawer({
               <button
                 type="button"
                 onClick={onClose}
+                aria-label="Cerrar"
                 className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />

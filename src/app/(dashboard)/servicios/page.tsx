@@ -1,24 +1,27 @@
-import { Suspense } from "react";
-import { getServicios, getCategoriasServicio } from "@/lib/actions/servicios";
+import { getSessionOrThrow } from "@/lib/actions/servicios";
+import { getCachedServicios, getCachedCategoriasServicio, getCachedInventario } from "@/lib/data";
 import { ServiciosClient } from "./servicios-client";
 
 export const metadata = {
   title: "Catálogo de Servicios - WashMaster Pro",
-  description: "Gestión de los servicios ofrecidos, tarifas y duración de lavado.",
+  description: "Gestión de los servicios ofrecidos, recetas de insumos y tarifas.",
 };
 
 export default async function ServiciosPage() {
-  // Obtener datos del servidor
-  const servicios = await getServicios();
-  const categorias = await getCategoriasServicio();
+  const session = await getSessionOrThrow();
+
+  const [servicios, categorias, insumos] = await Promise.all([
+    getCachedServicios(session.user.sucursalId!),
+    getCachedCategoriasServicio(session.user.sucursalId!),
+    getCachedInventario(session.user.sucursalId!),
+  ]);
 
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-zinc-500">Cargando servicios...</div>}>
-      <ServiciosClient
-        initialServicios={servicios}
-        initialCategorias={categorias}
-      />
-    </Suspense>
+    <ServiciosClient
+      initialServicios={servicios}
+      initialCategorias={categorias}
+      insumosDisponibles={insumos}
+    />
   );
 }
 

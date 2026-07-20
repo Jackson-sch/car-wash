@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { Building2, Building, ShieldCheck, HelpCircle } from "lucide-react";
-import { StatsCard } from "@/components/shared/StatsCard";
-import { SucursalItem } from "./types";
+import { Building2, Building, ShieldCheck } from "lucide-react";
+import type { SucursalItem } from "./types";
 
 interface SucursalesKpisProps {
   sucursales: SucursalItem[];

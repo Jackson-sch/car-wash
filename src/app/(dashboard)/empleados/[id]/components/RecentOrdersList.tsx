@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/formats";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card } from "@/components/ui/card";
-import { Eye, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 interface OrdenReciente {
   id: string;

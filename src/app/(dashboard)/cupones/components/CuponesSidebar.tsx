@@ -13,9 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 
+interface Cupon {
+  id: string;
+  codigo: string;
+  activo: boolean;
+  tipoDescuento: "porcentaje" | "fijo";
+  valorDescuento: number;
+  fechaFin: Date | null;
+  usos?: unknown[];
+  servicios?: { servicioId?: string | null; servicio?: { id: string } | null }[];
+}
+
 interface CuponesSidebarProps {
-  cupones: any[];
-  onEdit: (cupon: any) => void;
+  cupones: Cupon[];
+  onEdit: (cupon: Cupon) => void;
 }
 
 export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
@@ -34,7 +45,7 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
     const term = (searchQuery || "").toLowerCase();
     if (!term) return cupones;
     return cupones.filter(
-      (c: any) =>
+      (c: Cupon) =>
         c.codigo.toLowerCase().includes(term) ||
         (c.tipoDescuento || "").toLowerCase().includes(term)
     );
@@ -79,11 +90,11 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
             className="pl-8 pr-8 h-8 text-xs"
           />
           {searchQuery && (
-            <button
-              onClick={() => {
+            <button type="button" onClick={() => {
                 setSearchQuery("");
                 setPage(null);
               }}
+              aria-label="Limpiar búsqueda"
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-3.5 w-3.5" />
@@ -105,7 +116,7 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
           </div>
         ) : (
           <div className="space-y-3">
-            {paginatedData.map((cupon: any) => (
+            {paginatedData.map((cupon: Cupon) => (
               <div
                 key={cupon.id}
                 className={`p-3 border rounded-lg transition-colors ${
@@ -135,7 +146,7 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
                   {cupon.tipoDescuento === "porcentaje" ? `${cupon.valorDescuento}% off` : `${formatCurrency(cupon.valorDescuento)} off`}
-                  {cupon.servicios?.length > 0 ? ` en ${cupon.servicios.length} servicios` : " en todo"}
+                  {cupon.servicios && cupon.servicios.length > 0 ? ` en ${cupon.servicios.length} servicios` : " en todo"}
                 </p>
                 <div className="flex justify-between items-center text-[11px] text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -163,7 +174,7 @@ export function CuponesSidebar({ cupones, onEdit }: CuponesSidebarProps) {
           <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-3">Impacto General</h4>
           <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
             <p className="text-3xl font-bold text-foreground">
-              {cupones.reduce((acc: number, c: any) => acc + (c.usos?.length || 0), 0)}
+              {cupones.reduce((acc: number, c: Cupon) => acc + (c.usos?.length || 0), 0)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">Canjes Totales de Cupones</p>
             <div className="mt-3 flex items-center text-[11px] text-green-600 font-medium">
