@@ -39,6 +39,7 @@ async function getEmpleadosComisiones() {
         empleadoId: ordenes.empleadoId,
         totalLavados: count(ordenes.id),
         montoTotal: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
+        tiempoPromedioMin: sql<number>`coalesce(avg(extract(epoch from (${ordenes.updatedAt} - ${ordenes.createdAt})) / 60), 25)::int`,
       })
       .from(ordenes)
       .where(
@@ -49,25 +50,27 @@ async function getEmpleadosComisiones() {
       )
       .groupBy(ordenes.empleadoId);
 
-    const statsMap = new Map<string, { totalLavados: number; montoTotal: number }>();
+    const statsMap = new Map<string, { totalLavados: number; montoTotal: number; tiempoPromedioMin: number }>();
     for (const row of lavadorStats) {
       if (row.empleadoId) {
         statsMap.set(row.empleadoId, {
           totalLavados: row.totalLavados,
           montoTotal: parseFloat(row.montoTotal || "0"),
+          tiempoPromedioMin: row.tiempoPromedioMin || 25,
         });
       }
     }
 
     const result = empleadosList.map((emp) => {
       if (emp.rol === "lavador") {
-        const s = statsMap.get(emp.id) || { totalLavados: 0, montoTotal: 0 };
+        const s = statsMap.get(emp.id) || { totalLavados: 0, montoTotal: 0, tiempoPromedioMin: 25 };
         const comisionVal = s.montoTotal * 0.30;
         return {
           ...emp,
           totalLavados: s.totalLavados,
           montoLavado: s.montoTotal,
           comisionAcumulada: comisionVal,
+          tiempoPromedioMin: s.tiempoPromedioMin,
         };
       }
       return {
@@ -75,6 +78,7 @@ async function getEmpleadosComisiones() {
         totalLavados: 0,
         montoLavado: 0,
         comisionAcumulada: 0,
+        tiempoPromedioMin: 0,
       };
     });
 

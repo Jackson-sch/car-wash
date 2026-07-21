@@ -117,6 +117,11 @@ export function NuevaOrdenClient({
             vehiculoTipo={o.vehiculoTipo}
             descuento={o.descuento}
             setDescuento={o.setDescuento}
+            cuponCodigo={o.cuponCodigo}
+            setCuponCodigo={o.setCuponCodigo}
+            cuponAplicado={o.cuponAplicado}
+            aplicarCupon={o.aplicarCupon}
+            removerCupon={o.removerCupon}
             subtotal={o.subtotal}
             total={o.total}
             sucursalConfig={sucursalConfig}

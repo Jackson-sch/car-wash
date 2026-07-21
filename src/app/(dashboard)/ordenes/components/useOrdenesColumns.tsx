@@ -73,10 +73,10 @@ export function useOrdenesColumns({
         };
 
         return (
-          <div className="flex flex-col gap-0.5 relative pl-3">
+          <div className="flex flex-col gap-0.5">
             {/* Indicador sutil de prioridad en el borde izquierdo del ticket */}
             {ord.prioridad === 1 && (
-              <span className="absolute left-0 top-0 bottom-0 w-[2.5px] bg-rose-500 rounded-full" />
+              <span className="absolute left-0 top-0 bottom-0 w-[5px] bg-rose-500 rounded-full" />
             )}
             <div className="flex items-center gap-1.5">
               <span className="font-mono font-black text-foreground text-xs tracking-tight">
@@ -84,7 +84,7 @@ export function useOrdenesColumns({
               </span>
               {ord.prioridad === 1 && (
                 <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[8px] font-black tracking-wider uppercase animate-pulse">
-                  Express ⚡
+                  Express
                 </span>
               )}
             </div>
@@ -105,7 +105,7 @@ export function useOrdenesColumns({
                 className="text-[9px] text-muted-foreground font-medium flex items-center gap-1 mt-0.5"
                 suppressHydrationWarning
               >
-                <Clock className="h-2.5 w-2.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+                <Clock className="size-2.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
                 {formatTime(ord.createdAt)}
               </span>
             )}
@@ -117,7 +117,7 @@ export function useOrdenesColumns({
       accessorKey: "placa",
       header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Placa</span>,
       cell: ({ row }) => (
-        <div className="inline-flex items-center bg-muted/65 dark:bg-muted/40 border border-border rounded px-1.5 py-0.5 shadow-2xs select-none font-mono">
+        <div className="inline-flex w-16 items-center bg-muted/65 dark:bg-muted/40 border border-border rounded px-1.5 py-0.5 shadow-2xs select-none font-mono">
           <div className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-650 mr-1 shadow-2xs" />
           <span className="text-[10px] font-bold text-foreground  uppercase">
             {row.getValue("placa")}

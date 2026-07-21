@@ -14,6 +14,7 @@ import {
   servicioRecetas,
   inventario,
   inventarioMovimientos,
+  puntosFidelidad,
 } from "@/lib/db/schema";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
@@ -455,8 +456,34 @@ export async function updateOrdenEstado(id: string, nuevoEstado: "pendiente" | "
       .where(and(eq(ordenes.id, id), eq(ordenes.sucursalId, sucursalId)))
       .returning();
 
-    revalidateTag("dashboard", { expire: 300 });
+    // Acumulación automática de Puntos de Fidelidad al completar o cobrar
+    if ((nuevoEstado === "completado" || nuevoEstado === "cobrado") && updated.vehiculoId) {
+      const [veh] = await db
+        .select({ clienteId: vehiculos.clienteId })
+        .from(vehiculos)
+        .where(eq(vehiculos.id, updated.vehiculoId));
+
+      if (veh?.clienteId) {
+        const puntosGanados = Math.floor(parseFloat(updated.total || "0"));
+        if (puntosGanados > 0) {
+          await db
+            .insert(puntosFidelidad)
+            .values({
+              clienteId: veh.clienteId,
+              ordenId: updated.id,
+              puntos: puntosGanados,
+              tipo: "ganado",
+              descripcion: `Puntos ganados por Orden #${updated.nroTicket || updated.id.substring(0, 8)}`,
+            })
+            .catch(() => {});
+        }
+      }
+    }
+
+    revalidateTag("dashboard", { expire: 0 });
+    revalidateTag("ordenes", { expire: 0 });
     revalidatePath("/ordenes");
+    revalidatePath("/kiosco");
     revalidatePath("/caja");
     revalidatePath("/inventario");
     revalidatePath("/dashboard");
@@ -517,7 +544,7 @@ export async function registrarComprobanteSunat(data: {
   numero?: string;
 }) {
   try {
-    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "editar" });
+    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "crear" });
     const sucursalId = session.user.sucursalId!;
     const isSuperAdmin = session.user.rol === "superadmin";
 
@@ -590,3 +617,53 @@ export async function registrarComprobanteSunat(data: {
     return { success: false, error: getErrorMessage(error, "Error al registrar comprobante") };
   }
 }
+
+// Obtener automáticamente el siguiente número correlativo para la serie de comprobantes
+export async function getSiguienteCorrelativoComprobante(
+  tipo: "boleta" | "factura",
+  serieInput?: string
+) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "ver" });
+    const sucursalId = session.user.sucursalId!;
+
+    const serie = (serieInput || (tipo === "boleta" ? "B001" : "F001")).toUpperCase().trim();
+
+    const [row] = await db
+      .select({
+        maxNum: sql<string>`MAX(${ordenes.comprobanteNumero})`,
+      })
+      .from(ordenes)
+      .where(
+        and(
+          eq(ordenes.sucursalId, sucursalId),
+          eq(ordenes.comprobanteTipo, tipo),
+          eq(ordenes.comprobanteSerie, serie)
+        )
+      );
+
+    let nextNumber = 1;
+    if (row?.maxNum) {
+      const parsed = parseInt(row.maxNum, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        nextNumber = parsed + 1;
+      }
+    }
+
+    const numeroPadded = nextNumber.toString().padStart(8, "0");
+
+    return {
+      success: true,
+      serie,
+      numero: numeroPadded,
+    };
+  } catch (error) {
+    console.error("Error al obtener siguiente correlativo:", error);
+    return {
+      success: false,
+      serie: tipo === "boleta" ? "B001" : "F001",
+      numero: "00000001",
+    };
+  }
+}
+

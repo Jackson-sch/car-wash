@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { registrarComprobanteSunat } from "@/lib/actions/ordenes";
+import { registrarComprobanteSunat, getSiguienteCorrelativoComprobante } from "@/lib/actions/ordenes";
 import { TicketPreview } from "./components/TicketPreview";
 import { SunatControlPanel } from "./components/SunatControlPanel";
 
@@ -81,9 +81,6 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
   const [hidePrices, setHidePrices] = useState(false);
 
   // Estados para el formulario de SUNAT
-  // Cada ticket tiene su propia URL (/ordenes/[id]/ticket), por lo que Next.js
-  // monta/desmonta el componente al navegar entre tickets, dando estado fresco.
-  // Esto elimina la necesidad de un useEffect para sincronizar props → estado.
   const [tipo, setTipo] = useState<"boleta" | "factura" | "ninguno">(
     (orden.comprobanteTipo as "boleta" | "factura") || "ninguno",
   );
@@ -92,16 +89,37 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // Manejar cambio de tipo y autocompletar serie estándar
-  const handleTipoChange = (newTipo: "boleta" | "factura" | "ninguno") => {
+  // Manejar cambio de tipo y autocompletar serie/número correlativo automático
+  const handleTipoChange = async (newTipo: "boleta" | "factura" | "ninguno") => {
     setTipo(newTipo);
-    if (newTipo === "boleta" && (!serie || serie === "F001")) {
-      setSerie("B001");
-    } else if (newTipo === "factura" && (!serie || serie === "B001")) {
-      setSerie("F001");
-    } else if (newTipo === "ninguno") {
+    if (newTipo === "ninguno") {
       setSerie("");
       setNumero("");
+      return;
+    }
+
+    const defaultSerie = newTipo === "boleta" ? "B001" : "F001";
+    setSerie(defaultSerie);
+
+    startTransition(async () => {
+      const res = await getSiguienteCorrelativoComprobante(newTipo, defaultSerie);
+      if (res.success) {
+        setSerie(res.serie);
+        setNumero(res.numero);
+      }
+    });
+  };
+
+  const handleSerieChange = (newSerie: string) => {
+    const cleanSerie = newSerie.toUpperCase().slice(0, 4);
+    setSerie(cleanSerie);
+    if (cleanSerie.length === 4 && (tipo === "boleta" || tipo === "factura")) {
+      startTransition(async () => {
+        const res = await getSiguienteCorrelativoComprobante(tipo, cleanSerie);
+        if (res.success) {
+          setNumero(res.numero);
+        }
+      });
     }
   };
 
@@ -216,7 +234,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
           numero={numero}
           isPending={isPending}
           onTipoChange={handleTipoChange}
-          onSerieChange={(v) => setSerie(v.toUpperCase().slice(0, 4))}
+          onSerieChange={handleSerieChange}
           onNumeroChange={(v) => setNumero(v.replace(/\D/g, "").slice(0, 8))}
           onSave={handleSaveComprobante}
         />

@@ -84,6 +84,7 @@ export function PasoVehiculoCliente({
     clienteApellido: string | null;
     clienteTelefono: string | null;
     clienteEmail: string | null;
+    puntosAcumulados?: number;
   }
 
   const [isSearching, setIsSearching] = useState(false);
@@ -179,10 +180,17 @@ export function PasoVehiculoCliente({
               </p>
             )}
             {!isSearching && vehiculoEncontrado && (
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1 animate-in fade-in duration-300">
-                <CheckCircle2 className="size-3.5 text-emerald-500" />
-                Vehículo registrado — Cliente: {vehiculoEncontrado.clienteNombre} {vehiculoEncontrado.clienteApellido || ""}
-              </p>
+              <div className="space-y-1">
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1 animate-in fade-in duration-300">
+                  <CheckCircle2 className="size-3.5 text-emerald-500" />
+                  Vehículo registrado — Cliente: {vehiculoEncontrado.clienteNombre} {vehiculoEncontrado.clienteApellido || ""}
+                </p>
+                {vehiculoEncontrado.puntosAcumulados !== undefined && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-bold text-amber-400">
+                    ⭐ Saldo: {vehiculoEncontrado.puntosAcumulados} Puntos de Fidelidad
+                  </span>
+                )}
+              </div>
             )}
             {!isSearching && !vehiculoEncontrado && placa.trim().length >= 3 && (
               <p className="text-[10px] text-zinc-500 dark:text-zinc-450 font-bold flex items-center gap-1 animate-in fade-in duration-300">

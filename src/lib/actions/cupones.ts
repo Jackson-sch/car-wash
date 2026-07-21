@@ -208,3 +208,69 @@ export async function validarCupon(codigo: string, ordenId: string): Promise<Val
     return { success: false, error: "Error al validar el cupón." };
   }
 }
+
+export async function validarCuponPrevio(
+  codigo: string,
+  montoSubtotal: number,
+  clienteId?: string
+): Promise<ValidarCuponResult> {
+  try {
+    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "ver" });
+    const sucursalId = session.user.sucursalId!;
+
+    const [cupon] = await db
+      .select()
+      .from(cupones)
+      .where(and(eq(cupones.codigo, codigo.toUpperCase()), eq(cupones.sucursalId, sucursalId)));
+
+    if (!cupon) return { success: false, error: "Cupón no encontrado." };
+    if (!cupon.activo) return { success: false, error: "Este cupón está desactivado." };
+
+    const now = new Date();
+    if (cupon.fechaInicio && now < cupon.fechaInicio) {
+      return { success: false, error: "Este cupón aún no está vigente." };
+    }
+    if (cupon.fechaFin && now > cupon.fechaFin) {
+      return { success: false, error: "Este cupón ya ha expirado." };
+    }
+
+    const compraMin = cupon.compraMinima ? parseFloat(cupon.compraMinima) : 0;
+    if (compraMin > 0 && montoSubtotal < compraMin) {
+      return { success: false, error: `El monto mínimo de compra para este cupón es S/ ${compraMin.toFixed(2)}` };
+    }
+
+    // Contar usos totales
+    const [totalUsos] = await db
+      .select({ count: count() })
+      .from(cuponesUsos)
+      .where(eq(cuponesUsos.cuponId, cupon.id));
+
+    if (cupon.limiteTotal && totalUsos.count >= cupon.limiteTotal) {
+      return { success: false, error: "Este cupón ha alcanzado su límite de usos." };
+    }
+
+    // Contar usos por cliente
+    if (clienteId) {
+      const [usosCliente] = await db
+        .select({ count: count() })
+        .from(cuponesUsos)
+        .where(and(eq(cuponesUsos.cuponId, cupon.id), eq(cuponesUsos.clienteId, clienteId)));
+
+      if (cupon.limitePorCliente && usosCliente.count >= cupon.limitePorCliente) {
+        return { success: false, error: "Este cliente ya ha alcanzado el límite de uso de este cupón." };
+      }
+    }
+
+    return {
+      success: true,
+      cuponId: cupon.id,
+      tipoDescuento: cupon.tipoDescuento,
+      valorDescuento: parseFloat(cupon.valorDescuento),
+      compraMinima: cupon.compraMinima ? parseFloat(cupon.compraMinima) : null,
+    };
+  } catch (error) {
+    console.error("Error al validar cupón previo:", error);
+    return { success: false, error: "Error al validar el cupón." };
+  }
+}
+

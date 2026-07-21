@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createOrden } from "@/lib/actions/ordenes";
 import { toast } from "sonner";
 
+import { validarCuponPrevio } from "@/lib/actions/cupones";
+
 export type VehiculoTipo = "sedan" | "suv" | "pickup" | "moto" | "camion" | "furgon" | "otro";
 
 export interface Servicio {
@@ -59,9 +61,44 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
   const [clienteTelefono, setClienteTelefono] = useState("");
   const [clienteEmail, setClienteEmail] = useState("");
 
-  // Form Step 2: Servicios
+  // Form Step 2: Servicios & Cupones
   const [serviciosSeleccionados, setServiciosSeleccionados] = useState<string[]>([]);
   const [descuento, setDescuento] = useState("0");
+  const [cuponCodigo, setCuponCodigo] = useState("");
+  const [cuponAplicado, setCuponAplicado] = useState<{
+    id: string;
+    codigo: string;
+    descuentoMonto: number;
+  } | null>(null);
+
+  const aplicarCupon = async (codigo: string) => {
+    if (!codigo.trim()) return;
+    const res = await validarCuponPrevio(codigo.trim(), subtotal);
+    if (res.success) {
+      let descMonto = 0;
+      if (res.tipoDescuento === "porcentaje") {
+        descMonto = (subtotal * res.valorDescuento) / 100;
+      } else {
+        descMonto = res.valorDescuento;
+      }
+      descMonto = Math.min(descMonto, subtotal);
+      setDescuento(descMonto.toFixed(2));
+      setCuponAplicado({
+        id: res.cuponId,
+        codigo: codigo.toUpperCase(),
+        descuentoMonto: descMonto,
+      });
+      toast.success(`¡Cupón ${codigo.toUpperCase()} aplicado con éxito!`);
+    } else {
+      toast.error(res.error || "Cupón no válido.");
+    }
+  };
+
+  const removerCupon = () => {
+    setCuponAplicado(null);
+    setCuponCodigo("");
+    setDescuento("0");
+  };
 
   // Form Step 3: Asignaciones & Notas
   const [empleadoId, setEmpleadoId] = useState("");
@@ -199,6 +236,11 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
     serviciosSeleccionados,
     descuento,
     setDescuento,
+    cuponCodigo,
+    setCuponCodigo,
+    cuponAplicado,
+    aplicarCupon,
+    removerCupon,
     empleadoId,
     setEmpleadoId,
     notas,

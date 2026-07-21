@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { Clock, CheckCircle, Coins, Search, X } from "lucide-react";
+import { Clock, CheckCircle, Coins, Search, X, Ticket, Tag } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/formats";
 import { Separator } from "@/components/ui/separator";
 import { useQueryState } from "nuqs";
@@ -27,6 +28,11 @@ interface PasoServiciosCostoProps {
   vehiculoTipo: string;
   descuento: string;
   setDescuento: (v: string) => void;
+  cuponCodigo?: string;
+  setCuponCodigo?: (v: string) => void;
+  cuponAplicado?: { id: string; codigo: string; descuentoMonto: number } | null;
+  aplicarCupon?: (codigo: string) => void;
+  removerCupon?: () => void;
   subtotal: number;
   total: number;
   sucursalConfig: { multipliers?: Record<string, number> };
@@ -51,6 +57,11 @@ export function PasoServiciosCosto({
   vehiculoTipo,
   descuento,
   setDescuento,
+  cuponCodigo,
+  setCuponCodigo,
+  cuponAplicado,
+  aplicarCupon,
+  removerCupon,
   subtotal,
   total,
   sucursalConfig,
@@ -228,6 +239,47 @@ export function PasoServiciosCosto({
               className="bg-card border-zinc-300 focus-visible:border-secondary text-xs h-8 w-24 rounded-lg text-foreground animate-none text-right"
               placeholder="0"
             />
+          </div>
+
+          {/* Sección Cupón Promocional */}
+          <div className="space-y-2 pt-2 border-t border-border/60">
+            <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <Ticket className="h-3.5 w-3.5 text-amber-400" />
+              Cupón Promocional
+            </Label>
+            {cuponAplicado ? (
+              <div className="flex items-center justify-between p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs font-bold text-emerald-400">
+                <span className="flex items-center gap-1">
+                  <Tag className="h-3.5 w-3.5" />
+                  {cuponAplicado.codigo} (-S/ {cuponAplicado.descuentoMonto.toFixed(2)})
+                </span>
+                <button
+                  type="button"
+                  onClick={removerCupon}
+                  className="text-xs text-rose-400 hover:underline cursor-pointer"
+                >
+                  Quitar
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={cuponCodigo || ""}
+                  onChange={(e) => setCuponCodigo && setCuponCodigo(e.target.value.toUpperCase())}
+                  placeholder="Ej. LAVADO20"
+                  className="text-xs h-8 uppercase font-mono tracking-wider"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => aplicarCupon && aplicarCupon(cuponCodigo || "")}
+                  className="h-8 text-[11px] font-bold bg-amber-500 hover:bg-amber-400 text-amber-950 px-3 cursor-pointer shadow-xs"
+                >
+                  Aplicar
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { updateOrdenEstado } from "@/lib/actions/ordenes";
+import { updateOrdenEstado, getOrdenes } from "@/lib/actions/ordenes";
 import { toast } from "sonner";
 import { formatWhatsAppMessage, buildWhatsAppUrl } from "@/lib/whatsapp-utils";
 
@@ -31,7 +31,8 @@ interface OrdenItem {
   estado: "pendiente" | "en_proceso" | "completado" | "cobrado" | "cancelado";
   prioridad: number | null;
   total: string | null;
-  createdAt: Date | null;
+  createdAt: Date | string | null;
+  updatedAt?: Date | string | null;
   placa: string;
   vehiculoMarca: string | null;
   vehiculoModelo: string | null;
@@ -63,6 +64,22 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
       setTimeStr(new Date(current).toLocaleTimeString("es-PE"));
     }, 10000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Sincronización en tiempo real (Auto-polling cada 3 segundos para Smart TVs)
+  useEffect(() => {
+    const pollTimer = setInterval(async () => {
+      try {
+        const latest = await getOrdenes();
+        if (latest && Array.isArray(latest)) {
+          setOrdenesList(latest as unknown as OrdenItem[]);
+        }
+      } catch {
+        // Silencioso
+      }
+    }, 3000);
+
+    return () => clearInterval(pollTimer);
   }, []);
 
   // Escuchar cambios de fullscreen del navegador (ESC key o botón exit)
@@ -156,9 +173,12 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
     .slice(0, 6);
 
   return (
-    <div className={isFullscreen ? "fixed inset-0 z-[9999] bg-background p-6 md:p-8 overflow-y-auto w-screen h-screen space-y-6" : "space-y-6"}>
+    <div
+      suppressHydrationWarning
+      className={isFullscreen ? "fixed inset-0 z-[9999] bg-background p-6 md:p-8 overflow-y-auto w-screen h-screen space-y-6" : "space-y-6"}
+    >
       {/* Header Kiosco TV */}
-      <Card className="bg-card/80 backdrop-blur-md border-border p-5 md:p-6 shadow-sm rounded-2xl">
+      <Card suppressHydrationWarning className="bg-card/80 backdrop-blur-md border-border p-5 md:p-6 shadow-sm rounded-2xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3.5">
             <div className="p-3 bg-secondary/15 rounded-2xl border border-secondary/30 text-secondary shadow-sm">
@@ -220,8 +240,12 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {enProcesoList.map((ord) => {
-                const createdMs = ord.createdAt ? new Date(ord.createdAt).getTime() : now;
-                const elapsedMins = Math.max(1, Math.floor((now - createdMs) / 60000));
+                const startTimeMs = ord.updatedAt
+                  ? new Date(ord.updatedAt).getTime()
+                  : ord.createdAt
+                  ? new Date(ord.createdAt).getTime()
+                  : now;
+                const elapsedMins = Math.max(1, Math.floor((now - startTimeMs) / 60000));
                 const duracionEstimada = 30; // 30 min estándar
                 const isOverdue = elapsedMins > duracionEstimada;
                 const isNearEnd = elapsedMins >= duracionEstimada - 5 && !isOverdue;

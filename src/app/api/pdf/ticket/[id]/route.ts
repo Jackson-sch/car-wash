@@ -73,7 +73,7 @@ export async function GET(
       ? new Date(orden.createdAt).toLocaleString("es-PE")
       : new Date().toLocaleString("es-PE");
 
-    const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/ordenes/${orden.id}`;
+    const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/consulta/${orden.nroTicket || orden.id}`;
     const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 140, margin: 1, color: { dark: "#111", light: "#fff" } });
 
     const html = `<!DOCTYPE html>
@@ -172,7 +172,8 @@ export async function GET(
   <div style="text-align: center; margin: 8px 0;">
     <img src="${qrDataUrl}" alt="QR" style="width:72px;height:72px;display:inline-block;" />
   </div>
-  <div style="text-align: center; font-size: 6px; color: #999;">${orden.nroTicket || orden.id.toString().substring(0, 8).toUpperCase()}</div>
+  <div style="text-align: center; font-size: 6px; color: #666; margin-top: 2px;">Escanea el QR para ver el estado de tu lavado en vivo</div>
+  <div style="text-align: center; font-size: 6px; color: #999; margin-top: 1px;">${orden.nroTicket || orden.id.toString().substring(0, 8).toUpperCase()}</div>
 
   <div class="footer">
     <div class="bold" style="margin-bottom: 2px;">¡MUCHAS GRACIAS POR SU PREFERENCIA!</div>

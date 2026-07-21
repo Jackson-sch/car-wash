@@ -26,6 +26,11 @@ export async function buscarVehiculoPorPlaca(placa: string) {
         clienteApellido: clientes.apellido,
         clienteTelefono: clientes.telefono,
         clienteEmail: clientes.email,
+        puntosAcumulados: sql<number>`coalesce((
+          select sum(${puntosFidelidad.puntos})::int
+          from ${puntosFidelidad}
+          where ${puntosFidelidad.clienteId} = ${clientes.id}
+        ), 0)`,
       })
       .from(vehiculos)
       .innerJoin(clientes, eq(vehiculos.clienteId, clientes.id))

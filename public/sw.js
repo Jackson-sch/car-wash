@@ -1,24 +1,18 @@
-const CACHE_NAME = 'washmaster-pro-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/offline.html',
-  '/favicon.ico',
-  '/icon-192.png',
-  '/icon-512.png',
-];
+// WashMaster Pro - Service Worker PWA & Notificaciones Push
 
-// Install Event
-self.addEventListener('install', (event) => {
+const CACHE_NAME = "washmaster-pwa-v1";
+const DYNAMIC_ASSETS = ["/login", "/manifest.webmanifest"];
+
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(DYNAMIC_ASSETS);
     })
   );
   self.skipWaiting();
 });
 
-// Activate Event
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -33,53 +27,43 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event
-self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and local navigation/assets
-  if (event.request.method !== 'GET') return;
+// Manejo de eventos de Notificaciones Push
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
 
-  const url = new URL(event.request.url);
+  try {
+    const payload = event.data.json();
+    const title = payload.title || "WashMaster Pro";
+    const options = {
+      body: payload.body || "Actualización del estado de lavado",
+      icon: payload.icon || "/icons/icon-192x192.png",
+      badge: "/icons/badge-72x72.png",
+      data: payload.url || "/kiosco",
+      vibrate: [200, 100, 200],
+      tag: payload.tag || "washmaster-notification",
+    };
 
-  // Exclude API, authentication endpoints and Hot Module Reload (HMR) or Turbopack websockets
-  if (
-    url.pathname.startsWith('/api') ||
-    url.pathname.startsWith('/_next') ||
-    url.pathname.includes('webpack') ||
-    url.pathname.includes('turbopack')
-  ) {
-    return;
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (err) {
+    console.error("Error al procesar push:", err);
   }
+});
 
-  // Check if it's a page navigation request
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/offline.html');
-      })
-    );
-    return;
-  }
+// Al hacer clic en la notificación emergente
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data || "/kiosco";
 
-  // Cache-first for static assets (images, icons, fonts, CSS files, JS files)
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((response) => {
-        // Cache dynamic assets if they are from our origin
-        if (
-          response &&
-          response.status === 200 &&
-          url.origin === self.location.origin
-        ) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      for (let client of windowClients) {
+        if (client.url === urlToOpen && "focus" in client) {
+          return client.focus();
         }
-        return response;
-      });
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
     })
   );
 });
