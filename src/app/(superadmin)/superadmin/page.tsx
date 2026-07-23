@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getSuperAdminMetrics } from "@/lib/actions/superadmin";
 import { Building2, Store, Users, ShieldAlert, ArrowRight } from "lucide-react";
 import Link from "next/link";

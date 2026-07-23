@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getTurnoActivo, getTurnosHistorial } from "@/lib/actions/caja";
 import { CajaClient } from "./caja-client";
 

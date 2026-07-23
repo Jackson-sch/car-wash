@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { db } from "@/lib/db";
 import { configGlobal } from "@/lib/db/schema";
 import { Wrench } from "lucide-react";

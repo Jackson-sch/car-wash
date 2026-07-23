@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { DashboardClient } from "./dashboard-client";
 import { getSessionOrThrow } from "@/lib/actions/servicios";
 import { getCachedDashboardData } from "@/lib/data";

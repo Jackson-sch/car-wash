@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getSucursalesList } from "@/lib/actions/sucursales";
 import { SucursalesClient } from "./sucursales-client";
 import type { SucursalItem } from "./components/types";

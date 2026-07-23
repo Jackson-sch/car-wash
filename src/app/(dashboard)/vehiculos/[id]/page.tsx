@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import { getVehiculoById } from "@/lib/actions/vehiculos";
 import { VehiculoDetailClient } from "./vehiculo-detail-client";

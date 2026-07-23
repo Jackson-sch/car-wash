@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { EvaluacionClient } from "./evaluacion-client";
 import { db } from "@/lib/db";
 import { ordenes, sucursales, vehiculos } from "@/lib/db/schema";

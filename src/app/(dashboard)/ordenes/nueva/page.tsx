@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getServicios } from "@/lib/actions/servicios";
 import { getEmpleadosLavadores } from "@/lib/actions/ordenes";
 import { getSucursalConfig } from "@/lib/actions/configuracion";

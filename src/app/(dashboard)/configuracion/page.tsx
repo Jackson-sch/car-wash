@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getSucursalConfig } from "@/lib/actions/configuracion";
 import { ConfiguracionClient } from "./configuracion-client";
 

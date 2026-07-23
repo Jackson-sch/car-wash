@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Ban, Car, Mail, Phone, ArrowUpRight, AlertTriangle } from "lucide-react";

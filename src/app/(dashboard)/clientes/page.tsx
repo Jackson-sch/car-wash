@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { getSessionOrThrow } from "@/lib/actions/servicios";
 import { getCachedClientes } from "@/lib/data";

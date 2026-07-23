@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getSessionOrThrow } from "@/lib/actions/servicios";
 import { getCachedServicios, getCachedCategoriasServicio, getCachedInventario } from "@/lib/data";
 import { ServiciosClient } from "./servicios-client";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import { getEmpleadoRendimiento } from "@/lib/actions/empleados";
 import { EmpleadoDetailClient } from "./empleado-detail-client";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { db } from "@/lib/db";
 import { planes } from "@/lib/db/schema";
 import { PlanesClient } from "./planes-client";

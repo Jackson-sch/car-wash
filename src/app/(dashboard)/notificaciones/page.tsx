@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { getNotificaciones } from "@/lib/actions/notificaciones";
 import { NotificacionesClient } from "./notificaciones-client";

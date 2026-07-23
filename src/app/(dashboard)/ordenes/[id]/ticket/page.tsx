@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getOrdenById } from "@/lib/actions/ordenes";
 import { getSucursalConfig } from "@/lib/actions/configuracion";
 import { notFound } from "next/navigation";

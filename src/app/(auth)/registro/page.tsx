@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { redirect } from "next/navigation";
 import BootstrapForm from "./bootstrap-form";
 import { checkSystemStatus } from "@/lib/actions/bootstrap";

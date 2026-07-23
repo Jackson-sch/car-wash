@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { getCupones } from "@/lib/actions/cupones";
 import { getServicios } from "@/lib/actions/servicios";

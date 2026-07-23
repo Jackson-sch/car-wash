@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getDetalleCierreCaja } from "@/lib/actions/caja";
 import { redirect } from "next/navigation";
 import { CierreCajaClient } from "./cierre-client";

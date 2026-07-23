@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import { getVehiculos } from "@/lib/actions/vehiculos";
 import { VehiculosClient } from "./vehiculos-client";
