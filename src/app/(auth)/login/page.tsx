@@ -49,11 +49,11 @@ export default function LoginPage() {
       if (error) {
         setAuthError(error.message || "Error al iniciar sesión. Verifica tus credenciales.");
         toast.error(error.message || "Error al iniciar sesión. Verifica tus credenciales.");
-      } else if (data?.user) {
+      } else {
         setAuthError(null);
-        const redirectTo = data.user.rol === "superadmin" ? "/superadmin" : "/dashboard";
-        toast.success("Sesión iniciada con éxito");
-        router.push(redirectTo);
+        const redirectTo = data?.user?.rol === "superadmin" ? "/superadmin" : "/dashboard";
+        toast.success("¡Bienvenido! Iniciando sesión...");
+        window.location.href = redirectTo;
       }
     } catch (err) {
       setAuthError("Ocurrió un error inesperado al iniciar sesión.");

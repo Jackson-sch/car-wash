@@ -25,8 +25,7 @@ export async function getMiEmpresaNombre() {
       .where(eq(empresas.id, empresaId));
 
     return empresa?.nombre || null;
-  } catch (error) {
-    console.error("Error al obtener el nombre de la empresa:", error);
+  } catch {
     return null;
   }
 }
@@ -44,8 +43,7 @@ export async function getSucursalConfig() {
       .where(eq(sucursales.id, sucursalId));
 
     return sucursal || null;
-  } catch (error) {
-    console.error("Error al obtener la configuración de la sucursal:", error);
+  } catch {
     return null;
   }
 }
