@@ -76,7 +76,7 @@ export function useOrdenesColumns({
           <div className="flex flex-col gap-0.5">
             {/* Indicador sutil de prioridad en el borde izquierdo del ticket */}
             {ord.prioridad === 1 && (
-              <span className="absolute left-0 top-0 bottom-0 w-[5px] bg-rose-500 rounded-full" />
+              <span className="absolute left-0 top-0 bottom-0 w-1.25 bg-rose-500 rounded-full" />
             )}
             <div className="flex items-center gap-1.5">
               <span className="font-mono font-black text-foreground text-xs tracking-tight">
@@ -151,12 +151,12 @@ export function useOrdenesColumns({
               {iniciales}
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-bold text-foreground truncate max-w-[170px]">
+              <div className="text-xs font-bold text-foreground truncate max-w-42.5">
                 {clienteNombreCompleto}
               </div>
               <div className="text-[9.5px] text-muted-foreground flex items-center gap-1 mt-0.5 font-medium">
                 {getVehicleIcon(ord.vehiculoTipo)}
-                <span className="truncate max-w-[145px]">
+                <span className="truncate max-w-36.25">
                   {ord.vehiculoMarca} {ord.vehiculoModelo}
                   {ord.vehiculoTipo && (
                     <span className="text-zinc-450 dark:text-zinc-500 font-normal ml-0.5">
@@ -181,7 +181,7 @@ export function useOrdenesColumns({
               Detalle en ticket
             </span>
             {ord.notas && (
-              <span className="text-[8.5px] text-zinc-550 dark:text-zinc-400 italic truncate max-w-[130px]" title={ord.notas}>
+              <span className="text-[8.5px] text-zinc-550 dark:text-zinc-400 italic truncate max-w-32.5" title={ord.notas}>
                 Nota: {ord.notas}
               </span>
             )}

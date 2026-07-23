@@ -112,7 +112,7 @@ export function OrdenesTable({
   return (
     <Card className="border border-border/80 bg-card/60 p-0 backdrop-blur-md overflow-hidden shadow-xs rounded-xl">
       <div className="overflow-x-auto">
-        <Table className="min-w-[1000px]">
+        <Table className="min-w-250">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="bg-muted/40 border-b border-border/50 hover:bg-transparent">
@@ -140,7 +140,7 @@ export function OrdenesTable({
                     key={cell.id} 
                     className={`px-4 py-3 align-middle transition-all ${
                       index === 0 
-                        ? "relative after:absolute after:left-0 after:top-2.5 after:bottom-2.5 after:w-[3px] after:bg-secondary after:rounded-r-full after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-150" 
+                        ? "relative after:absolute after:left-0 after:top-2.5 after:bottom-2.5 after:w-0.75 after:bg-secondary after:rounded-r-full after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-150" 
                         : ""
                     }`}
                   >
