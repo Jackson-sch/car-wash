@@ -724,6 +724,7 @@ export interface EmpleadoCached {
   totalLavados: number;
   montoLavado: number;
   comisionAcumulada: number;
+  tiempoPromedioMin?: number;
 }
 
 async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]> {
@@ -751,6 +752,7 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
         empleadoId: ordenes.empleadoId,
         totalLavados: count(ordenes.id),
         montoTotal: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
+        tiempoPromedioMin: sql<number>`coalesce(avg(extract(epoch from (${ordenes.updatedAt} - ${ordenes.createdAt})) / 60), 25)::int`,
       })
       .from(ordenes)
       .where(
@@ -762,24 +764,26 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
       .groupBy(ordenes.empleadoId),
   ]);
 
-  const statsMap = new Map<string, { totalLavados: number; montoTotal: number }>();
+  const statsMap = new Map<string, { totalLavados: number; montoTotal: number; tiempoPromedioMin: number }>();
   for (const row of lavadorStats) {
     if (row.empleadoId) {
       statsMap.set(row.empleadoId, {
         totalLavados: row.totalLavados,
         montoTotal: parseFloat(row.montoTotal || "0"),
+        tiempoPromedioMin: row.tiempoPromedioMin || 25,
       });
     }
   }
 
   return empleadosList.map((emp) => {
     if (emp.rol === "lavador") {
-      const s = statsMap.get(emp.id) || { totalLavados: 0, montoTotal: 0 };
+      const s = statsMap.get(emp.id) || { totalLavados: 0, montoTotal: 0, tiempoPromedioMin: 25 };
       return {
         ...emp,
         totalLavados: s.totalLavados,
         montoLavado: s.montoTotal,
         comisionAcumulada: s.montoTotal * 0.30,
+        tiempoPromedioMin: s.tiempoPromedioMin,
       };
     }
     return {
@@ -787,6 +791,7 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
       totalLavados: 0,
       montoLavado: 0,
       comisionAcumulada: 0,
+      tiempoPromedioMin: 0,
     };
   });
 }

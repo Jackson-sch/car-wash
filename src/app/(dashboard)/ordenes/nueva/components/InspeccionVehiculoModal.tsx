@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Check, ShieldAlert, X } from "lucide-react";
+import { AlertTriangle, Check, ShieldAlert, X, Zap, Search, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { CarDiagramSVG } from "@/components/shared/CarDiagramSVG";
 
 interface InspeccionPoint {
   id: number;
@@ -82,56 +83,47 @@ export function InspeccionVehiculoModal({
             </label>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { id: "rayon", label: "⚡ Rayón / Guadaña", color: "border-amber-500 text-amber-500" },
-                { id: "abolladura", label: "💥 Abolladura / Choque", color: "border-red-500 text-red-500" },
-                { id: "rotura", label: "🔍 Vidrio / Espejo", color: "border-blue-500 text-blue-500" },
-                { id: "pertenencia", label: "🎒 Pertenencia Dejada", color: "border-emerald-500 text-emerald-500" },
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTipoSeleccionado(t.id as InspeccionPoint["tipo"])}
-                  className={`py-1.5 px-2 text-[10px] font-bold rounded-lg border text-center transition-all cursor-pointer ${
-                    tipoSeleccionado === t.id
-                      ? `${t.color} bg-card shadow-sm font-black`
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+                { id: "rayon", label: "Rayón / Guadaña", icon: Zap, color: "border-amber-500 text-amber-500" },
+                { id: "abolladura", label: "Abolladura", icon: AlertTriangle, color: "border-red-500 text-red-500" },
+                { id: "rotura", label: "Vidrio / Espejo", icon: Search, color: "border-blue-500 text-blue-500" },
+                { id: "pertenencia", label: "Pertenencia", icon: Package, color: "border-emerald-500 text-emerald-500" },
+              ].map((t) => {
+                const IconComp = t.icon;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTipoSeleccionado(t.id as InspeccionPoint["tipo"])}
+                    className={`h-10 px-3 text-xs font-bold rounded-lg border text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      tipoSeleccionado === t.id
+                        ? `${t.color} bg-card shadow-sm font-black`
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <IconComp className="h-4 w-4" />
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Gráfico Interactivo de Vehículo */}
+          {/* Gráfico Interactivo de Vehículo (Plano Vectorial Blueprint CAD) */}
           <div
             onClick={handleImageClick}
-            className="relative w-full h-52 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-xl flex items-center justify-center cursor-crosshair overflow-hidden group select-none"
+            className="relative w-full h-80 min-h-[300px] bg-slate-950 border-2 border-dashed border-sky-800/80 rounded-2xl flex items-center justify-center cursor-crosshair overflow-hidden group select-none shadow-2xl"
           >
-            {/* Silueta vectorial esquemática del vehículo */}
-            <div className="absolute inset-0 opacity-40 flex items-center justify-center p-6 pointer-events-none">
-              <svg viewBox="0 0 400 160" className="w-full h-full stroke-zinc-400 fill-none stroke-[2]">
-                <rect x="50" y="40" width="300" height="80" rx="20" />
-                <path d="M 90 40 L 130 10 L 270 10 L 310 40 Z" />
-                <circle cx="100" cy="120" r="18" className="fill-zinc-900 stroke-zinc-400" />
-                <circle cx="300" cy="120" r="18" className="fill-zinc-900 stroke-zinc-400" />
-              </svg>
+            {/* Componente SVG de Blueprint de Vehículo */}
+            <div className="absolute inset-0 p-2 flex items-center justify-center pointer-events-none">
+              <CarDiagramSVG />
             </div>
 
-            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-zinc-300 transition-colors pointer-events-none">
-              HAZ CLIC EN LA ZONA DEL VEHÍCULO PARA MARCAR UN DAÑO
-            </span>
-
-            {/* Puntos Marcados */}
+            {/* Puntos marcados */}
             {puntos.map((p) => (
               <div
                 key={p.id}
                 style={{ left: `${p.x}%`, top: `${p.y}%` }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemovePoint(p.id);
-                }}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg cursor-pointer hover:scale-125 transition-transform ${
+                className={`absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg animate-bounce ${
                   p.tipo === "rayon"
                     ? "bg-amber-500"
                     : p.tipo === "abolladura"
@@ -140,29 +132,36 @@ export function InspeccionVehiculoModal({
                     ? "bg-blue-500"
                     : "bg-emerald-500"
                 }`}
-                title={`Haz clic para eliminar (${p.zona})`}
               >
                 !
               </div>
             ))}
+
+            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest bg-zinc-950/80 px-3 py-1 rounded-full border border-zinc-800 pointer-events-none">
+              Haz clic en la zona del vehículo para marcar un daño
+            </span>
           </div>
 
-          {/* Resumen de Marcas */}
+          {/* Lista de Puntos Registrados */}
           {puntos.length > 0 && (
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-muted-foreground">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Marcas Registradas ({puntos.length}):
-              </span>
-              <div className="flex flex-wrap gap-1.5">
+              </label>
+              <div className="flex flex-wrap gap-2">
                 {puntos.map((p) => (
                   <span
                     key={p.id}
-                    className="inline-flex items-center gap-1.5 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-[10px] font-bold"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-muted border border-border"
                   >
-                    <AlertTriangle className="h-3 w-3 text-amber-400" />
-                    {p.zona} ({p.tipo})
-                    <button onClick={() => handleRemovePoint(p.id)} className="text-zinc-400 hover:text-red-400">
-                      ×
+                    <span>{p.zona}</span>
+                    <span className="text-muted-foreground">({p.tipo})</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePoint(p.id)}
+                      className="text-muted-foreground hover:text-red-400 ml-1"
+                    >
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </span>
                 ))}
@@ -185,11 +184,11 @@ export function InspeccionVehiculoModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border bg-zinc-900/40 flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={onClose} className="text-xs font-bold">
+        <div className="p-4 border-t border-border bg-zinc-900/40 flex justify-end gap-2.5">
+          <Button type="button" variant="outline" onClick={onClose} className="h-10 px-5 rounded-lg text-xs font-bold border-border cursor-pointer">
             Cancelar
           </Button>
-          <Button size="sm" onClick={handleConfirm} className="text-xs font-bold gap-1.5 bg-secondary text-secondary-foreground">
+          <Button type="button" onClick={handleConfirm} className="h-10 px-5 rounded-lg text-xs font-bold gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm cursor-pointer">
             <Check className="h-4 w-4" />
             Guardar Inspección
           </Button>

@@ -11,6 +11,7 @@ import {
   MessageCircle,
   ShieldCheck,
   RefreshCw,
+  Star,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,9 +105,21 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
               ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 animate-pulse'
               : 'bg-secondary/15 border-secondary/40 text-secondary'
           }">
-            {orden.estado === 'en_proceso' && "🌊 LAVANDO EN BAHÍA"}
-            {orden.estado === 'pendiente' && "⏳ EN COLA DE ESPERA"}
-            {(orden.estado === 'completado' || orden.estado === 'cobrado') && "✨ LISTO PARA RETIRO"}
+            {orden.estado === 'en_proceso' && (
+              <span className="inline-flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" /> LAVANDO EN BAHÍA
+              </span>
+            )}
+            {orden.estado === 'pendiente' && (
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" /> EN COLA DE ESPERA
+              </span>
+            )}
+            {(orden.estado === 'completado' || orden.estado === 'cobrado') && (
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" /> LISTO PARA RETIRO
+              </span>
+            )}
           </div>
         </Card>
 
@@ -169,13 +182,25 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
             <p className="text-muted-foreground text-[11px]">{orden.sucursalDireccion}</p>
           )}
 
-          {orden.sucursalTelefono && (
+          {(orden.estado === "completado" || orden.estado === "cobrado") && (
             <div className="pt-2">
+              <a
+                href={`/evaluacion/${orden.nroTicket}`}
+                className="inline-flex items-center justify-center gap-1.5 w-full bg-amber-500 hover:bg-amber-400 text-amber-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-md transition-all border border-amber-400"
+              >
+                <Star className="h-4 w-4 fill-amber-950 text-amber-950" />
+                Calificar mi Servicio de Lavado
+              </a>
+            </div>
+          )}
+
+          {orden.sucursalTelefono && (
+            <div className="pt-1">
               <a
                 href={`https://wa.me/${orden.sucursalTelefono.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition-all"
+                className="inline-flex items-center justify-center gap-1.5 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all"
               >
                 <MessageCircle className="h-4 w-4" />
                 Contactar Sucursal por WhatsApp

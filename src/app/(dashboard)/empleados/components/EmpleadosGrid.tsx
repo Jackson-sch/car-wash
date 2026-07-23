@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Search, X, UserCog, MoreVertical, Edit, UserMinus, UserCheck } from "lucide-react";
+import { Search, X, UserCog, MoreVertical, Edit, UserMinus, UserCheck, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ interface Empleado {
   totalLavados: number;
   montoLavado: number;
   comisionAcumulada: number;
+  tiempoPromedioMin?: number;
   sucursalNombre?: string | null;
 }
 
@@ -86,10 +87,10 @@ export function EmpleadosGrid({
   );
 
   return (
-    <div className="space-y-6">
+    <div suppressHydrationWarning className="space-y-6">
       {/* Search */}
-      <div className="flex gap-4 items-center">
-        <div className="relative w-full sm:w-80">
+      <div suppressHydrationWarning className="flex gap-4 items-center">
+        <div suppressHydrationWarning className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nombre..."
@@ -115,7 +116,7 @@ export function EmpleadosGrid({
       </div>
 
       {filtered.length === 0 ? (
-        <Card className="p-12 border-border bg-card text-center flex flex-col items-center justify-center space-y-3 max-w-md mx-auto">
+        <Card suppressHydrationWarning className="p-12 border-border bg-card text-center flex flex-col items-center justify-center space-y-3 max-w-md mx-auto">
           <UserCog className="h-10 w-10 text-muted-foreground/40" />
           <p className="font-medium text-foreground">
             {searchQuery
@@ -130,18 +131,19 @@ export function EmpleadosGrid({
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div suppressHydrationWarning className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedData.map((emp) => (
               <Card
+                suppressHydrationWarning
                 key={emp.id}
                 className={`p-6 border-border bg-card hover:border-zinc-350 hover:shadow-md transition-all duration-300 flex flex-col justify-between ${
                   !emp.activo ? "opacity-75 dark:opacity-65" : ""
                 }`}
               >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 rounded-full bg-muted text-foreground font-extrabold flex items-center justify-center text-sm uppercase border border-border shrink-0">
+                <div suppressHydrationWarning className="space-y-4">
+                  <div suppressHydrationWarning className="flex items-start justify-between gap-2">
+                    <div suppressHydrationWarning className="flex items-center gap-3 min-w-0">
+                      <div suppressHydrationWarning className="h-10 w-10 rounded-full bg-muted text-foreground font-extrabold flex items-center justify-center text-sm uppercase border border-border shrink-0">
                         {emp.nombre.charAt(0)}
                       </div>
                       <div className="min-w-0">
@@ -226,23 +228,36 @@ export function EmpleadosGrid({
                   </div>
 
                   {emp.rol === "lavador" && (
-                    <div className="pt-3 border-t border-border grid grid-cols-2 gap-2 text-xs font-bold">
-                      <div>
-                        <span className="text-[10px] text-muted-foreground font-medium block">
-                          Lavados
-                        </span>
-                        <span className="text-foreground font-extrabold">
-                          {emp.totalLavados} servicios
-                        </span>
+                    <div className="pt-3 border-t border-border space-y-2">
+                      <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+                        <div>
+                          <span className="text-[10px] text-muted-foreground font-medium block">
+                            Lavados
+                          </span>
+                          <span className="text-foreground font-extrabold">
+                            {emp.totalLavados} servicios
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-muted-foreground font-medium block">
+                            Comisión (30%)
+                          </span>
+                          <span className="text-secondary font-extrabold">
+                            {formatCurrency(emp.comisionAcumulada)}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-muted-foreground font-medium block">
-                          Comisión (30%)
-                        </span>
-                        <span className="text-secondary font-extrabold">
-                          {formatCurrency(emp.comisionAcumulada)}
-                        </span>
-                      </div>
+                      {emp.tiempoPromedioMin !== undefined && (
+                        <div className="text-xs font-bold border-t border-dashed border-border/60 pt-2 flex items-center justify-between">
+                          <span className="text-[10px] text-muted-foreground font-medium">
+                            Velocidad Promedio
+                          </span>
+                          <span className="text-amber-500 font-extrabold text-[11px] flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-amber-500" />
+                            {emp.tiempoPromedioMin} min / auto
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

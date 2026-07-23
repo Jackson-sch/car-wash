@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Car, Save, Gauge, Bike, Truck, Van, Sparkles } from "lucide-react";
+import { Car, Save, Gauge, Bike, Truck, Van, Sparkles, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -47,8 +47,9 @@ export function PreciosPanel({ initialMultipliers, isPending, onSave }: PreciosP
       <div className="p-6 space-y-4">
         {/* Explicación de las tarifas */}
         <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
-          <p className="font-bold text-secondary flex items-center gap-1.5">
-            💡 ¿Cómo funcionan los multiplicadores?
+          <p className="font-bold text-secondary flex items-center gap-2">
+            <Lightbulb className="h-4 w-4" />
+            ¿Cómo funcionan los multiplicadores?
           </p>
           <p className="text-muted-foreground">
             El sistema calcula el precio de cada servicio de manera dinámica multiplicando el precio base del catálogo por el factor del vehículo seleccionado:

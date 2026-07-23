@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Tag, Gift, TrendingUp } from "lucide-react";
+import { Tag, Gift, TrendingUp, Lightbulb } from "lucide-react";
 import { CuponForm } from "./components/CuponForm";
 import { CuponesSidebar } from "./components/CuponesSidebar";
 
@@ -158,8 +158,9 @@ export function CuponesClient({
 
       {/* Explicación de los cupones */}
       <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
-        <p className="font-bold text-secondary flex items-center gap-1.5">
-          💡 Guía de Cupones y Promociones
+        <p className="font-bold text-secondary flex items-center gap-2">
+          <Lightbulb className="h-4 w-4 text-secondary shrink-0" />
+          Guía de Cupones y Promociones
         </p>
         <p className="text-muted-foreground">
           Usa esta sección para configurar códigos de descuento promocionales para las órdenes de tus clientes:

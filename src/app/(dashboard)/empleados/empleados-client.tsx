@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserCog, ClipboardCheck, Coins, UserPlus } from "lucide-react";
+import { UserCog, ClipboardCheck, Coins, UserPlus, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   registrarEmpleado,
@@ -26,6 +26,7 @@ interface Empleado {
   totalLavados: number;
   montoLavado: number;
   comisionAcumulada: number;
+  tiempoPromedioMin?: number;
   sucursalNombre?: string | null;
 }
 
@@ -155,10 +156,10 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
   );
 
   return (
-    <div className="space-y-8 text-foreground animate-in fade-in duration-300">
+    <div suppressHydrationWarning className="space-y-8 text-foreground animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+      <div suppressHydrationWarning className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div suppressHydrationWarning>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
             <UserCog className="h-7 w-7 text-secondary" />
             Gestión de Empleados
@@ -168,7 +169,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             lavado completados.
           </p>
         </div>
-        <div>
+        <div suppressHydrationWarning>
           <Button
             onClick={() => setIsCreateOpen(true)}
             className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
@@ -180,9 +181,9 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div suppressHydrationWarning className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: Total Personal */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+        <div suppressHydrationWarning className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -263,8 +264,9 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
 
       {/* Explicación de comisiones de lavadores */}
       <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
-        <p className="font-bold text-secondary flex items-center gap-1.5">
-          💡 ¿Cómo funcionan las comisiones de lavado?
+        <p className="font-bold text-secondary flex items-center gap-2">
+          <Lightbulb className="h-4 w-4 text-secondary shrink-0" />
+          ¿Cómo funcionan las comisiones de lavado?
         </p>
         <p className="text-muted-foreground">
           La comisión devengada por el personal de lavado se calcula de manera transparente al completarse un servicio asignado:

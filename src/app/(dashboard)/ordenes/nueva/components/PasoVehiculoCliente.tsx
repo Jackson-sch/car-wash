@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, startTransition } from "react";
-import { Car, User, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Car, User, Loader2, CheckCircle2, AlertCircle, Star, ShieldAlert } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { buscarVehiculoPorPlaca } from "@/lib/actions/clientes";
 import { toast } from "sonner";
+import { InspeccionVehiculoModal } from "./InspeccionVehiculoModal";
 
 type VehiculoTipo = "sedan" | "suv" | "pickup" | "moto" | "camion" | "furgon" | "otro";
 
@@ -90,6 +92,8 @@ export function PasoVehiculoCliente({
   const [isSearching, setIsSearching] = useState(false);
   const [vehiculoEncontrado, setVehiculoEncontrado] = useState<VehiculoSearchResult | null>(null);
   const [lastAutoFilledPlaca, setLastAutoFilledPlaca] = useState("");
+  const [isInspeccionOpen, setIsInspeccionOpen] = useState(false);
+  const [inspeccionNotas, setInspeccionNotas] = useState("");
 
   const dbMultipliers = sucursalConfig.multipliers || {};
 
@@ -186,8 +190,9 @@ export function PasoVehiculoCliente({
                   Vehículo registrado — Cliente: {vehiculoEncontrado.clienteNombre} {vehiculoEncontrado.clienteApellido || ""}
                 </p>
                 {vehiculoEncontrado.puntosAcumulados !== undefined && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-bold text-amber-400">
-                    ⭐ Saldo: {vehiculoEncontrado.puntosAcumulados} Puntos de Fidelidad
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-bold text-amber-400">
+                    <Star className="size-3 fill-amber-400 text-amber-400" />
+                    Saldo: {vehiculoEncontrado.puntosAcumulados} Puntos de Fidelidad
                   </span>
                 )}
               </div>
@@ -266,7 +271,35 @@ export function PasoVehiculoCliente({
             />
           </div>
         </div>
+
+        {/* Botón Inspección de Daños */}
+        <div className="pt-2 border-t border-border/50">
+          <Button
+            type="button"
+            onClick={() => setIsInspeccionOpen(true)}
+            className={`w-full h-10 rounded-xl text-xs font-bold gap-2 transition-all shadow-sm cursor-pointer border ${
+              inspeccionNotas
+                ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 hover:border-amber-500/60"
+            }`}
+          >
+            <ShieldAlert className={`h-4 w-4 ${inspeccionNotas ? "text-emerald-400" : "text-amber-400"}`} />
+            <span>
+              {inspeccionNotas ? "✓ Inspección de Daños Registrada" : "Registrar Inspección de Daños (Rayones / Abolladuras)"}
+            </span>
+          </Button>
+        </div>
       </Card>
+
+      <InspeccionVehiculoModal
+        isOpen={isInspeccionOpen}
+        onClose={() => setIsInspeccionOpen(false)}
+        onSave={({ puntos, notasGeneral }) => {
+          const notasStr = `[INS PUNTOS: ${puntos.length}] ${puntos.map(p => `${p.zona}: ${p.tipo}`).join(", ")} ${notasGeneral ? `| ${notasGeneral}` : ""}`;
+          setInspeccionNotas(notasStr);
+          toast.success("Inspección de vehículo registrada correctamente.");
+        }}
+      />
 
       {/* Cliente Card */}
       <Card className="p-6 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4">

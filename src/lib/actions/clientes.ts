@@ -128,6 +128,36 @@ export async function createCliente(data: {
   }
 }
 
+// Obtener clientes inactivos sin lavados recientes para campañas de WhatsApp
+export async function getClientesInactivos(diasInactividad = 30) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "clientes", accion: "ver" });
+    const sucursalId = session.user.sucursalId!;
+
+    const result = await db
+      .select({
+        id: clientes.id,
+        nombre: clientes.nombre,
+        apellido: clientes.apellido,
+        telefono: clientes.telefono,
+        email: clientes.email,
+        ultimoLavadoAt: sql<string>`max(${ordenes.createdAt})`,
+      })
+      .from(clientes)
+      .leftJoin(vehiculos, eq(vehiculos.clienteId, clientes.id))
+      .leftJoin(ordenes, eq(ordenes.vehiculoId, vehiculos.id))
+      .where(eq(clientes.sucursalId, sucursalId))
+      .groupBy(clientes.id, clientes.nombre, clientes.apellido, clientes.telefono, clientes.email)
+      .limit(50);
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("Error al obtener clientes inactivos:", error);
+    return { success: false, data: [] };
+  }
+}
+
+
 // Obtener el historial completo de un cliente
 export async function getClienteHistorial(clienteId: string) {
   try {
