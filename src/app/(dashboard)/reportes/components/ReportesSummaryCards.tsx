@@ -9,7 +9,7 @@ export function ReportesSummaryCards({ kpis }: ReportesSummaryCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Card 1: Facturación */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -28,11 +28,11 @@ export function ReportesSummaryCards({ kpis }: ReportesSummaryCardsProps) {
           <span>Ingresos brutos registrados</span>
         </div>
         {/* Subtle gradient glow */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 2: Ticket Promedio */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-500/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-emerald-500/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -51,11 +51,11 @@ export function ReportesSummaryCards({ kpis }: ReportesSummaryCardsProps) {
           <span>Valor promedio de ticket de venta</span>
         </div>
         {/* Subtle gradient glow */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 3: Servicios Atendidos */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -74,7 +74,7 @@ export function ReportesSummaryCards({ kpis }: ReportesSummaryCardsProps) {
           <span>Servicios finalizados con éxito</span>
         </div>
         {/* Subtle gradient glow */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
     </div>
   );

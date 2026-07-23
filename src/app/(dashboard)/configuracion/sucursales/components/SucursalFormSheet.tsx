@@ -60,22 +60,27 @@ export function SucursalFormSheet({
     }
 
     setSaving(true);
-    const res = editingId
-      ? await updateSucursalAction(editingId, form)
-      : await createSucursalAction(form);
+    try {
+      const res = editingId
+        ? await updateSucursalAction(editingId, form)
+        : await createSucursalAction(form);
 
-    if (res.success) {
-      toast.success(editingId ? "Sucursal actualizada con éxito" : "Sucursal creada con éxito");
-      onClose();
-      // Refrescar lista
-      const refreshed = await import("@/lib/actions/sucursales").then((m) => m.getSucursalesList());
-      if (refreshed.success) {
-        onSuccess(refreshed.sucursales as SucursalItem[]);
+      if (res.success) {
+        toast.success(editingId ? "Sucursal actualizada con éxito" : "Sucursal creada con éxito");
+        onClose();
+        // Refrescar lista
+        const refreshed = await import("@/lib/actions/sucursales").then((m) => m.getSucursalesList());
+        if (refreshed.success) {
+          onSuccess(refreshed.sucursales as SucursalItem[]);
+        }
+      } else {
+        toast.error(res.error || "Error al guardar");
       }
-    } else {
-      toast.error(res.error || "Error al guardar");
+    } catch (error) {
+      toast.error("Ocurrió un error inesperado al guardar la sucursal");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (

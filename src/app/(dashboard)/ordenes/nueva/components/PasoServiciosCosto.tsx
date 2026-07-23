@@ -106,7 +106,7 @@ export function PasoServiciosCosto({
   }, [filteredServicios]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-300">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 transition-opacity duration-300">
       {/* Services Grid Selection */}
       <div className="md:col-span-2 space-y-4">
         <div className="flex items-center justify-between gap-4">
@@ -153,7 +153,7 @@ export function PasoServiciosCosto({
                         key={serv.id}
                         type="button"
                         onClick={() => onServiceToggle(serv.id)}
-                        className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between h-32 cursor-pointer ${
+                        className={`p-4 rounded-xl border text-left transition-colors relative overflow-hidden flex flex-col justify-between h-32 cursor-pointer ${
                           isSelected
                             ? "bg-secondary/5 border-secondary text-secondary"
                             : "bg-card border-border/60 text-zinc-750 hover:border-zinc-400/60 dark:hover:border-zinc-650/60 shadow-sm"

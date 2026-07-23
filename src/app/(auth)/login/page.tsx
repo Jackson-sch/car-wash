@@ -65,7 +65,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-background text-foreground overflow-hidden relative selection:bg-secondary/20 selection:text-foreground">
+    <div className="min-h-dvh w-full grid grid-cols-1 lg:grid-cols-12 bg-background text-foreground overflow-hidden relative selection:bg-secondary/20 selection:text-foreground">
       
       {/* UNIFIED BACKGROUND EFFECTS */}
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -118,13 +118,13 @@ export default function LoginPage() {
                     id="email"
                     type="email"
                     placeholder="admin@washmaster.com"
-                    className="w-full h-12 pl-11 pr-4 rounded-xl border border-border bg-background/50 text-foreground placeholder:text-muted-foreground/60 focus:border-secondary focus:ring-4 focus:ring-secondary/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl border border-border bg-background/50 text-foreground placeholder:text-muted-foreground/60 focus:border-secondary focus:ring-4 focus:ring-secondary/10 focus:outline-none transition-colors transition-shadow duration-300 disabled:opacity-50 text-sm"
                     disabled={loading}
                     {...register("email")}
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.email.message}</p>
+                  <p className="text-xs text-destructive font-medium  fade-in slide-in-from-top-1">{errors.email.message}</p>
                 )}
               </div>
 
@@ -141,7 +141,7 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="w-full h-12 pl-11 pr-11 rounded-xl border border-border bg-background/50 text-foreground placeholder:text-muted-foreground/60 focus:border-secondary focus:ring-4 focus:ring-secondary/10 focus:outline-none transition-all duration-300 disabled:opacity-50 text-sm"
+                    className="w-full h-12 pl-11 pr-11 rounded-xl border border-border bg-background/50 text-foreground placeholder:text-muted-foreground/60 focus:border-secondary focus:ring-4 focus:ring-secondary/10 focus:outline-none transition-colors transition-shadow duration-300 disabled:opacity-50 text-sm"
                     disabled={loading}
                     {...register("password")}
                   />
@@ -155,12 +155,12 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.password.message}</p>
+                  <p className="text-xs text-destructive font-medium  fade-in slide-in-from-top-1">{errors.password.message}</p>
                 )}
               </div>
 
               {authError && (
-                <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs font-semibold text-destructive animate-in fade-in slide-in-from-top-1 flex items-center gap-2">
+                <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs font-semibold text-destructive  fade-in slide-in-from-top-1 flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
                   <span>{authError}</span>
                 </div>
@@ -169,7 +169,7 @@ export default function LoginPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full h-12 mt-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold rounded-xl shadow-lg shadow-secondary/20 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer text-sm group"
+                className="w-full h-12 mt-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold rounded-xl shadow-lg shadow-secondary/20 flex items-center justify-center gap-2 transition-colors transition-transform duration-300 cursor-pointer text-sm group"
                 disabled={loading}
               >
                 {loading ? (
@@ -232,7 +232,7 @@ export default function LoginPage() {
           {/* Floating Stats Widgets */}
           <div className="grid grid-cols-2 gap-5">
             {/* Widget 1 */}
-            <div className="p-6 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md shadow-xl space-y-3 hover:border-secondary/40 hover:-translate-y-1 transition-all duration-300">
+            <div className="p-6 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md shadow-xl space-y-3 hover:border-secondary/40 hover:-translate-y-1 transition-colors transition-transform duration-300">
               <div className="flex items-center gap-2 text-secondary">
                 <CheckCircle2 className="h-5 w-5" />
                 <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Servicios Hoy</span>
@@ -249,7 +249,7 @@ export default function LoginPage() {
             </div>
 
             {/* Widget 2 */}
-            <div className="p-6 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md shadow-xl space-y-3 hover:border-secondary/40 hover:-translate-y-1 transition-all duration-300">
+            <div className="p-6 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md shadow-xl space-y-3 hover:border-secondary/40 hover:-translate-y-1 transition-colors transition-transform duration-300">
               <div className="flex items-center gap-2 text-secondary">
                 <ShieldCheck className="h-5 w-5" />
                 <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Cierres de Caja</span>
@@ -265,7 +265,7 @@ export default function LoginPage() {
           </div>
 
           {/* Wide Widget */}
-          <div className="p-6 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md shadow-xl flex items-center gap-5 hover:border-secondary/40 hover:-translate-y-1 transition-all duration-300">
+          <div className="p-6 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-md shadow-xl flex items-center gap-5 hover:border-secondary/40 hover:-translate-y-1 transition-colors transition-transform duration-300">
             <div className="h-12 w-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary shrink-0 border border-secondary/20">
               <Users className="h-6 w-6" />
             </div>

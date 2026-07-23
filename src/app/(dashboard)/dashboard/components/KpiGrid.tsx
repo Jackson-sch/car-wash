@@ -76,7 +76,7 @@ export function KpiGrid({ kpis }: KpiGridProps) {
         return (
           <div
             key={kpi.title}
-            className="p-6 rounded-lg border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:border-secondary transition-all duration-300 flex flex-col justify-between h-32 group"
+            className="p-6 rounded-lg border border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] hover:border-secondary transition-colors duration-300 flex flex-col justify-between h-32 group"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-muted-foreground tracking-wider uppercase">

@@ -41,19 +41,17 @@ export async function bootstrapSystem(data: {
   sucursalNombre: string;
 }) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
     // 1. Validar que la base de datos no contenga usuarios (prevención de reinicialización)
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(usuarios);
     
-    if (count > 0) {
-      // Si ya hay usuarios, exigir autenticación de superadmin para reinicializar
-      const session = await auth.api.getSession({
-        headers: await headers(),
-      });
-      if (!session || session.user.rol !== "superadmin") {
-        return { success: false, error: "El sistema ya cuenta con usuarios registrados." };
-      }
+    if (count > 0 && (!session || session.user.rol !== "superadmin")) {
+      return { success: false, error: "El sistema ya cuenta con usuarios registrados." };
     }
 
     // 2. Crear la Sucursal Principal

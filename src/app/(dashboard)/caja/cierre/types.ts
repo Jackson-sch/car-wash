@@ -7,6 +7,7 @@ export interface TurnoActivo {
   nombreEmpleado: string;
   apellidoEmpleado: string | null;
   pagos: { metodo: string; total: number }[];
+  totalEgresos?: number;
 }
 
 export interface PagoReciente {

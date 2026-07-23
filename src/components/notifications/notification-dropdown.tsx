@@ -93,7 +93,7 @@ export function NotificationDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-80 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95"
+        className="w-80 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5  fade-in-50 zoom-in-95"
       >
         <DropdownMenuLabel className="font-bold px-2.5 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground flex items-center justify-between">
           <span>Notificaciones</span>

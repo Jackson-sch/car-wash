@@ -90,8 +90,8 @@ export function AjustarStockModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-card border border-border w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 text-foreground">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity duration-200">
+      <div className="bg-card border border-border w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
         {/* Header */}
         <div className="p-5 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export function AjustarStockModal({
                     key={key}
                     type="button"
                     onClick={() => setMovTipo(key as typeof movTipo)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-[10px] font-bold cursor-pointer transition-all ${
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-[10px] font-bold cursor-pointer transition-colors ${
                       isActive
                         ? `${cfg.activeBg} ${cfg.activeText} ${cfg.border}`
                         : "bg-background text-muted-foreground border-border hover:border-zinc-400 hover:text-foreground"

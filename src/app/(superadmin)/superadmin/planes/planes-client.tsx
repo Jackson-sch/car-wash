@@ -195,6 +195,7 @@ export function PlanesClient({ initialPlanes }: PlanesClientProps) {
           <input
             type="text"
             placeholder="Buscar planes..."
+            aria-label="Buscar planes"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-transparent border-0 text-sm text-foreground focus:outline-none w-full focus:ring-0 placeholder-muted-foreground"

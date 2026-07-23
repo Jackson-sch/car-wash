@@ -47,7 +47,7 @@ export function SucursalesGrid({
   if (data.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-20 bg-card border border-border rounded-2xl p-8 shadow-sm">
-        <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse duration-2000" />
+        <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse transition-opacity duration-1000" />
         <p className="font-bold text-lg text-foreground">
           {searchQuery ? "Sin resultados para tu búsqueda" : "No hay sucursales registradas"}
         </p>
@@ -69,9 +69,9 @@ export function SucursalesGrid({
         return (
           <Card
             key={s.id}
-            className={`group relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 ${
+            className={`group relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl border transition-colors transition-opacity duration-300 ${
               isCurrent
-                ? "bg-gradient-to-br from-card via-card to-secondary/3 border-secondary/50 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ring-1 ring-secondary/20"
+                ? "bg-linear-to-br from-card via-card to-secondary/3 border-secondary/50 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ring-1 ring-secondary/20"
                 : s.activa
                 ? "bg-card hover:border-zinc-400/50 dark:hover:border-zinc-700/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] border-border/80"
                 : "bg-muted/30 border-dashed border-border/60 opacity-85"
@@ -187,7 +187,7 @@ export function SucursalesGrid({
                     variant="ghost"
                     size="icon"
                     onClick={() => onSetMain(s.id)}
-                    className="h-8 w-8 rounded-lg hover:bg-card hover:text-amber-500 transition-all cursor-pointer text-muted-foreground"
+                    className="h-8 w-8 rounded-lg hover:bg-card hover:text-amber-500 transition-colors cursor-pointer text-muted-foreground"
                     title="Establecer como Sucursal Principal"
                   >
                     <Star className="h-4 w-4" />
@@ -197,7 +197,7 @@ export function SucursalesGrid({
                   variant="ghost"
                   size="icon"
                   onClick={() => onEdit(s)}
-                  className="h-8 w-8 rounded-lg hover:bg-card hover:text-primary transition-all cursor-pointer"
+                  className="h-8 w-8 rounded-lg hover:bg-card hover:text-primary transition-colors cursor-pointer"
                   title="Editar"
                 >
                   <Pencil className="h-4 w-4" />
@@ -207,7 +207,7 @@ export function SucursalesGrid({
                   size="icon"
                   onClick={() => onToggleStatus(s.id)}
                   disabled={isCurrent}
-                  className={`h-8 w-8 rounded-lg hover:bg-card transition-all cursor-pointer ${
+                  className={`h-8 w-8 rounded-lg hover:bg-card transition-colors cursor-pointer ${
                     isCurrent && "cursor-not-allowed opacity-50"
                   }`}
                   title={

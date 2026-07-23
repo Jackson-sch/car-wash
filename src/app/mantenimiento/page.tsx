@@ -8,7 +8,7 @@ export default async function MantenimientoPage() {
   const mensaje = config?.mantenimientoMensaje || "Estamos realizando tareas de mantenimiento. Vuelve pronto.";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-dvh bg-background flex flex-col">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-15%] right-[-5%] w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px]" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-[120px]" />

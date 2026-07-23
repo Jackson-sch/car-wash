@@ -81,7 +81,7 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
                 <SidebarMenuButton
                   tooltip="Nueva Orden"
                   render={<Link href="/ordenes/nueva" />}
-                  className="w-full bg-secondary text-secondary-foreground duration-200 ease-linear hover:bg-secondary/90 hover:text-secondary-foreground active:bg-secondary/90 active:text-secondary-foreground font-bold h-8 rounded-md shadow-md shadow-secondary/15"
+                  className="w-full bg-secondary text-secondary-foreground transition-opacity duration-200 ease-linear hover:bg-secondary/90 hover:text-secondary-foreground active:bg-secondary/90 active:text-secondary-foreground font-bold h-8 rounded-md shadow-md shadow-secondary/15"
                 >
                   <PlusCircle className="size-4" />
                   <span className="group-data-[collapsible=icon]:hidden text-sm">Nueva Orden</span>

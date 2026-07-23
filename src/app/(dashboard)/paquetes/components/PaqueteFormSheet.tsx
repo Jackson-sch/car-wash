@@ -69,19 +69,24 @@ export function PaqueteFormSheet({
       return;
     }
     setSaving(true);
-    const res = editingId
-      ? await updatePaquete(editingId, form)
-      : await createPaquete(form);
+    try {
+      const res = editingId
+        ? await updatePaquete(editingId, form)
+        : await createPaquete(form);
 
-    if (res.success) {
-      toast.success(editingId ? "Paquete actualizado" : "Paquete creado");
-      onClose();
-      const refreshed = await import("@/lib/actions/paquetes").then((m) => m.getPaquetes());
-      onSuccess(refreshed);
-    } else {
-      toast.error(res.error || "Error al guardar");
+      if (res.success) {
+        toast.success(editingId ? "Paquete actualizado" : "Paquete creado");
+        onClose();
+        const refreshed = await import("@/lib/actions/paquetes").then((m) => m.getPaquetes());
+        onSuccess(refreshed);
+      } else {
+        toast.error(res.error || "Error al guardar");
+      }
+    } catch (error) {
+      toast.error("Ocurrió un error inesperado al guardar el paquete");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (

@@ -64,7 +64,7 @@ export default async function EmpresaDetallePage({ params }: PageProps) {
   const planBadgeColor = planColors[empresa.plan] || planColors.free;
 
   return (
-    <div className="space-y-8 animate-in fade-in-50 duration-300">
+    <div className="space-y-8 -50 transition-opacity duration-300">
       {/* Back button */}
       <Link
         href="/superadmin/empresas"

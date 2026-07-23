@@ -82,13 +82,13 @@ export function VehiculoHero({ vehiculo, onEditClick }: VehiculoHeroProps) {
         <Button 
           variant="outline"
           onClick={onEditClick}
-          className="w-full sm:w-auto gap-2 border-border hover:border-zinc-350 dark:hover:border-zinc-700 bg-card/65 font-bold h-11 px-6 rounded-xl transition-all hover:scale-102 duration-300 cursor-pointer text-foreground shadow-xs"
+          className="w-full sm:w-auto gap-2 border-border hover:border-zinc-350 dark:hover:border-zinc-700 bg-card/65 font-bold h-11 px-6 rounded-xl transition-colors transition-transform hover:scale-102 duration-300 cursor-pointer text-foreground shadow-xs"
         >
           <Edit3 className="h-4 w-4 text-muted-foreground" />
           Editar
         </Button>
         <Link href={`/ordenes/nueva?vehiculoId=${vehiculo.id}`} className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto gap-2 bg-secondary hover:bg-secondary/90 text-white font-bold h-11 px-6 rounded-xl shadow-md shadow-secondary/15 transition-all hover:scale-102 duration-300 cursor-pointer">
+          <Button className="w-full sm:w-auto gap-2 bg-secondary hover:bg-secondary/90 text-white font-bold h-11 px-6 rounded-xl shadow-md shadow-secondary/15 transition-colors transition-transform hover:scale-102 duration-300 cursor-pointer">
             <PlusCircle className="h-5 w-5" />
             Nueva Orden
           </Button>

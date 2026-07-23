@@ -42,7 +42,7 @@ export function CierreHeader({ turno, systemStats, onPrint }: CierreHeaderProps)
             href={`/api/pdf/cierre/${turno.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg transition-all shadow-sm"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg transition-colors shadow-sm"
           >
             <Printer className="h-4 w-4" /> PDF Ticket Arqueo
           </a>

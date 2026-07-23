@@ -47,7 +47,7 @@ function FeatureCard({ icon: Icon, title, desc, glow }: typeof features[number])
 
   return (
     <div
-      className={`p-6 rounded-2xl backdrop-blur-xl transition-all duration-500 cursor-default group border shadow-md bg-linear-to-br ${
+      className={`p-6 rounded-2xl backdrop-blur-xl transition-colors duration-500 cursor-default group border shadow-md bg-linear-to-br ${
         hovered ? "from-white/6 to-white/1" : "from-white/2 to-transparent"
       }`}
       style={{
@@ -61,7 +61,7 @@ function FeatureCard({ icon: Icon, title, desc, glow }: typeof features[number])
       onMouseLeave={() => setHovered(false)}
     >
       <div
-        className="h-12 w-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-500"
+        className="h-12 w-12 rounded-xl flex items-center justify-center mb-5 transition-colors duration-500"
         style={{
           backgroundColor: hovered ? `${glow}15` : "rgba(255,255,255,0.03)",
           border: `1px solid ${hovered ? `${glow}25` : "rgba(255,255,255,0.05)"}`,

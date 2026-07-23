@@ -75,7 +75,7 @@ export interface DashboardData {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
-async function getEmpresaBranches(empresaId: string): Promise<{ id: string; nombre: string }[]> {
+async function _getEmpresaBranches(empresaId: string): Promise<{ id: string; nombre: string }[]> {
   return await db
     .select({ id: sucursales.id, nombre: sucursales.nombre })
     .from(sucursales)
@@ -84,7 +84,7 @@ async function getEmpresaBranches(empresaId: string): Promise<{ id: string; nomb
 
 // ─── Main fetcher ───────────────────────────────────────────────────────────────
 
-async function getDashboardData(
+async function _getDashboardData(
   vistaInput: "todas" | "sucursal" = "sucursal"
 ): Promise<DashboardData> {
   const session = await getSessionOrThrow();
@@ -105,7 +105,7 @@ async function getDashboardData(
         .where(eq(sucursales.activa, true));
       branchIds = allBranches.map((b) => b.id);
     } else if (empresaId) {
-      const empresaBranches = await getEmpresaBranches(empresaId);
+      const empresaBranches = await _getEmpresaBranches(empresaId);
       branchIds = empresaBranches.map((b) => b.id);
     }
   } else {
@@ -156,7 +156,7 @@ async function getDashboardData(
         .where(eq(sucursales.activa, true));
       sucursalesInfo = allBranches;
     } else if (empresaId) {
-      sucursalesInfo = await getEmpresaBranches(empresaId);
+      sucursalesInfo = await _getEmpresaBranches(empresaId);
     }
   } else if (userSucursalId) {
     const [branch] = await db

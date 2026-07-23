@@ -11,7 +11,7 @@ import { auth } from "@/lib/auth/config";
 import { sendWelcomeEmail } from "@/lib/email";
 
 // Obtener lavadores y comisiones ganadas por órdenes completadas/cobradas
-async function getEmpleadosComisiones() {
+async function _getEmpleadosComisiones() {
   try {
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
@@ -406,12 +406,16 @@ export async function liquidarComisionesEmpleado(data: {
   notas?: string;
 }) {
   try {
-    if (!data.ordenIds || data.ordenIds.length === 0) {
-      return { success: false, error: "Seleccione al menos una orden para liquidar." };
-    }
-
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "editar" });
-    const sucursalId = session.user.sucursalId!;
+    if (!session?.user?.sucursalId || !data.ordenIds?.length) {
+      return {
+        success: false,
+        error: !data.ordenIds?.length
+          ? "Seleccione al menos una orden para liquidar."
+          : "Usuario sin sucursal asignada.",
+      };
+    }
+    const sucursalId = session.user.sucursalId;
 
     const ordenesPendientes = await db
       .select({
@@ -476,7 +480,7 @@ export async function liquidarComisionesEmpleado(data: {
   }
 }
 
-export async function getHistorialLiquidaciones(empleadoId: string) {
+async function getHistorialLiquidaciones(empleadoId: string) {
   try {
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
     const sucursalId = session.user.sucursalId!;

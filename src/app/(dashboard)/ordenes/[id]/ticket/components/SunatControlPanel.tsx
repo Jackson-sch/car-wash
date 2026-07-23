@@ -26,7 +26,7 @@ export function SunatControlPanel({
   onSave,
 }: SunatControlPanelProps) {
   return (
-    <div className="w-full max-w-md bg-zinc-50 dark:bg-card p-6 rounded-3xl border border-border space-y-5 shadow-xs transition-all shrink-0">
+    <div className="w-full max-w-md bg-zinc-50 dark:bg-card p-6 rounded-3xl border border-border space-y-5 shadow-xs transition-colors shrink-0">
       <div className="flex items-start gap-3">
         <div className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-350 border border-zinc-200/50 dark:border-zinc-700/50 shrink-0">
           <ShieldCheck className="h-5 w-5 text-secondary" />
@@ -62,7 +62,7 @@ export function SunatControlPanel({
                 key={t}
                 type="button"
                 onClick={() => onTipoChange(t)}
-                className={`py-2 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg border text-center transition-all cursor-pointer ${
+                className={`py-2 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg border text-center transition-colors cursor-pointer ${
                   tipo === t
                     ? "bg-secondary border-secondary text-secondary-foreground shadow-sm"
                     : "bg-background border-border text-muted-foreground hover:text-foreground"
@@ -76,7 +76,7 @@ export function SunatControlPanel({
 
         {/* Serie y Número */}
         {tipo !== "ninguno" && (
-          <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-200">
+          <div className="grid grid-cols-2 gap-4 transition-opacity duration-200">
             <div className="space-y-1.5">
               <label htmlFor="serie-input" className="text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">
                 Serie (4 letras/Núm.)

@@ -74,7 +74,7 @@ export function VehiculoEditModal({ isOpen, onClose, vehiculo }: VehiculoEditMod
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md bg-card border border-border shadow-2xl p-6 rounded-2xl animate-in fade-in zoom-in-95 duration-200">
+      <DialogContent className="max-w-md bg-card border border-border shadow-2xl p-6 rounded-2xl transition-opacity transition-transform duration-200">
         <DialogHeader>
           <DialogTitle className="text-lg font-black tracking-tight text-foreground">
             Editar Vehículo
@@ -188,7 +188,7 @@ export function VehiculoEditModal({ isOpen, onClose, vehiculo }: VehiculoEditMod
             <Button
               type="submit"
               disabled={isSaving}
-              className="bg-secondary hover:bg-secondary/90 text-white font-bold rounded-xl shadow-md shadow-secondary/15 transition-all min-w-[100px] cursor-pointer"
+              className="bg-secondary hover:bg-secondary/90 text-white font-bold rounded-xl shadow-md shadow-secondary/15 transition-colors min-w-[100px] cursor-pointer"
             >
               {isSaving ? (
                 <>

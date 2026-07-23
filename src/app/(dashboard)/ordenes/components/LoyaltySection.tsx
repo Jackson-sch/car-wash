@@ -32,7 +32,7 @@ export function LoyaltySection({
   );
 
   return (
-    <div className="space-y-3 p-3.5 rounded-2xl border border-amber-200/50 bg-amber-500/5 dark:bg-amber-950/10 dark:border-amber-900/30 animate-in fade-in duration-200">
+    <div className="space-y-3 p-3.5 rounded-2xl border border-amber-200/50 bg-amber-500/5 dark:bg-amber-950/10 dark:border-amber-900/30 transition-opacity duration-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
@@ -60,7 +60,7 @@ export function LoyaltySection({
             }
           }}
           aria-label={canjearPuntos ? "Quitar canje de puntos" : "Canjear puntos"}
-          className={`text-[9px] font-extrabold px-2.5 py-1 rounded-lg border cursor-pointer transition-all active:scale-95 uppercase tracking-wider ${
+          className={`text-[9px] font-extrabold px-2.5 py-1 rounded-lg border cursor-pointer transition-colors transition-transform active:scale-95 uppercase tracking-wider ${
             canjearPuntos
               ? "border-amber-500 text-amber-500 bg-amber-500/15"
               : "border-border text-muted-foreground hover:text-foreground"
@@ -71,7 +71,7 @@ export function LoyaltySection({
       </div>
 
       {canjearPuntos && (
-        <div className="space-y-2 pt-2 border-t border-border/50 animate-in fade-in duration-200">
+        <div className="space-y-2 pt-2 border-t border-border/50 transition-opacity duration-200">
           <div className="flex items-center justify-between text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
             <span>Puntos a canjear:</span>
             <span className="text-secondary font-extrabold">

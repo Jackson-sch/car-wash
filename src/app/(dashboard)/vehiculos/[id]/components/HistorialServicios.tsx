@@ -101,12 +101,12 @@ export function HistorialServicios({ vehiculoId, ordenes }: HistorialServiciosPr
             return (
               <div key={o.id} className="relative">
                 {/* Timeline node dot */}
-                <div className={`absolute left-[-27px] sm:left-[-29px] top-1.5 h-6 w-6 rounded-full border-2 border-background flex items-center justify-center ring-4 transition-all duration-300 ${dotStyle} bg-white dark:bg-zinc-950 shadow-xs z-10`}>
+                <div className={`absolute left-[-27px] sm:left-[-29px] top-1.5 h-6 w-6 rounded-full border-2 border-background flex items-center justify-center ring-4 transition-colors duration-300 ${dotStyle} bg-white dark:bg-zinc-950 shadow-xs z-10`}>
                   {cloneElement(config.icon as React.ReactElement<{ className?: string }>, { className: "h-3.5 w-3.5" })}
                 </div>
 
                 <Card
-                  className={`p-4 border-border bg-card hover:border-zinc-350 dark:hover:border-zinc-700 hover:shadow-md transition-all duration-300 rounded-2xl ${
+                  className={`p-4 border-border bg-card hover:border-zinc-350 dark:hover:border-zinc-700 hover:shadow-md transition-colors duration-300 rounded-2xl ${
                     isFirst ? "ring-1 ring-secondary/35 bg-linear-to-br from-card via-card to-secondary/2" : ""
                   }`}
                 >

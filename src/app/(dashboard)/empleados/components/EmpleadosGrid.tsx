@@ -136,7 +136,7 @@ export function EmpleadosGrid({
               <Card
                 suppressHydrationWarning
                 key={emp.id}
-                className={`p-6 border-border bg-card hover:border-zinc-350 hover:shadow-md transition-all duration-300 flex flex-col justify-between ${
+                className={`p-6 border-border bg-card hover:border-zinc-350 hover:shadow-md transition-colors duration-300 flex flex-col justify-between ${
                   !emp.activo ? "opacity-75 dark:opacity-65" : ""
                 }`}
               >
@@ -180,7 +180,7 @@ export function EmpleadosGrid({
                       />
                       <DropdownMenuContent
                         align="end"
-                        className="w-44 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95"
+                        className="w-44 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5  fade-in-50 zoom-in-95"
                       >
                         <DropdownMenuItem
                           onClick={() => router.push(`/empleados/${emp.id}`)}

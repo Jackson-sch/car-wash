@@ -4,7 +4,7 @@ import { Ban, Car, Mail, Phone, ArrowUpRight, AlertTriangle } from "lucide-react
 
 export default function SuspendidoPage() {
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-dvh bg-background overflow-hidden">
 
       {/* ── Keyframes ───────────────────────────────────────────────────────── */}
       <style dangerouslySetInnerHTML={{ __html: `
@@ -46,14 +46,14 @@ export default function SuspendidoPage() {
           box-shadow: 0 8px 32px rgb(186 26 26 / 0.09);
         }
         .btn-primary-hover {
-          transition: all 0.2s ease;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .btn-primary-hover:hover {
           transform: translateY(-1px);
           box-shadow: 0 6px 24px rgb(0 0 0 / 0.15);
         }
         .btn-secondary-hover {
-          transition: all 0.2s ease;
+          transition: border-color 0.2s ease, color 0.2s ease;
         }
         .btn-secondary-hover:hover {
           border-color: rgb(186 26 26 / 0.9) !important;
@@ -178,7 +178,7 @@ export default function SuspendidoPage() {
             ].map((item) => (
               <div
                 key={item.n}
-                className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm transition-all duration-200 hover:border-destructive/60 hover:bg-card/80"
+                className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm transition-colors duration-200 hover:border-destructive/60 hover:bg-card/80"
               >
                 {/* Number badge */}
                 <span

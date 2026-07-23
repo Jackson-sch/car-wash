@@ -58,7 +58,7 @@ export function PaquetesTable({
                 colSpan={5}
                 className="text-center text-muted-foreground py-20"
               >
-                <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/35 animate-pulse duration-2000" />
+                <Package className="h-10 w-10 mx-auto mb-3 text-muted-foreground/35 animate-pulse transition-opacity duration-1000" />
                 <p className="font-bold text-base text-foreground">
                   {searchQuery
                     ? "Sin resultados para tu búsqueda"
@@ -137,7 +137,7 @@ export function PaquetesTable({
                       variant="ghost"
                       size="icon"
                       onClick={() => onEdit(p)}
-                      className="h-8 w-8 rounded-lg hover:bg-muted/80 hover:text-primary transition-all"
+                      className="h-8 w-8 rounded-lg hover:bg-muted/80 hover:text-primary transition-colors"
                       title="Editar"
                     >
                       <Pencil className="h-4 w-4" />
@@ -146,7 +146,7 @@ export function PaquetesTable({
                       variant="ghost"
                       size="icon"
                       onClick={() => onToggleStatus(p.id)}
-                      className="h-8 w-8 rounded-lg hover:bg-muted/80 transition-all"
+                      className="h-8 w-8 rounded-lg hover:bg-muted/80 transition-colors"
                       title={p.activo ? "Desactivar" : "Activar"}
                     >
                       {p.activo ? (
@@ -159,7 +159,7 @@ export function PaquetesTable({
                       variant="ghost"
                       size="icon"
                       onClick={() => onDelete(p.id)}
-                      className="h-8 w-8 rounded-lg  hover:text-destructive hover:bg-destructive/10 transition-all"
+                      className="h-8 w-8 rounded-lg hover:text-destructive hover:bg-destructive/10 transition-colors"
                       title="Eliminar"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />

@@ -146,7 +146,7 @@ export function SucursalesClient({
           placeholder="Buscar sucursal por nombre..."
           value={search || ""}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 pr-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
+          className="pl-9 pr-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-colors shadow-sm"
         />
         {search && (
           <button type="button" onClick={() => setSearch("")}
@@ -159,7 +159,7 @@ export function SucursalesClient({
       </div>
 
       {/* Card Grid */}
-      <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="transition-opacity duration-300">
         <SucursalesGrid
           data={filtered}
           searchQuery={search}

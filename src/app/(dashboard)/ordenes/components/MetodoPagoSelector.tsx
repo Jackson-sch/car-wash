@@ -110,7 +110,7 @@ export function MetodoPagoSelector({
                 type="button"
                 onClick={() => !disabled && setPaymentMethod(method.id)}
                 disabled={disabled}
-                className={`p-3 border rounded-xl flex flex-col items-center justify-center gap-1.5 relative transition-all duration-200 cursor-pointer ${
+                className={`p-3 border rounded-xl flex flex-col items-center justify-center gap-1.5 relative transition-colors transition-opacity duration-200 cursor-pointer ${
                   isSelected ? method.activeClass : method.colorClass
                 } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
               >
@@ -131,7 +131,7 @@ export function MetodoPagoSelector({
 
       <div className="space-y-3 min-h-[110px] flex flex-col justify-end">
         {paymentMethod === "efectivo" ? (
-          <div className="space-y-3 animate-in slide-in-from-top-2 duration-300">
+          <div className="space-y-3 transition-opacity duration-300">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <label
                 htmlFor="montoRecibido"
@@ -148,7 +148,7 @@ export function MetodoPagoSelector({
                     type="button"
                     onClick={() => setCashReceived(opt.toFixed(2))}
                     disabled={disabled}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded border transition-all cursor-pointer ${
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded border transition-colors cursor-pointer ${
                       cashReceivedNum === opt
                         ? "bg-emerald-600 border-emerald-600 text-white"
                         : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100"
@@ -206,7 +206,7 @@ export function MetodoPagoSelector({
             )}
           </div>
         ) : (
-          <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+          <div className="space-y-2 transition-opacity duration-300">
             <label
               htmlFor="referencia"
               className="text-xs font-bold text-zinc-650"
@@ -219,7 +219,7 @@ export function MetodoPagoSelector({
               value={paymentReference}
               onChange={(e) => setPaymentReference(e.target.value)}
               disabled={disabled}
-              className={`bg-card border-zinc-200 text-xs h-9 rounded-lg transition-all focus-visible:ring-1 ${
+              className={`bg-card border-zinc-200 text-xs h-9 rounded-lg transition-colors focus-visible:ring-1 ${
                 paymentMethod === "yape"
                   ? "focus-visible:border-purple-500 focus-visible:ring-purple-500/20"
                   : paymentMethod === "plin"

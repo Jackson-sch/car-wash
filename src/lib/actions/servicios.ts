@@ -53,7 +53,7 @@ export async function getSessionOrThrow(permission?: {
 }
 
 // Obtener todas las categorías de servicio de la sucursal
-async function getCategoriasServicio() {
+async function _getCategoriasServicio() {
   try {
     const session = await getSessionOrThrow({ modulo: "servicios", accion: "ver" });
     const sucursalId = session.user.sucursalId!;

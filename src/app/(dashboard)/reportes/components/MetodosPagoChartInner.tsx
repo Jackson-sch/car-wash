@@ -55,7 +55,7 @@ export function MetodosPagoChartInner({ pagosMetodo }: MetodosPagoChartProps) {
         endAngle={endAngle}
         fill={fill}
         cornerRadius={4}
-        className="transition-all duration-300"
+        className="transition-colors duration-300"
       />
     );
   };

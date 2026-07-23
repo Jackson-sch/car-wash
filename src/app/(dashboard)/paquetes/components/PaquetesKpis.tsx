@@ -20,7 +20,7 @@ export function PaquetesKpis({ paquetes }: PaquetesKpisProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full">
       {/* Total de Paquetes */}
-      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Total de Paquetes
@@ -38,7 +38,7 @@ export function PaquetesKpis({ paquetes }: PaquetesKpisProps) {
       </div>
 
       {/* Paquetes Activos */}
-      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Paquetes Activos
@@ -56,7 +56,7 @@ export function PaquetesKpis({ paquetes }: PaquetesKpisProps) {
       </div>
 
       {/* Valor Total */}
-      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Valor de Combos

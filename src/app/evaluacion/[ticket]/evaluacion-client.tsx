@@ -18,6 +18,14 @@ interface EvaluacionClientProps {
   };
 }
 
+const ASPECTOS_LIST = [
+  { id: "Brillo y Limpieza Excelente", label: "Brillo y Limpieza Excelente", icon: Sparkles },
+  { id: "Rapidez en la Entrega", label: "Rapidez en la Entrega", icon: Clock },
+  { id: "Trato Amable y Profesional", label: "Trato Amable y Profesional", icon: Smile },
+  { id: "Cuidado de Tapicería", label: "Cuidado de Tapicería", icon: Droplets },
+  { id: "Gran Relación Calidad-Precio", label: "Gran Relación Calidad-Precio", icon: Gem },
+];
+
 export function EvaluacionClient({ orden }: EvaluacionClientProps) {
   const [estrellas, setEstrellas] = useState<number>(5);
   const [hoverEstrellas, setHoverEstrellas] = useState<number>(0);
@@ -25,14 +33,6 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
   const [comentario, setComentario] = useState("");
   const [enviado, setEnviado] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  const ASPECTOS_LIST = [
-    { id: "Brillo y Limpieza Excelente", label: "Brillo y Limpieza Excelente", icon: Sparkles },
-    { id: "Rapidez en la Entrega", label: "Rapidez en la Entrega", icon: Clock },
-    { id: "Trato Amable y Profesional", label: "Trato Amable y Profesional", icon: Smile },
-    { id: "Cuidado de Tapicería", label: "Cuidado de Tapicería", icon: Droplets },
-    { id: "Gran Relación Calidad-Precio", label: "Gran Relación Calidad-Precio", icon: Gem },
-  ];
 
   const toggleAspecto = (id: string) => {
     if (aspectos.includes(id)) {
@@ -63,10 +63,10 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
 
   if (enviado) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-8 text-center space-y-4 border-border bg-card shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="min-h-dvh bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full p-8 text-center space-y-4 border-border bg-card shadow-2xl transition-transform duration-300">
           <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
-            <CheckCircle2 className="w-10 h-10 animate-bounce" />
+            <CheckCircle2 className="w-10 h-10 transition-transform duration-300 hover:scale-110" />
           </div>
           <h2 className="text-xl font-extrabold text-foreground">¡Gracias por tu Calificación!</h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -82,7 +82,7 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-foreground flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-zinc-950 text-foreground flex items-center justify-center p-4">
       <Card className="max-w-lg w-full p-6 sm:p-8 space-y-6 border-zinc-800 bg-zinc-900 shadow-2xl rounded-3xl">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -107,6 +107,7 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
                 <button
                   key={star}
                   type="button"
+                  aria-label={`Calificar con ${star} estrella${star !== 1 ? "s" : ""}`}
                   onClick={() => setEstrellas(star)}
                   onMouseEnter={() => setHoverEstrellas(star)}
                   onMouseLeave={() => setHoverEstrellas(0)}
@@ -149,9 +150,9 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
 
           {/* Aspectos destacados */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
               ¿Qué es lo que más te gustó?
-            </label>
+            </span>
             <div className="flex flex-wrap gap-2">
               {ASPECTOS_LIST.map((asp) => {
                 const IconComp = asp.icon;
@@ -161,7 +162,7 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
                     key={asp.id}
                     type="button"
                     onClick={() => toggleAspecto(asp.id)}
-                    className={`py-1.5 px-3 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`py-1.5 px-3 text-xs font-bold rounded-xl border transition-colors cursor-pointer flex items-center gap-1.5 ${
                       selected
                         ? "bg-secondary text-secondary-foreground border-secondary shadow-md font-black"
                         : "bg-zinc-800/60 border-zinc-700 text-zinc-300 hover:text-white"
@@ -177,10 +178,11 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
 
           {/* Comentarios */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+            <label htmlFor="comentario-evaluacion" className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
               Comentario u Observaciones Adicionales
             </label>
             <Textarea
+              id="comentario-evaluacion"
               placeholder="Déjanos saber si tienes alguna sugerencia para mejorar nuestro servicio..."
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}

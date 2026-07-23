@@ -38,7 +38,7 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
     const yapePlinVentas = yapeVentas + plinVentas;
     const transferenciasVentas =
       turno.pagos.find((p) => p.metodo === "transferencia")?.total || 0;
-    const totalEgresos = (turno as any).totalEgresos || 0;
+    const totalEgresos = turno.totalEgresos || 0;
 
     const totalVentas =
       turno.pagos.reduce((acc, curr) => acc + curr.total, 0) || 0;
@@ -151,7 +151,7 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
         <Link
           href="/caja/cierre"
           className={cn(
-            "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-[1.01]",
+            "w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm flex items-center justify-center transition-colors duration-200 hover:scale-[1.01]",
           )}
         >
           <Lock className="size-4" />

@@ -62,7 +62,7 @@ export function OrdenesKpiCards({ ordenes }: OrdenesKpiCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
       {/* Active Orders */}
-      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Órdenes Activas
@@ -81,7 +81,7 @@ export function OrdenesKpiCards({ ordenes }: OrdenesKpiCardsProps) {
       </div>
 
       {/* Vehicles in Queue */}
-      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Vehículos en Espera
@@ -99,7 +99,7 @@ export function OrdenesKpiCards({ ordenes }: OrdenesKpiCardsProps) {
       </div>
 
       {/* Avg. Completion Time */}
-      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Tiempo Prom. Lavado
@@ -117,7 +117,7 @@ export function OrdenesKpiCards({ ordenes }: OrdenesKpiCardsProps) {
       </div>
 
       {/* Current Revenue */}
-      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-all duration-300 bg-card border border-border relative overflow-hidden group">
+      <div className="bento-card p-5 rounded-2xl flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-xs transition-colors transition-transform duration-300 bg-card border border-border relative overflow-hidden group">
         <div className="flex justify-between items-start">
           <span className="text-[10px] uppercase font-extrabold tracking-widest text-muted-foreground">
             Ingresos de Caja

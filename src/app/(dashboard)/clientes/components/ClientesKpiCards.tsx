@@ -17,7 +17,7 @@ export function ClientesKpiCards({ clientesList }: ClientesKpiCardsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {/* Card 1: Total Clientes */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -35,11 +35,11 @@ export function ClientesKpiCards({ clientesList }: ClientesKpiCardsProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
           <span>Clientes registrados en el sistema</span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 2: Vehículos Asociados */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -57,11 +57,11 @@ export function ClientesKpiCards({ clientesList }: ClientesKpiCardsProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
           <span>Vehículos vinculados a propietarios</span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 3: Puntos Activos */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-500/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-amber-500/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -79,11 +79,11 @@ export function ClientesKpiCards({ clientesList }: ClientesKpiCardsProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
           <span>Puntos circulantes por canjear</span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 4: Programa de Puntos */}
-      <Card className="p-6 border-amber-500/20 bg-card shadow-sm hover:border-amber-500/40 transition-all flex flex-col justify-between relative overflow-hidden group">
+      <Card className="p-6 border-amber-500/20 bg-card shadow-sm hover:border-amber-500/40 transition-colors flex flex-col justify-between relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-300">
           <Award className="h-24 w-24 text-amber-500" />
         </div>
@@ -108,7 +108,7 @@ export function ClientesKpiCards({ clientesList }: ClientesKpiCardsProps) {
             </div>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </Card>
     </div>
   );

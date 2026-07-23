@@ -137,7 +137,7 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: Total Productos */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -156,11 +156,11 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
             <span>Monitoreando catálogo de materiales</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         {/* Card 2: Bajo Stock */}
-        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md ${
+        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md ${
           lowStockItems > 0 
             ? "border-amber-500/30 hover:border-amber-500/60" 
             : "border-border hover:border-zinc-350"
@@ -186,7 +186,7 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
             {totalItems > 0 ? (
               <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                 <div 
-                  className={`h-full rounded-full transition-all duration-500 ${
+                  className={`h-full rounded-full transition-colors duration-500 ${
                     lowStockItems > 0 ? "bg-amber-500" : "bg-emerald-500"
                   }`}
                   style={{ width: `${(lowStockItems / totalItems) * 100}%` }}
@@ -202,12 +202,12 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
             </p>
           </div>
           {lowStockItems > 0 && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent" />
           )}
         </div>
 
         {/* Card 3: Agotados */}
-        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md ${
+        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md ${
           outOfStockItems > 0 
             ? "border-rose-500/30 hover:border-rose-500/60" 
             : "border-border hover:border-zinc-350"
@@ -240,7 +240,7 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
             </span>
           </div>
           {outOfStockItems > 0 && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-rose-500/50 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-rose-500/50 to-transparent" />
           )}
         </div>
       </div>

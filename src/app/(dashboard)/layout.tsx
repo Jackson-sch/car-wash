@@ -33,7 +33,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider className="h-screen overflow-hidden font-sans relative">
+    <SidebarProvider className="h-dvh overflow-hidden font-sans relative">
       {/* Sidebar — estático, prerenderizado */}
       <Sidebar />
 
@@ -47,7 +47,7 @@ export default function DashboardLayout({
             {/* Content Page wrapper */}
             <main className="flex-1 overflow-y-auto p-6">
               <AmbientBackground />
-              <div className="max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="max-w-7xl mx-auto w-full transition-opacity duration-500">
                 <Suspense fallback={<PageSkeleton />}>
                   {children}
                 </Suspense>

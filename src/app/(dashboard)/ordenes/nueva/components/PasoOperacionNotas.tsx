@@ -39,7 +39,7 @@ export function PasoOperacionNotas({
   placa,
 }: PasoOperacionNotasProps) {
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-2xl mx-auto space-y-6 transition-opacity duration-300">
       <Card className="p-6 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider">
           Parámetros Operativos

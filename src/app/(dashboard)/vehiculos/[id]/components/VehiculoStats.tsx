@@ -15,7 +15,7 @@ export function VehiculoStats({ ordenes, totalGastado, ordenesActivas, ultimaOrd
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Total Orders */}
-      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-indigo-500/35 hover:shadow-md transition-all duration-300 flex items-center justify-between">
+      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-indigo-500/35 hover:shadow-md transition-colors duration-300 flex items-center justify-between">
         <div className="space-y-1.5 z-10">
           <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">
             Total Órdenes
@@ -24,14 +24,14 @@ export function VehiculoStats({ ordenes, totalGastado, ordenesActivas, ultimaOrd
             {ordenes.length}
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300">
+        <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-colors transition-transform duration-300">
           <ClipboardList className="h-6 w-6" />
         </div>
         <div className="absolute right-0 bottom-0 h-16 w-16 bg-indigo-500/3 blur-2xl rounded-full" />
       </div>
 
       {/* Total Spent */}
-      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-emerald-500/35 hover:shadow-md transition-all duration-300 flex items-center justify-between">
+      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-emerald-500/35 hover:shadow-md transition-colors duration-300 flex items-center justify-between">
         <div className="space-y-1.5 z-10">
           <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">
             Total Gastado
@@ -40,14 +40,14 @@ export function VehiculoStats({ ordenes, totalGastado, ordenesActivas, ultimaOrd
             {formatCurrency(totalGastado)}
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
+        <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-colors transition-transform duration-300">
           <DollarSign className="h-6 w-6" />
         </div>
         <div className="absolute right-0 bottom-0 h-16 w-16 bg-emerald-500/3 blur-2xl rounded-full" />
       </div>
 
       {/* Active Orders */}
-      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-amber-500/35 hover:shadow-md transition-all duration-300 flex items-center justify-between">
+      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-amber-500/35 hover:shadow-md transition-colors duration-300 flex items-center justify-between">
         <div className="space-y-1.5 z-10">
           <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">
             Órdenes Activas
@@ -56,14 +56,14 @@ export function VehiculoStats({ ordenes, totalGastado, ordenesActivas, ultimaOrd
             {ordenesActivas}
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
+        <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 group-hover:scale-110 group-hover:bg-amber-500/20 transition-colors transition-transform duration-300">
           <Gauge className="h-6 w-6" />
         </div>
         <div className="absolute right-0 bottom-0 h-16 w-16 bg-amber-500/3 blur-2xl rounded-full" />
       </div>
 
       {/* Last Visit */}
-      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-sky-500/35 hover:shadow-md transition-all duration-300 flex items-center justify-between">
+      <div className="group relative overflow-hidden bg-card/65 backdrop-blur-md p-5 rounded-2xl border border-border/80 shadow-xs hover:border-sky-500/35 hover:shadow-md transition-colors duration-300 flex items-center justify-between">
         <div className="space-y-1.5 z-10">
           <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">
             {ultimaOrden ? "Última Visita" : "Sin Actividad"}
@@ -72,7 +72,7 @@ export function VehiculoStats({ ordenes, totalGastado, ordenesActivas, ultimaOrd
             {ultimaOrden?.createdAt ? formatDate(ultimaOrden.createdAt) : "—"}
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-sky-500/10 text-sky-500 dark:text-sky-400 group-hover:scale-110 group-hover:bg-sky-500/20 transition-all duration-300">
+        <div className="p-3 rounded-xl bg-sky-500/10 text-sky-500 dark:text-sky-400 group-hover:scale-110 group-hover:bg-sky-500/20 transition-colors transition-transform duration-300">
           <Calendar className="h-6 w-6" />
         </div>
         <div className="absolute right-0 bottom-0 h-16 w-16 bg-sky-500/3 blur-2xl rounded-full" />

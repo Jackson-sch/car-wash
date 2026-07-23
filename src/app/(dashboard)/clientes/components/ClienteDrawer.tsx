@@ -67,7 +67,7 @@ export function ClienteDrawer({
 }: ClienteDrawerProps) {
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} direction="right">
-      <DrawerContent className="h-screen max-h-none rounded-r-none border-l bg-card text-foreground data-[vaul-drawer-direction=right]:sm:max-w-2xl w-full">
+      <DrawerContent className="h-dvh max-h-none rounded-r-none border-l bg-card text-foreground data-[vaul-drawer-direction=right]:sm:max-w-2xl w-full">
         {cliente && (
           <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}

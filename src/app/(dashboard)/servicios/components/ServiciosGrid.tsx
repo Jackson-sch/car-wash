@@ -108,11 +108,11 @@ export function ServiciosGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-305">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-305">
       {filteredServicios.map((serv) => (
         <Card
           key={serv.id}
-          className="p-6 border-border bg-card/50 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex flex-col justify-between hover:border-zinc-400 hover:shadow-md transition-all duration-300 relative overflow-hidden"
+          className="p-6 border-border bg-card/50 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex flex-col justify-between hover:border-zinc-400 hover:shadow-md transition-colors duration-300 relative overflow-hidden"
         >
           <div className="space-y-4">
             {/* Header Card */}

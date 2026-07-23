@@ -39,7 +39,7 @@ export function SidebarUserFooter() {
           render={
             <SidebarMenuButton
               size="lg"
-              className="w-full flex items-center gap-3 px-2 py-2 hover:bg-sidebar-accent/50 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:border-sidebar-border/50 data-[state=open]:bg-sidebar-accent/50"
+              className="w-full flex items-center gap-3 px-2 py-2 hover:bg-sidebar-accent/50 rounded-xl transition-colors duration-200 cursor-pointer border border-transparent hover:border-sidebar-border/50 data-[state=open]:bg-sidebar-accent/50"
             />
           }
         >
@@ -58,7 +58,7 @@ export function SidebarUserFooter() {
           side="right"
           align="end"
           sideOffset={12}
-          className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95 dark"
+          className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5  fade-in-50 zoom-in-95 dark"
         >
           <DropdownMenuLabel className="px-2.5 py-2 font-normal">
             <div className="flex items-center gap-2.5 text-left text-sm">

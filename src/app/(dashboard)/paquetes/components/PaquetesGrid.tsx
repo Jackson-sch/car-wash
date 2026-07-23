@@ -25,7 +25,7 @@ export function PaquetesGrid({
   if (data.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-20 bg-card border border-border rounded-2xl p-8 shadow-sm">
-        <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse duration-2000" />
+        <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse transition-opacity duration-1000" />
         <p className="font-bold text-lg text-foreground">
           {searchQuery ? "Sin resultados para tu búsqueda" : "No hay paquetes registrados"}
         </p>
@@ -43,7 +43,7 @@ export function PaquetesGrid({
       {data.map((p) => (
         <Card
           key={p.id}
-          className={`group relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 ${
+          className={`group relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl border transition-colors transition-opacity duration-300 ${
             p.activo
               ? "bg-linear-to-br from-card via-card to-secondary/3 hover:border-zinc-400/50 dark:hover:border-zinc-700/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.3)] border-border/80"
               : "bg-muted/30 border-dashed border-border/60 opacity-80"
@@ -126,7 +126,7 @@ export function PaquetesGrid({
                 variant="ghost"
                 size="icon"
                 onClick={() => onEdit(p)}
-                className="h-8 w-8 rounded-lg hover:bg-card hover:text-primary transition-all"
+                className="h-8 w-8 rounded-lg hover:bg-card hover:text-primary transition-colors"
                 title="Editar"
               >
                 <Pencil className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function PaquetesGrid({
                 variant="ghost"
                 size="icon"
                 onClick={() => onToggleStatus(p.id)}
-                className="h-8 w-8 rounded-lg hover:bg-card transition-all"
+                className="h-8 w-8 rounded-lg hover:bg-card transition-colors"
                 title={p.activo ? "Desactivar" : "Activar"}
               >
                 {p.activo ? (
@@ -148,7 +148,7 @@ export function PaquetesGrid({
                 variant="ghost"
                 size="icon"
                 onClick={() => onDelete(p.id)}
-                className="h-8 w-8 rounded-lg  hover:text-destructive hover:bg-destructive/10 transition-all"
+                className="h-8 w-8 rounded-lg hover:text-destructive hover:bg-destructive/10 transition-colors"
                 title="Eliminar"
               >
                 <Trash2 className="h-4 w-4 text-destructive" />

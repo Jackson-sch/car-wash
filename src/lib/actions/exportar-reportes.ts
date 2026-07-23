@@ -5,7 +5,7 @@ import { ordenes, pagos, ordenServicios } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 
-function csvEscape(val: unknown): string {
+function _csvEscape(val: unknown): string {
   const str = String(val ?? "");
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
     return `"${str.replace(/"/g, '""')}"`;
@@ -13,9 +13,9 @@ function csvEscape(val: unknown): string {
   return str;
 }
 
-function toCSV(headers: string[], rows: string[][]): string {
-  const headerLine = headers.map(csvEscape).join(",");
-  const bodyLines = rows.map((row) => row.map(csvEscape).join(","));
+function _toCSV(headers: string[], rows: string[][]): string {
+  const headerLine = headers.map(_csvEscape).join(",");
+  const bodyLines = rows.map((row) => row.map(_csvEscape).join(","));
   return [headerLine, ...bodyLines, ""].join("\n");
 }
 
@@ -44,7 +44,7 @@ export async function exportarVentasCSV() {
 
     return {
       success: true,
-      csv: toCSV(headers, data),
+      csv: _toCSV(headers, data),
       filename: `ventas-${new Date().toISOString().split("T")[0]}.csv`,
     };
   } catch (error) {
@@ -78,7 +78,7 @@ export async function exportarServiciosCSV() {
 
     return {
       success: true,
-      csv: toCSV(headers, data),
+      csv: _toCSV(headers, data),
       filename: `servicios-${new Date().toISOString().split("T")[0]}.csv`,
     };
   } catch (error) {
@@ -109,7 +109,7 @@ export async function exportarPagosCSV() {
 
     return {
       success: true,
-      csv: toCSV(headers, data),
+      csv: _toCSV(headers, data),
       filename: `pagos-${new Date().toISOString().split("T")[0]}.csv`,
     };
   } catch (error) {
@@ -118,7 +118,7 @@ export async function exportarPagosCSV() {
   }
 }
 
-export async function exportarComisionesCSV() {
+async function exportarComisionesCSV() {
   try {
     await getSessionOrThrow({ modulo: "reportes", accion: "exportar" });
     const { usuarios } = await import("@/lib/db/schema");
@@ -145,7 +145,7 @@ export async function exportarComisionesCSV() {
 
     return {
       success: true,
-      csv: toCSV(headers, data),
+      csv: _toCSV(headers, data),
       filename: `comisiones-lavadores-${new Date().toISOString().split("T")[0]}.csv`,
     };
   } catch (error) {
@@ -154,7 +154,7 @@ export async function exportarComisionesCSV() {
   }
 }
 
-export async function exportarMargenNetoCSV() {
+async function exportarMargenNetoCSV() {
   try {
     await getSessionOrThrow({ modulo: "reportes", accion: "exportar" });
 
@@ -183,7 +183,7 @@ export async function exportarMargenNetoCSV() {
 
     return {
       success: true,
-      csv: toCSV(headers, data),
+      csv: _toCSV(headers, data),
       filename: `margen-neto-${new Date().toISOString().split("T")[0]}.csv`,
     };
   } catch (error) {

@@ -16,7 +16,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-interface OrdenConsulta {
+export interface OrdenConsulta {
   id: string;
   nroTicket: string;
   estado: "pendiente" | "en_proceso" | "completado" | "cobrado" | "cancelado";
@@ -33,15 +33,36 @@ interface OrdenConsulta {
   sucursalTelefono: string | null;
 }
 
+const CONSULTA_STEPS = [
+  {
+    key: "pendiente",
+    title: "En Cola de Espera",
+    desc: "Tu vehículo ha ingresado a la recepción y aguarda turno de lavado.",
+    icon: Clock,
+  },
+  {
+    key: "en_proceso",
+    title: "Lavando en Bahía",
+    desc: "Nuestros operarios están realizando el servicio de autolavado.",
+    icon: Sparkles,
+  },
+  {
+    key: "completado",
+    title: "Listo para Retiro",
+    desc: "¡Tu auto está reluciente y esperándote en la zona de entrega!",
+    icon: CheckCircle2,
+  },
+];
+
 export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
   const [lastRefresh, setLastRefresh] = useState<string>("");
 
   useEffect(() => {
-    setLastRefresh(new Date().toLocaleTimeString("es-PE"));
+    setLastRefresh(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
   }, []);
 
   const getStepStatus = (stepEstado: "pendiente" | "en_proceso" | "completado") => {
-    const ordenEstados = ["pendiente", "en_proceso", "completado", "cobrado"];
+    const ordenEstados = ["pendiente", "en_proceso", "completado"];
     const currentIndex = ordenEstados.indexOf(orden.estado === "cobrado" ? "completado" : orden.estado);
     const stepIndex = ordenEstados.indexOf(stepEstado);
 
@@ -50,29 +71,8 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
     return "pending";
   };
 
-  const steps = [
-    {
-      key: "pendiente",
-      title: "En Cola de Espera",
-      desc: "Tu vehículo ha ingresado a la recepción y aguarda turno de lavado.",
-      icon: Clock,
-    },
-    {
-      key: "en_proceso",
-      title: "Lavando en Bahía",
-      desc: "Nuestros operarios están realizando el servicio de autolavado.",
-      icon: Sparkles,
-    },
-    {
-      key: "completado",
-      title: "Listo para Retiro",
-      desc: "¡Tu auto está reluciente y esperándote en la zona de entrega!",
-      icon: CheckCircle2,
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans flex flex-col justify-between">
+    <div className="min-h-dvh bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans flex flex-col justify-between">
       <div className="max-w-md mx-auto w-full space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
@@ -98,13 +98,13 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
             {orden.marca} {orden.modelo}
           </div>
 
-          <div className="inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-sm ${
+          <div className={`inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-sm ${
             orden.estado === 'completado' || orden.estado === 'cobrado'
               ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
               : orden.estado === 'en_proceso'
               ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 animate-pulse'
               : 'bg-secondary/15 border-secondary/40 text-secondary'
-          }">
+          }`}>
             {orden.estado === 'en_proceso' && (
               <span className="inline-flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" /> LAVANDO EN BAHÍA
@@ -128,6 +128,7 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
           <h2 className="text-xs font-black uppercase tracking-wider text-muted-foreground flex items-center justify-between">
             <span>Progreso del Servicio</span>
             <button
+              type="button"
               onClick={() => window.location.reload()}
               className="inline-flex items-center gap-1 text-[11px] text-secondary hover:underline cursor-pointer"
             >
@@ -136,13 +137,13 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
           </h2>
 
           <div className="space-y-6 relative before:absolute before:left-5 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60">
-            {steps.map((st) => {
-              const state = getStepStatus(st.key as any);
+            {CONSULTA_STEPS.map((st) => {
+              const state = getStepStatus(st.key as "pendiente" | "en_proceso" | "completado");
               const Icon = st.icon;
 
               return (
                 <div key={st.key} className="flex items-start gap-4 relative z-10">
-                  <div className={`p-2.5 rounded-full border shadow-sm transition-all ${
+                  <div className={`p-2.5 rounded-full border shadow-sm transition-colors ${
                     state === 'completed'
                       ? 'bg-emerald-500 text-emerald-950 border-emerald-400 font-bold'
                       : state === 'active'
@@ -186,7 +187,7 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
             <div className="pt-2">
               <a
                 href={`/evaluacion/${orden.nroTicket}`}
-                className="inline-flex items-center justify-center gap-1.5 w-full bg-amber-500 hover:bg-amber-400 text-amber-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-md transition-all border border-amber-400"
+                className="inline-flex items-center justify-center gap-1.5 w-full bg-amber-500 hover:bg-amber-400 text-amber-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-md transition-colors border border-amber-400"
               >
                 <Star className="h-4 w-4 fill-amber-950 text-amber-950" />
                 Calificar mi Servicio de Lavado
@@ -200,7 +201,7 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
                 href={`https://wa.me/${orden.sucursalTelefono.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all"
+                className="inline-flex items-center justify-center gap-1.5 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-colors"
               >
                 <MessageCircle className="h-4 w-4" />
                 Contactar Sucursal por WhatsApp

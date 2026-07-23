@@ -231,7 +231,7 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
               <Label className="text-xs font-semibold uppercase text-muted-foreground">Tipo de Descuento</Label>
               <div className="flex p-1 bg-muted/50 rounded-lg border border-border">
                 <button type="button" onClick={() => sf("tipoDescuento", "porcentaje")}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     tipoDescuento === "porcentaje"
                       ? "bg-background shadow-sm border border-border text-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -240,7 +240,7 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                   Porcentaje (%)
                 </button>
                 <button type="button" onClick={() => sf("tipoDescuento", "fijo")}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
                     tipoDescuento === "fijo"
                       ? "bg-background shadow-sm border border-border text-foreground"
                       : "text-muted-foreground hover:text-foreground"

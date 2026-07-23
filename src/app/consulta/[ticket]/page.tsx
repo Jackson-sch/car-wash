@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { ordenes, vehiculos, clientes, sucursales } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { ConsultaClient } from "./consulta-client";
+import { ConsultaClient, type OrdenConsulta } from "./consulta-client";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +42,7 @@ export default async function ConsultaPage({ params }: { params: Promise<{ ticke
 
   if (!orden) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-4 bg-card border border-border p-8 rounded-2xl shadow-lg">
           <div className="inline-block p-4 bg-rose-500/10 text-rose-400 rounded-full mb-2">
             🚗❌
@@ -56,5 +56,5 @@ export default async function ConsultaPage({ params }: { params: Promise<{ ticke
     );
   }
 
-  return <ConsultaClient orden={orden as any} />;
+  return <ConsultaClient orden={orden as unknown as OrdenConsulta} />;
 }

@@ -74,7 +74,7 @@ export function ServiciosTopChartInner({ serviciosTop }: ServiciosTopChartProps)
                     key={`cell-${entry.name}`}
                     fill={COLORS[index % COLORS.length]}
                     opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
-                    className="transition-all duration-300"
+                    className="transition-colors duration-300"
                     onMouseEnter={(e: unknown) => onMouseEnter(e, index)}
                     onMouseLeave={onMouseLeave}
                   />

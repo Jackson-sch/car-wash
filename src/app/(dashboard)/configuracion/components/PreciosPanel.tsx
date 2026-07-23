@@ -68,7 +68,7 @@ export function PreciosPanel({ initialMultipliers, isPending, onSave }: PreciosP
             return (
               <div
                 key={v.id}
-                className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/30 hover:border-zinc-350 hover:bg-muted/50 transition-all"
+                className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/30 hover:border-zinc-350 hover:bg-muted/50 transition-colors"
               >
                 <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
                   <Icon className="h-4 w-4 text-secondary" />

@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import tseslint from "typescript-eslint";
+import security from "eslint-plugin-security";
 
 const eslintConfig = defineConfig([
   // Next.js recommended configs (core-web-vitals + typescript)
@@ -10,6 +11,9 @@ const eslintConfig = defineConfig([
 
   // TypeScript strict rules on top of Next.js defaults
   ...tseslint.configs.strict,
+
+  // Security scanning rules
+  security.configs.recommended,
 
   // Custom overrides
   {

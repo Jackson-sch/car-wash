@@ -46,7 +46,7 @@ export function useCierreCaja(turno: TurnoActivo) {
     const transferenciasVentas =
       turno.pagos.find((p) => p.metodo === "transferencia")?.total || 0;
 
-    const totalEgresos = (turno as any).totalEgresos || 0;
+    const totalEgresos = turno.totalEgresos || 0;
     const expectedEfectivo = Math.max(0, openingCash + efectivoVentas - totalEgresos);
 
     return {

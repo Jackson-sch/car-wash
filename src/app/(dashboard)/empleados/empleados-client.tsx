@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { EmpleadosGrid } from "./components/EmpleadosGrid";
 import { CrearEmpleadoModal } from "./components/CrearEmpleadoModal";
 import { EditarEmpleadoModal } from "./components/EditarEmpleadoModal";
+import { LiquidarComisionModal } from "./components/LiquidarComisionModal";
 import { formatCurrency } from "@/lib/formats";
 import { useSession } from "@/lib/auth-client";
 
@@ -156,7 +157,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
   );
 
   return (
-    <div suppressHydrationWarning className="space-y-8 text-foreground animate-in fade-in duration-300">
+    <div suppressHydrationWarning className="space-y-8 text-foreground transition-opacity duration-300">
       {/* Header */}
       <div suppressHydrationWarning className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div suppressHydrationWarning>
@@ -183,7 +184,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
       {/* KPI Stats */}
       <div suppressHydrationWarning className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: Total Personal */}
-        <div suppressHydrationWarning className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+        <div suppressHydrationWarning className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -202,11 +203,11 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             <span>Colaboradores registrados y activos</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         {/* Card 2: Lavadores Activos */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -224,7 +225,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             {totalPersonal > 0 ? (
               <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                 <div 
-                  className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                  className="h-full rounded-full bg-blue-500 transition-colors duration-500"
                   style={{ width: `${(totalLavadores / totalPersonal) * 100}%` }}
                 />
               </div>
@@ -235,11 +236,12 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
               Operarios en bahía de lavado
             </p>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
-        {/* Card 3: Comisiones */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-500/50">
+        {/* Card 3: Comisiones por Pagar */}
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-emerald-500/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -258,7 +260,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             <span>Suma acumulada por pagar</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
       </div>
 
@@ -304,6 +306,15 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
         empleado={selectedEmpleado}
         currentUserId={currentUserId}
         onSave={handleEditSave}
+      />
+
+      {/* LIQUIDAR COMISION MODAL */}
+      <LiquidarComisionModal
+        open={false}
+        onOpenChange={() => {}}
+        empleadoId=""
+        empleadoNombre=""
+        ordenesPendientes={[]}
       />
     </div>
   );

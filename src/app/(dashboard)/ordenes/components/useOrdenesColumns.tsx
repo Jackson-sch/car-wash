@@ -208,7 +208,7 @@ export function useOrdenesColumns({
             onValueChange={(val: string | null) => onAssignLavador(ord.id, !val || val === "unassigned" ? null : val)}
           >
             <SelectTrigger 
-              className={`rounded-lg text-[10px] h-7 px-2.5 select-none transition-all duration-150 outline-none w-52 shrink-0 ${
+              className={`rounded-lg text-[10px] h-7 px-2.5 select-none transition-colors duration-150 outline-none w-52 shrink-0 ${
                 isUnassigned
                   ? "border border-dashed border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 hover:border-amber-500/60"
                   : "border border-border bg-card/60 hover:bg-card/90 text-foreground hover:border-zinc-400 dark:hover:border-zinc-650"
@@ -305,7 +305,7 @@ export function useOrdenesColumns({
               onValueChange={(val: string | null) => val && onStatusChange(ord.id, val as Orden["estado"])}
             >
               <SelectTrigger
-                className={`text-[10px] font-extrabold h-7 rounded-full px-2.5 border outline-none cursor-pointer w-28 justify-between select-none shadow-xs transition-all duration-200 shrink-0 ${config.style}`}
+                className={`text-[10px] font-extrabold h-7 rounded-full px-2.5 border outline-none cursor-pointer w-28 justify-between select-none shadow-xs transition-colors duration-200 shrink-0 ${config.style}`}
               >
                 <span className="flex items-center gap-1 min-w-0">
                   {config.icon}
@@ -409,7 +409,7 @@ export function useOrdenesColumns({
                   variant="outline"
                   size="icon"
                   title={ord.comprobanteTipo ? "Ver Comprobante SUNAT registrado" : "Registrar Comprobante SUNAT"}
-                  className={`h-7 w-7 cursor-pointer shadow-xs rounded-lg transition-all border ${
+                  className={`h-7 w-7 cursor-pointer shadow-xs rounded-lg transition-colors border ${
                     ord.comprobanteTipo
                       ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-emerald-500/5 hover:bg-emerald-500/15 border-emerald-500/30 hover:border-emerald-500/50"
                       : "text-amber-500 dark:text-amber-400 hover:text-amber-600 bg-amber-500/5 hover:bg-amber-500/15 border-amber-500/30 hover:border-amber-500/50 animate-pulse"
@@ -424,7 +424,7 @@ export function useOrdenesColumns({
                 variant="outline"
                 size="icon"
                 title="Ver detalle / Emitir Comprobante"
-                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-all"
+                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-colors"
               >
                 <Eye className="h-3.5 w-3.5" />
               </Button>
@@ -437,7 +437,7 @@ export function useOrdenesColumns({
                     variant="outline"
                     size="icon"
                     title="Imprimir ticket..."
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-all"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-colors"
                   >
                     <Printer className="h-3.5 w-3.5" />
                   </Button>

@@ -58,8 +58,8 @@ export function CrearEmpleadoModal({ isOpen, onClose, isPending, onSave }: Crear
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-card border border-border w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 text-foreground">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity duration-200">
+      <div className="bg-card border border-border w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
         <div className="p-6 border-b border-border flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-foreground">Registrar Nuevo Personal</h3>

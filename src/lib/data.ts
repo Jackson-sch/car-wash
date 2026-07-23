@@ -864,8 +864,9 @@ async function _getCachedPaquetes(sucursalId: string): Promise<PaqueteCached[]> 
         servicios: [],
       });
     }
-    if (row.servicioId) {
-      grouped.get(row.id)!.servicios.push({
+    const pkg = grouped.get(row.id);
+    if (row.servicioId && pkg) {
+      pkg.servicios.push({
         id: row.servicioId,
         nombre: row.servicioNombre || "",
       });

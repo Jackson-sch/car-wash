@@ -19,6 +19,16 @@ export interface TurnoActivo {
   ventasPorCategoria: { categoria: string; total: number }[];
   ventasPorHora: { hora: string; total: number }[];
   transaccionesDetalladas: TransaccionDetallada[];
+  totalEgresos?: number;
+  egresosList?: {
+    id: string;
+    monto: number;
+    motivo: string;
+    categoria: string;
+    comprobanteNum: string | null;
+    createdAt: Date;
+    registradoPor: string | null;
+  }[];
 }
 
 export interface TurnoHistorial {

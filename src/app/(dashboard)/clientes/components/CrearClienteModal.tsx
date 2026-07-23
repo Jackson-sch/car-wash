@@ -69,8 +69,8 @@ export function CrearClienteModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
-      <div className="bg-card border border-border w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 text-foreground">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-200 p-4">
+      <div className="bg-card border border-border w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
         <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-zinc-900">Registrar Cliente Nuevo</h3>

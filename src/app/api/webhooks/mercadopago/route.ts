@@ -4,8 +4,40 @@ import { ordenes, pagos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 
+import crypto from "crypto";
+import { crearPreferenciaPago } from "@/lib/payments/mercadopago";
+
 export async function POST(req: NextRequest) {
   try {
+    const xSignature = req.headers.get("x-signature");
+    const xRequestId = req.headers.get("x-request-id");
+    const webhookSecret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+
+    if (webhookSecret && xSignature) {
+      const parts = xSignature.split(",");
+      let ts = "";
+      let hash = "";
+      for (const part of parts) {
+        const [key, val] = part.split("=");
+        if (key.trim() === "ts") ts = val.trim();
+        if (key.trim() === "v1") hash = val.trim();
+      }
+
+      if (ts && hash) {
+        const urlParams = new URL(req.url).searchParams;
+        const dataID = urlParams.get("data.id") || "";
+        const manifest = `id:${dataID};request-id:${xRequestId || ""};ts:${ts};`;
+        const expectedHash = crypto
+          .createHmac("sha256", webhookSecret)
+          .update(manifest)
+          .digest("hex");
+
+        if (!crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(expectedHash))) {
+          return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
+        }
+      }
+    }
+
     const body = await req.json().catch(() => ({}));
     const action = body.action || body.type;
     const ordenId = body.data?.id || body.external_reference || body.ordenId;

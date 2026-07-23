@@ -39,7 +39,7 @@ export function RecetaModal({
   onSuccess,
 }: RecetaModalProps) {
   const [items, setItems] = useState<
-    { itemId: string; cantidadConsumo: string }[]
+    { id: string; itemId: string; cantidadConsumo: string }[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +50,8 @@ export function RecetaModal({
       getRecetaServicio(servicioId)
         .then((receta) => {
           setItems(
-            receta.map((r) => ({
+            receta.map((r, idx) => ({
+              id: `rec_${idx}_${r.itemId}`,
               itemId: r.itemId,
               cantidadConsumo: r.cantidadConsumo,
             }))
@@ -71,7 +72,7 @@ export function RecetaModal({
 
     setItems((prev) => [
       ...prev,
-      { itemId: nextInsumo.id, cantidadConsumo: "0.050" },
+      { id: `rec_${Date.now()}_${Math.random()}`, itemId: nextInsumo.id, cantidadConsumo: "0.050" },
     ]);
   };
 
@@ -89,7 +90,8 @@ export function RecetaModal({
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await asignarRecetaServicio(servicioId, items);
+      const itemsPayload = items.map(({ itemId, cantidadConsumo }) => ({ itemId, cantidadConsumo }));
+      const res = await asignarRecetaServicio(servicioId, itemsPayload);
       if (res.success) {
         toast.success("Receta de consumo guardada correctamente");
         onOpenChange(false);
@@ -98,7 +100,7 @@ export function RecetaModal({
         toast.error(res.error || "Error al guardar receta");
       }
     } catch {
-      toast.error("Error al procesar la receta");
+      toast.error("Ocurrió un error inesperado");
     } finally {
       setIsSubmitting(false);
     }
@@ -166,8 +168,8 @@ export function RecetaModal({
                     const insumoActual = insumosDisponibles.find((i) => i.id === item.itemId);
                     return (
                       <div
-                        key={`receta-item-${index}-${item.itemId}`}
-                        className="flex items-center gap-3 p-3 border border-border rounded-xl bg-card hover:bg-muted/20 transition-all shadow-sm"
+                        key={item.id}
+                        className="flex items-center gap-3 p-3 border border-border rounded-xl bg-card hover:bg-muted/20 transition-colors shadow-sm"
                       >
                         {/* Selector de Insumo (Ocupa todo el espacio disponible sobrante) */}
                         <div className="flex-1 min-w-0">

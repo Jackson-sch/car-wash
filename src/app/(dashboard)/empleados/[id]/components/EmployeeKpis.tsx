@@ -27,7 +27,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Servicios Realizados */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-emerald-500/30 transition-all duration-300 flex items-center justify-between group">
+        <Card className="p-6 border border-border bg-card shadow-sm hover:border-emerald-500/30 transition-colors duration-300 flex items-center justify-between group">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
               Servicios Lavados
@@ -42,7 +42,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
         </Card>
 
         {/* KPI 2: Ingresos Generados */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-blue-500/30 transition-all duration-300 flex items-center justify-between group">
+        <Card className="p-6 border border-border bg-card shadow-sm hover:border-blue-500/30 transition-colors duration-300 flex items-center justify-between group">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
               Monto Lavados
@@ -57,7 +57,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
         </Card>
 
         {/* KPI 3: Comisión Acumulada */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-secondary/30 transition-all duration-300 flex items-center justify-between group">
+        <Card className="p-6 border border-border bg-card shadow-sm hover:border-secondary/30 transition-colors duration-300 flex items-center justify-between group">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
               Comisión Acumulada (30%)
@@ -72,7 +72,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
         </Card>
 
         {/* KPI 4: Ticket Promedio */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-purple-500/30 transition-all duration-300 flex items-center justify-between group">
+        <Card className="p-6 border border-border bg-card shadow-sm hover:border-purple-500/30 transition-colors duration-300 flex items-center justify-between group">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
               Promedio por Servicio
@@ -93,7 +93,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* KPI 1: Órdenes Registradas */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-emerald-500/30 transition-all duration-300 flex items-center justify-between group">
+      <Card className="p-6 border border-border bg-card shadow-sm hover:border-emerald-500/30 transition-colors duration-300 flex items-center justify-between group">
         <div className="space-y-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
             Órdenes Registradas
@@ -108,7 +108,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
       </Card>
 
       {/* KPI 2: Monto Total Procesado */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-blue-500/30 transition-all duration-300 flex items-center justify-between group">
+      <Card className="p-6 border border-border bg-card shadow-sm hover:border-blue-500/30 transition-colors duration-300 flex items-center justify-between group">
         <div className="space-y-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
             Monto Total Cobrado
@@ -123,7 +123,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
       </Card>
 
       {/* KPI 3: Turnos de Caja Gestionados */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-amber-500/30 transition-all duration-300 flex items-center justify-between group">
+      <Card className="p-6 border border-border bg-card shadow-sm hover:border-amber-500/30 transition-colors duration-300 flex items-center justify-between group">
         <div className="space-y-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
             Turnos de Caja
@@ -138,7 +138,7 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
       </Card>
 
       {/* KPI 4: Ticket Promedio */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-purple-500/30 transition-all duration-300 flex items-center justify-between group">
+      <Card className="p-6 border border-border bg-card shadow-sm hover:border-purple-500/30 transition-colors duration-300 flex items-center justify-between group">
         <div className="space-y-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
             Ticket Promedio

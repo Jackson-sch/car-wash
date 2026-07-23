@@ -140,7 +140,7 @@ export function SalesByCategoryChart({
                       key={slice.data.categoria}
                       d={path || undefined}
                       className={cn(
-                        "transition-all duration-300 cursor-pointer origin-center outline-none",
+                        "transition-colors duration-300 cursor-pointer origin-center outline-none",
                         colors.fill,
                         isHovered ? "opacity-100 scale-105" : "opacity-90 hover:opacity-100"
                       )}
@@ -177,7 +177,7 @@ export function SalesByCategoryChart({
                 <div
                   key={leg.categoria}
                   className={cn(
-                    "flex items-center gap-1.5 text-xs cursor-pointer transition-all duration-200 p-1.5 rounded-md border",
+                    "flex items-center gap-1.5 text-xs cursor-pointer transition-colors duration-200 p-1.5 rounded-md border",
                     isHovered ? "bg-accent border-border scale-[1.02]" : "border-transparent hover:bg-accent/50 hover:border-border/50"
                   )}
                   onMouseEnter={() => setHoveredIndex(index)}
@@ -197,7 +197,7 @@ export function SalesByCategoryChart({
           {/* Interactive Floating Tooltip inside SVG container */}
           {activeSegment && (
             <div
-              className="absolute bg-popover text-popover-foreground border border-border p-2.5 rounded-xl pointer-events-none whitespace-nowrap shadow-xl z-50 transition-all duration-100 text-left flex flex-col gap-0.5"
+              className="absolute bg-popover text-popover-foreground border border-border p-2.5 rounded-xl pointer-events-none whitespace-nowrap shadow-xl z-50 transition-colors duration-100 text-left flex flex-col gap-0.5"
               style={{
                 left: `${activeSegment.x + 10}px`,
                 top: `${activeSegment.y - 45}px`,

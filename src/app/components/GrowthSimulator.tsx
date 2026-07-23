@@ -97,7 +97,7 @@ export function GrowthSimulator() {
         {/* Results panel */}
         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Card 1: Fidelización */}
-          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-colors duration-300 flex flex-col justify-between shadow-md">
             <div>
               <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-4">
                 <Gift className="h-5 w-5 text-pink-500" />
@@ -114,7 +114,7 @@ export function GrowthSimulator() {
           </div>
 
           {/* Card 2: Horas Pico */}
-          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-colors duration-300 flex flex-col justify-between shadow-md">
             <div>
               <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
@@ -131,7 +131,7 @@ export function GrowthSimulator() {
           </div>
 
           {/* Card 3: Total Proyectado */}
-          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-md">
+          <div className="p-6 rounded-2xl bg-linear-to-br from-white/3 to-transparent border border-white/10 hover:border-white/20 transition-colors duration-300 flex flex-col justify-between shadow-md">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Facturación Proyectada</h3>
             <div className="mt-4">
               <div className="text-xs text-gray-500 font-medium">Nuevo ingreso mensual</div>

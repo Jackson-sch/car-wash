@@ -18,7 +18,7 @@ export function CajaCerradaBanner({
   onClose,
 }: CajaCerradaBannerProps) {
   return (
-    <div className="space-y-4 border border-red-500/20 bg-red-500/5 p-4.5 rounded-2xl text-left animate-in fade-in duration-200">
+    <div className="space-y-4 border border-red-500/20 bg-red-500/5 p-4.5 rounded-2xl text-left transition-opacity duration-200">
       <div className="flex items-start gap-2.5 text-red-700 dark:text-red-400">
         <AlertCircle className="h-4.5 w-4.5 shrink-0 mt-0.5 text-red-500 animate-pulse" />
         <div className="text-[11px] space-y-1">

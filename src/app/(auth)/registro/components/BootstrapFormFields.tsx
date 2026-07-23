@@ -131,7 +131,7 @@ export function BootstrapFormFields({
       <Button
         type="submit"
         disabled={isLoading || success}
-        className="w-full h-10 mt-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs"
+        className="w-full h-10 mt-4 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs"
       >
         {isLoading ? (
           <>

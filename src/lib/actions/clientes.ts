@@ -52,7 +52,7 @@ export async function buscarVehiculoPorPlaca(placa: string) {
 }
 
 // Obtener todos los clientes con su total de puntos y cantidad de vehículos
-async function getClientes() {
+async function _getClientes() {
   try {
     const session = await getSessionOrThrow({ modulo: "clientes", accion: "ver" });
     const sucursalId = session.user.sucursalId!;
@@ -129,7 +129,7 @@ export async function createCliente(data: {
 }
 
 // Obtener clientes inactivos sin lavados recientes para campañas de WhatsApp
-export async function getClientesInactivos(diasInactividad = 30) {
+async function getClientesInactivos(diasInactividad = 30) {
   try {
     const session = await getSessionOrThrow({ modulo: "clientes", accion: "ver" });
     const sucursalId = session.user.sucursalId!;

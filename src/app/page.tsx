@@ -7,7 +7,7 @@ import { GrowthSimulator } from "./components/GrowthSimulator";
 export default function Home() {
   return (
     <div
-      className="min-h-screen flex flex-col justify-between relative overflow-hidden"
+      className="min-h-dvh flex flex-col justify-between relative overflow-hidden"
       style={{
         backgroundColor: "#050510",
         backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px)",
@@ -64,7 +64,7 @@ export default function Home() {
             </Link>
             <Link
               href="/registro"
-              className="px-5 py-2.5 text-sm font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-secondary/20"
+              className="px-5 py-2.5 text-sm font-bold rounded-xl transition-colors transition-transform hover:scale-[1.02] hover:shadow-lg hover:shadow-secondary/20"
               style={{
                 background: "linear-gradient(135deg, #0ea5e9, #38bdf8)",
                 color: "#050510",
@@ -116,7 +116,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/login"
-              className="group w-full sm:w-auto px-8 py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2.5 text-base hover:scale-[1.01]"
+              className="group w-full sm:w-auto px-8 py-4 rounded-2xl font-bold transition-colors transition-transform flex items-center justify-center gap-2.5 text-base hover:scale-[1.01]"
               style={{
                 background: "linear-gradient(135deg, #0ea5e9, #06b6d4)",
                 color: "#050510",
@@ -158,15 +158,15 @@ export default function Home() {
                 <LayoutDashboard className="h-3.5 w-3.5 text-secondary" />
                 <span>Resumen Operativo</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-all">
+              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-colors">
                 <Car className="h-3.5 w-3.5" />
                 <span>Órdenes de Lavado</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-all">
+              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-colors">
                 <Coins className="h-3.5 w-3.5" />
                 <span>Cierre de Caja</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-all">
+              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-colors">
                 <Users className="h-3.5 w-3.5" />
                 <span>Directorio Clientes</span>
               </div>
@@ -178,20 +178,20 @@ export default function Home() {
               {/* Mini KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 
-                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-colors duration-300">
                   <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Caja Abierta (Efectivo)</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">S/ 3,420.50</span>
                   <span className="text-[9px] text-emerald-400 font-medium block mt-0.5">Sede: San Isidro</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-colors duration-300">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Órdenes Activas</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">18 Servicios</span>
                   <span className="text-[9px] text-gray-450 font-medium block mt-0.5">7 en cola, 11 en lavado</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-colors duration-300">
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Fidelización de Clientes</span>
                   <span className="text-base font-black text-white font-mono mt-1 block">+125 Canjes</span>
                   <span className="text-[9px] text-gray-450 font-medium block mt-0.5">1 Punto = S/ 0.20 descuento</span>
@@ -217,7 +217,7 @@ export default function Home() {
                       <span>En Espera</span>
                       <span>(2)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-amber-500/25 space-y-2 shadow-md hover:border-amber-500/40 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-amber-500/25 space-y-2 shadow-md hover:border-amber-500/40 transition-colors duration-300">
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>F4L-101</span>
                         <span className="text-[9px] text-gray-400 font-sans bg-white/5 px-1.5 py-0.5 rounded">Toyota</span>
@@ -232,7 +232,7 @@ export default function Home() {
                       <span>Lavado / Proceso</span>
                       <span>(1)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/[0.07] to-white/1 border border-blue-500/30 space-y-2 relative shadow-md hover:border-blue-500/45 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/[0.07] to-white/1 border border-blue-500/30 space-y-2 relative shadow-md hover:border-blue-500/45 transition-colors duration-300">
                       <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping" />
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>B2P-202</span>
@@ -248,7 +248,7 @@ export default function Home() {
                       <span>Completado</span>
                       <span>(3)</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-emerald-500/30 space-y-2 shadow-md hover:border-emerald-500/45 transition-all duration-300">
+                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-emerald-500/30 space-y-2 shadow-md hover:border-emerald-500/45 transition-colors duration-300">
                       <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
                         <span>K9X-909</span>
                         <span className="text-[9px] text-emerald-400 font-sans bg-emerald-500/10 px-1.5 py-0.5 rounded">Kia Rio</span>

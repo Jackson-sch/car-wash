@@ -22,7 +22,7 @@ export function ServiciosKpiCards({ servicios }: ServiciosKpiCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Card 1: Total Servicios */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -40,11 +40,11 @@ export function ServiciosKpiCards({ servicios }: ServiciosKpiCardsProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
           <span>Tipos de lavado y mantenimiento</span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 2: Precio Promedio */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-500/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-emerald-500/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -62,11 +62,11 @@ export function ServiciosKpiCards({ servicios }: ServiciosKpiCardsProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span>Costo promedio de lavado base</span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Card 3: Duración Promedio */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -84,7 +84,7 @@ export function ServiciosKpiCards({ servicios }: ServiciosKpiCardsProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
           <span>Tiempo estimado de servicio</span>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
     </div>
   );

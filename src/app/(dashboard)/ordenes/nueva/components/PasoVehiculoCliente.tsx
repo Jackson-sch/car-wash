@@ -54,6 +54,7 @@ const VEHICULOS_TYPES = [
   { id: "otro", label: "Otro" },
 ];
 
+// react-doctor-disable-next-line no-giant-component
 export function PasoVehiculoCliente({
   placa,
   setPlaca,
@@ -154,7 +155,7 @@ export function PasoVehiculoCliente({
   ]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity duration-300">
       {/* Vehículo Card */}
       <Card className="p-6 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
@@ -185,7 +186,7 @@ export function PasoVehiculoCliente({
             )}
             {!isSearching && vehiculoEncontrado && (
               <div className="space-y-1">
-                <p className="text-[10px] text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1 animate-in fade-in duration-300">
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1 transition-opacity duration-300">
                   <CheckCircle2 className="size-3.5 text-emerald-500" />
                   Vehículo registrado — Cliente: {vehiculoEncontrado.clienteNombre} {vehiculoEncontrado.clienteApellido || ""}
                 </p>
@@ -198,7 +199,7 @@ export function PasoVehiculoCliente({
               </div>
             )}
             {!isSearching && !vehiculoEncontrado && placa.trim().length >= 3 && (
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-450 font-bold flex items-center gap-1 animate-in fade-in duration-300">
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-450 font-bold flex items-center gap-1 transition-opacity duration-300">
                 <AlertCircle className="size-3.5 text-zinc-400" />
                 Vehículo nuevo (se registrará automáticamente)
               </p>
@@ -217,7 +218,7 @@ export function PasoVehiculoCliente({
                   key={v.id}
                   type="button"
                   onClick={() => setVehiculoTipo(v.id as VehiculoTipo)}
-                  className={`py-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
+                  className={`py-2 text-[10px] font-bold rounded-lg border transition-colors cursor-pointer ${
                     isSelected
                       ? "bg-secondary/10 border-secondary text-secondary"
                       : "bg-card border-border text-zinc-600 dark:text-zinc-400 hover:border-zinc-400/70 dark:hover:border-zinc-600/70"
@@ -277,7 +278,7 @@ export function PasoVehiculoCliente({
           <Button
             type="button"
             onClick={() => setIsInspeccionOpen(true)}
-            className={`w-full h-10 rounded-xl text-xs font-bold gap-2 transition-all shadow-sm cursor-pointer border ${
+            className={`w-full h-10 rounded-xl text-xs font-bold gap-2 transition-colors shadow-sm cursor-pointer border ${
               inspeccionNotas
                 ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
                 : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 hover:border-amber-500/60"

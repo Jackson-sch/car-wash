@@ -8,7 +8,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 
 // Obtener catálogo de insumos de inventario
-async function getInventario() {
+async function _getInventario() {
   try {
     const session = await getSessionOrThrow({ modulo: "inventario", accion: "ver" });
     const sucursalId = session.user.sucursalId!;

@@ -133,12 +133,12 @@ export function OrdenesTable({
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className="hover:bg-muted/35 dark:hover:bg-muted/15 transition-all duration-150 border-b border-border/20 last:border-0 group"
+                className="hover:bg-muted/35 dark:hover:bg-muted/15 transition-colors duration-150 border-b border-border/20 last:border-0 group"
               >
                 {row.getVisibleCells().map((cell, index) => (
                   <TableCell 
                     key={cell.id} 
-                    className={`px-4 py-3 align-middle transition-all ${
+                    className={`px-4 py-3 align-middle transition-colors ${
                       index === 0 
                         ? "relative after:absolute after:left-0 after:top-2.5 after:bottom-2.5 after:w-0.75 after:bg-secondary after:rounded-r-full after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-150" 
                         : ""

@@ -157,7 +157,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
             const hasHref = "href" in tab;
             const isActive = !hasHref && activeTab === tab.id;
             
-            const btnClassName = `flex items-center gap-3 w-full text-left px-3.5 py-3 text-sm font-semibold rounded-xl transition-all cursor-pointer border ${
+            const btnClassName = `flex items-center gap-3 w-full text-left px-3.5 py-3 text-sm font-semibold rounded-xl transition-colors cursor-pointer border ${
               isActive
                 ? "bg-secondary/10 dark:bg-secondary/20 text-secondary border-secondary/20 shadow-xs"
                 : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40 border-transparent"
@@ -210,7 +210,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
 
         {/* Tab Contents */}
         <div className="md:col-span-8 lg:col-span-9">
-          <div className="animate-in fade-in slide-in-from-right-3 duration-300">
+          <div className="transition-opacity duration-300">
             {activeTab === "general" && (
               <GeneralPanel sucursal={sucursal} isPending={isPending} onSave={handleSaveInfo} />
             )}

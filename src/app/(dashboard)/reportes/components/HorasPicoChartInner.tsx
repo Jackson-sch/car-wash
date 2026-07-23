@@ -139,7 +139,7 @@ export function HorasPicoChartInner({ horasPico }: HorasPicoChartProps) {
                 strokeWidth={hoveredIndex !== null ? 3.5 : 2.5}
                 fillOpacity={1}
                 fill="url(#colorActual)"
-                className="transition-all duration-300"
+                className="transition-colors duration-300"
               />
               <Area
                 type="monotone"
@@ -149,7 +149,7 @@ export function HorasPicoChartInner({ horasPico }: HorasPicoChartProps) {
                 strokeDasharray="4 4"
                 fillOpacity={1}
                 fill="url(#colorProjected)"
-                className="transition-all duration-300"
+                className="transition-colors duration-300"
               />
             </AreaChart>
           </ResponsiveContainer>

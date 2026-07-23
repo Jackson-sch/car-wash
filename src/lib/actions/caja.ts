@@ -6,6 +6,7 @@ import { eq, and, desc, sql, or } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
+import { calcularDesgloseIGV, generarHashComprobante } from "@/lib/sunat/facturacion";
 
 // Obtener el turno de caja abierto actual de la sucursal
 export async function getTurnoActivo() {

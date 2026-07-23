@@ -184,7 +184,7 @@ export function AmbientBackground() {
         {/* Orbe cursor — sigue al mouse con lag suave */}
         <div
           ref={cursorOrbRef}
-          className="absolute rounded-full will-change-transform"
+          className="absolute rounded-full"
           style={CURSOR_ORB_STYLE}
         />
 

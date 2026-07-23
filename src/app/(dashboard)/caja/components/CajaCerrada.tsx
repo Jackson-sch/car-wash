@@ -58,7 +58,7 @@ export function CajaCerrada({ isPending, onOpenCaja }: CajaCerradaProps) {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-200 hover:scale-[1.01]"
+          className="w-full font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm bg-primary hover:bg-primary/95 text-primary-foreground transition-colors transition-transform duration-200 hover:scale-[1.01]"
         >
           <Unlock className="h-4 w-4" />
           {isPending ? "Abriendo..." : "Abrir Turno de Caja"}

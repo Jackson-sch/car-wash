@@ -138,7 +138,7 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
                 <Download className="h-3.5 w-3.5 text-secondary" />
                 {exporting ? "Exportando..." : "Exportar"}
               </button>
-              <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-colors z-50 overflow-hidden">
                 <button type="button" onClick={() => handleExport("ventas")}
                   className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
                 >

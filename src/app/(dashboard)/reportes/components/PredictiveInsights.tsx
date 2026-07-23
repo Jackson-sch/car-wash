@@ -63,7 +63,7 @@ export function PredictiveInsights({ kpis, serviciosTop, horasPico }: Predictive
           </div>
           <div className="h-2 w-full bg-muted rounded-full overflow-hidden relative">
             <div 
-              className="h-full bg-linear-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-500" 
+              className="h-full bg-linear-to-r from-blue-500 to-emerald-500 rounded-full transition-colors duration-500" 
               style={{ width: `${Math.min(100, (proyeccionMensual / metaMensual) * 100)}%` }}
             />
           </div>

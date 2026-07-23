@@ -32,7 +32,7 @@ export default async function SuperAdminLayout({
   }
 
   return (
-    <SidebarProvider className="h-screen overflow-hidden font-sans relative">
+    <SidebarProvider className="h-dvh overflow-hidden font-sans relative">
       {/* Background soft glows */}
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[130px] pointer-events-none z-0" />
       <div className="absolute bottom-[-10%] left-[10%] w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[130px] pointer-events-none z-0" />
@@ -47,7 +47,7 @@ export default async function SuperAdminLayout({
 
         {/* Content Page wrapper */}
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="max-w-7xl mx-auto w-full transition-opacity duration-500">
             {children}
           </div>
         </main>

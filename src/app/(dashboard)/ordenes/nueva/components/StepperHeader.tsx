@@ -31,7 +31,7 @@ export function StepperHeader({ step }: StepperHeaderProps) {
             }`}
           >
             <div
-              className={`h-8 w-8 rounded-lg flex items-center justify-center font-bold text-xs border transition-all ${
+              className={`h-8 w-8 rounded-lg flex items-center justify-center font-bold text-xs border transition-colors ${
                 isActive
                   ? "bg-secondary/10 border-secondary text-secondary"
                   : isDone

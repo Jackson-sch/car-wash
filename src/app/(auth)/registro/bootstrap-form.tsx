@@ -76,7 +76,7 @@ export default function BootstrapForm() {
 
   return (
     <div
-      className="min-h-screen flex flex-col justify-between relative overflow-hidden text-foreground"
+      className="min-h-dvh flex flex-col justify-between relative overflow-hidden text-foreground"
       style={{ backgroundColor: "#050510" }}
     >
       <BackgroundOrbs />
@@ -92,7 +92,7 @@ export default function BootstrapForm() {
           {/* Right Side: Form Card */}
           <div className="md:col-span-7 flex justify-center">
             <Card
-              className="w-full max-w-xl p-8 rounded-2xl border backdrop-blur-xl transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+              className="w-full max-w-xl p-8 rounded-2xl border backdrop-blur-xl transition-colors duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
               style={{
                 backgroundColor: "rgba(10, 10, 15, 0.7)",
                 borderColor: "rgba(255, 255, 255, 0.08)",
@@ -109,7 +109,7 @@ export default function BootstrapForm() {
               </div>
 
               {success && (
-                <div className="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/10 text-emerald-400 text-xs flex items-center gap-3 animate-in fade-in duration-300">
+                <div className="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/10 text-emerald-400 text-xs flex items-center gap-3 transition-opacity duration-300">
                   <CheckCircle2 className="h-5 w-5 shrink-0" />
                   <div>
                     <span className="font-bold">¡Inicialización exitosa!</span> Redireccionando a la pantalla de ingreso.
@@ -118,7 +118,7 @@ export default function BootstrapForm() {
               )}
 
               {error && (
-                <div className="mb-6 p-4 rounded-xl border border-red-500/20 bg-red-950/10 text-red-400 text-xs animate-in fade-in duration-300 font-bold">
+                <div className="mb-6 p-4 rounded-xl border border-red-500/20 bg-red-950/10 text-red-400 text-xs transition-opacity duration-300 font-bold">
                   {error}
                 </div>
               )}

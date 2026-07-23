@@ -10,7 +10,7 @@ export default async function ConfiguracionPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in-50 duration-300">
+    <div className="space-y-8 -50 transition-opacity duration-300">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
           Configuración Global

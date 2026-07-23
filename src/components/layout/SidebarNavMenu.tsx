@@ -31,7 +31,7 @@ export function SidebarNavMenu({ items }: SidebarNavMenuProps) {
                 isActive={isActive}
                 tooltip={item.label}
                 render={<Link href={item.href} />}
-                className={`w-full group/btn transition-all duration-200 active:scale-[0.98] h-8.5 px-2.5 rounded-md ${
+                className={`w-full group/btn transition-colors transition-transform duration-200 active:scale-[0.98] h-8.5 px-2.5 rounded-md ${
                   isActive
                     ? "bg-secondary/10 text-secondary! font-bold"
                     : "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent/50"

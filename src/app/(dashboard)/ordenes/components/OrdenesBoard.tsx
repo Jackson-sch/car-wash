@@ -38,7 +38,7 @@ function DroppableColumnBody({ id, children, isAnyDragging }: DroppableColumnBod
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col gap-3 min-h-[200px] w-full min-w-0 pb-4 rounded-xl transition-all duration-300 ${
+      className={`flex flex-col gap-3 min-h-[200px] w-full min-w-0 pb-4 rounded-xl transition-colors transition-transform duration-300 ${
         isHighlighted
           ? "bg-secondary/8 ring-2 ring-secondary/35 ring-inset shadow-lg shadow-secondary/10 scale-[1.01]"
           : "bg-transparent"
@@ -69,18 +69,18 @@ function EmptyColumnPlaceholder({
 
   return (
     <div
-      className={`h-48 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 text-xs font-bold w-full select-none transition-all duration-300 ${
+      className={`h-48 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 text-xs font-bold w-full select-none transition-colors transition-transform duration-300 ${
         isOver
           ? "border-secondary/60 bg-secondary/10 text-secondary scale-[1.02] shadow-lg shadow-secondary/10"
           : "border-zinc-300/40 dark:border-zinc-600/40 text-zinc-400 dark:text-zinc-500 bg-zinc-50/20 dark:bg-zinc-800/10"
       }`}
     >
       <div
-        className={`w-8 h-0.5 rounded-full transition-all duration-300 ${
+        className={`w-8 h-0.5 rounded-full transition-colors duration-300 ${
           isOver ? "bg-secondary/60 w-12" : "bg-border/40"
         }`}
       />
-      <span className="transition-all duration-300">
+      <span className="transition-colors duration-300">
         {isOver ? "¡Suelta aquí!" : "Soltar tarjeta aquí"}
       </span>
       {isOver && (
@@ -264,7 +264,7 @@ export function OrdenesBoard({
             <div key={col.id} className="flex flex-col gap-3 min-w-0 w-full">
               {/* Column Header */}
               <div
-                className={`flex items-center justify-between p-3 rounded-xl border backdrop-blur-sm shadow-sm w-full min-w-0 transition-all duration-300 ${
+                className={`flex items-center justify-between p-3 rounded-xl border backdrop-blur-sm shadow-sm w-full min-w-0 transition-colors duration-300 ${
                   isColumnHovered && isAnyDragging
                     ? `${col.borderColor} ${col.headerBg} ring-2 ring-secondary/40 scale-[1.02]`
                     : `${col.borderColor} ${col.headerBg}`
@@ -275,7 +275,7 @@ export function OrdenesBoard({
                   <span className="truncate">{col.title}</span>
                 </h3>
                 <span
-                  className={`font-black text-sm px-2 py-0.5 rounded-md shrink-0 transition-all duration-300 ${
+                  className={`font-black text-sm px-2 py-0.5 rounded-md shrink-0 transition-colors transition-transform duration-300 ${
                     isColumnHovered && isAnyDragging
                       ? "bg-secondary text-secondary-foreground shadow-sm scale-110"
                       : "bg-white/50 dark:bg-black/20"
@@ -319,7 +319,7 @@ export function OrdenesBoard({
       {/* Drag Overlay */}
       <DragOverlay>
         {activeOrden ? (
-          <div className="w-[300px] sm:w-[350px] rotate-2 scale-105 shadow-2xl shadow-secondary/20 ring-2 ring-secondary/50 rounded-xl overflow-hidden animate-in zoom-in-90 duration-150">
+          <div className="w-[300px] sm:w-[350px] rotate-2 scale-105 shadow-2xl shadow-secondary/20 ring-2 ring-secondary/50 rounded-xl overflow-hidden transition-transform duration-150">
             <OrderCard
               orden={activeOrden}
               lavadores={lavadores}

@@ -204,7 +204,7 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95"
+                className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5  fade-in-50 zoom-in-95"
               >
                 <DropdownMenuLabel className="font-bold px-2.5 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                   Cambiar Sucursal
@@ -244,7 +244,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer shadow-xs transition-all duration-300"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer shadow-xs transition-colors duration-300"
                 title="Caja Abierta - Gestionar o Cerrar Turno"
               >
                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
@@ -259,7 +259,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/25 hover:bg-red-500/15 text-xs font-bold text-red-600 dark:text-red-400 cursor-pointer shadow-xs transition-all duration-300"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/25 hover:bg-red-500/15 text-xs font-bold text-red-600 dark:text-red-400 cursor-pointer shadow-xs transition-colors duration-300"
                 title="Caja Cerrada - Abrir Turno"
               >
                 <div className="h-2.5 w-2.5 rounded-full bg-red-500 shrink-0" />
@@ -288,7 +288,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon-lg"
-                className="h-9 w-9 p-0 rounded-full bg-linear-to-tr from-blue-600 to-sky-400 hover:scale-105 text-zinc-950 flex items-center justify-center font-bold text-xs border border-sky-400/25 shadow-md shadow-secondary/10 cursor-pointer transition-all duration-300"
+                className="h-9 w-9 p-0 rounded-full bg-linear-to-tr from-blue-600 to-sky-400 hover:scale-105 text-zinc-950 flex items-center justify-center font-bold text-xs border border-sky-400/25 shadow-md shadow-secondary/10 cursor-pointer transition-colors transition-transform duration-300"
               >
                 <span suppressHydrationWarning>
                   {mounted ? (session?.user?.name?.charAt(0).toUpperCase() || "U") : "U"}
@@ -298,7 +298,7 @@ export function Header() {
           />
           <DropdownMenuContent
             align="end"
-            className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5 animate-in fade-in-50 zoom-in-95"
+            className="w-56 border bg-popover text-popover-foreground shadow-xl rounded-2xl p-1.5  fade-in-50 zoom-in-95"
           >
             <DropdownMenuLabel className="font-bold px-2.5 py-1.5 text-xs uppercase tracking-wider text-muted-foreground">
               Mi Cuenta

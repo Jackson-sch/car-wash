@@ -45,7 +45,7 @@ export function EspecificacionesCard({ vehiculo }: EspecificacionesCardProps) {
   const swatchColor = getColorHex(vehiculo.color);
 
   return (
-    <Card className="p-6 border-border bg-card shadow-sm hover:border-zinc-350 dark:hover:border-zinc-700 transition-all duration-300 rounded-2xl">
+    <Card className="p-6 border-border bg-card shadow-sm hover:border-zinc-350 dark:hover:border-zinc-700 transition-colors duration-300 rounded-2xl">
       <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-5 flex items-center gap-2">
         <Car className="h-4 w-4 text-secondary" />
         Especificaciones Técnicas

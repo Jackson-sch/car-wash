@@ -95,15 +95,15 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
       />
 
       {value ? (
-        <div className="relative group flex items-center justify-center p-4 border border-border bg-card rounded-xl overflow-hidden aspect-video max-w-xs transition-all shadow-sm">
+        <div className="relative group flex items-center justify-center p-4 border border-border bg-card rounded-xl overflow-hidden aspect-video max-w-xs transition-colors shadow-sm">
           <Image
             src={value}
             alt="Logo Preview"
             fill
-            className="object-contain transition-all group-hover:scale-[1.02]"
+            className="object-contain transition-colors transition-transform group-hover:scale-[1.02]"
             sizes="(max-width: 320px) 100vw, 320px"
           />
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-colors">
             <Button
               type="button"
               variant="destructive"
@@ -130,7 +130,7 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
               fileInputRef.current?.click();
             }
           }}
-          className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all aspect-video max-w-xs text-center ${
+          className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-colors aspect-video max-w-xs text-center ${
             isDragging
               ? "border-secondary bg-secondary/5"
               : "border-border hover:border-zinc-400 dark:hover:border-zinc-600 bg-card/40 hover:bg-card/70"
@@ -145,7 +145,7 @@ export function LogoUploader({ value, onChange, className = "" }: LogoUploaderPr
             </div>
           ) : (
             <div className="space-y-2 flex flex-col items-center">
-              <div className="p-2.5 rounded-lg bg-muted text-muted-foreground group-hover:bg-background transition-all">
+              <div className="p-2.5 rounded-lg bg-muted text-muted-foreground group-hover:bg-background transition-colors">
                 <DynamicIcon name="Upload" className="size-5" />
               </div>
               <div className="text-xs">

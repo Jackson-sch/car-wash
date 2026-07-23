@@ -283,8 +283,8 @@ export function CobrarModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md animate-in fade-in duration-200 p-4">
-      <div className="bg-card border border-zinc-200 w-full max-w-md rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] animate-in zoom-in-95 duration-200 text-zinc-900 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md transition-opacity duration-200 p-4">
+      <div className="bg-card border border-zinc-200 w-full max-w-md rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-transform duration-200 text-zinc-900 flex flex-col">
         {/* Header */}
         <div className="p-5 border-b border-zinc-150 flex items-center justify-between bg-zinc-50/50 dark:bg-black/20">
           <div className="flex items-center gap-3">
@@ -304,7 +304,7 @@ export function CobrarModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 flex items-center justify-center transition-all duration-200"
+            className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 flex items-center justify-center transition-colors duration-200"
           >
             <X className="size-4.5" />
           </button>
@@ -381,7 +381,7 @@ export function CobrarModal({
                 <Button
                   type="submit"
                   disabled={isPending || isCashInsufficient}
-                  className={`font-black text-xs h-9 px-5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95 ${
+                  className={`font-black text-xs h-9 px-5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 transition-colors transition-transform active:scale-95 ${
                     isCashInsufficient
                       ? "border border-zinc-200 cursor-not-allowed opacity-50 bg-muted text-muted-foreground"
                       : "bg-secondary text-white hover:bg-secondary/80"

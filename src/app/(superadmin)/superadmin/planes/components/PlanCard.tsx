@@ -53,7 +53,7 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
   }, []);
 
   return (
-    <Card className={`relative overflow-hidden border border-border bg-card/60 backdrop-blur-md hover:border-zinc-350 dark:hover:border-zinc-700 hover:shadow-lg hover:scale-[1.01] transition-all duration-300 rounded-2xl flex flex-col justify-between ${
+    <Card className={`relative overflow-hidden border border-border bg-card/60 backdrop-blur-md hover:border-zinc-350 dark:hover:border-zinc-700 hover:shadow-lg hover:scale-[1.01] transition-colors transition-transform duration-300 rounded-2xl flex flex-col justify-between ${
       !plan.activo ? "opacity-75 dark:opacity-65" : ""
     }`}>
       <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-secondary/5 blur-2xl pointer-events-none" />

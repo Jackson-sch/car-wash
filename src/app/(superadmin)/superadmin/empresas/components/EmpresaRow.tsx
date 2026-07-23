@@ -28,7 +28,7 @@ export function EmpresaRow({ emp, onEdit, onToggleStatus }: EmpresaRowProps) {
   const isEnterprise = emp.plan === "enterprise";
 
   return (
-    <TableRow key={emp.id} className="border-b border-border hover:bg-muted/20 duration-150">
+    <TableRow key={emp.id} className="border-b border-border hover:bg-muted/20 transition-colors duration-150">
       <TableCell className="py-4 px-6 font-bold text-foreground">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-secondary/10 text-secondary border border-secondary/20 rounded-lg">

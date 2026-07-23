@@ -19,7 +19,7 @@ interface ReservaItem {
 
 export function ReservasClient({ initialReservas }: { initialReservas: ReservaItem[] }) {
   const [reservas, setReservas] = useState<ReservaItem[]>(initialReservas);
-  const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
+  const [fecha, setFecha] = useState(() => new Date().toISOString().split("T")[0]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const [clienteNombre, setClienteNombre] = useState("");
@@ -81,7 +81,7 @@ export function ReservasClient({ initialReservas }: { initialReservas: ReservaIt
       {/* Grid de Horarios de la Agenda */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {["08:00 AM - 11:00 AM", "11:00 AM - 02:00 PM", "02:00 PM - 06:00 PM"].map((bloque, idx) => (
-          <Card key={idx} className="p-4 border-border bg-card space-y-3">
+          <Card key={bloque} className="p-4 border-border bg-card space-y-3">
             <div className="flex items-center justify-between border-b border-border pb-2">
               <span className="text-xs font-bold flex items-center gap-1.5 text-foreground">
                 <Clock className="h-4 w-4 text-secondary" />

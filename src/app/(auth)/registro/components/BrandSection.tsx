@@ -6,7 +6,7 @@ export function BrandSection() {
       </div>
       <h1 className="text-3xl font-extrabold leading-tight text-white tracking-tight">
         Configura tu primer autolavado en{" "}
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400">
+        <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-indigo-400 to-cyan-400">
           segundos
         </span>.
       </h1>

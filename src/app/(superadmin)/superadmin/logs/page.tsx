@@ -12,7 +12,7 @@ export default async function AuditLogsPage() {
     .limit(500);
 
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-300">
+    <div className="space-y-6 -50 transition-opacity duration-300">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
           Auditoría de Actividad

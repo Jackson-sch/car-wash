@@ -91,15 +91,20 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
-    const res = await deletePaquete(deleteId);
-    if (res.success) {
-      setPaquetes((prev) => prev.filter((p) => p.id !== deleteId));
-      toast.success("Paquete desactivado");
-      setDeleteId(null);
-    } else {
-      toast.error(res.error || "Error al eliminar");
+    try {
+      const res = await deletePaquete(deleteId);
+      if (res.success) {
+        setPaquetes((prev) => prev.filter((p) => p.id !== deleteId));
+        toast.success("Paquete desactivado");
+        setDeleteId(null);
+      } else {
+        toast.error(res.error || "Error al eliminar");
+      }
+    } catch (error) {
+      toast.error("Ocurrió un error inesperado al eliminar el paquete");
+    } finally {
+      setDeleting(false);
     }
-    setDeleting(false);
   };
 
   return (
@@ -120,7 +125,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
           {/* Toggle Vista */}
           <div className="bg-background backdrop-blur-md p-1 rounded-lg border border-border flex items-center shadow-xs">
             <button type="button" onClick={() => setViewMode("grid")}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors cursor-pointer ${
                 viewMode === "grid"
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700"
                   : "text-zinc-500 hover:text-zinc-750 dark:hover:text-zinc-350"
@@ -130,7 +135,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
               Cuadrícula
             </button>
             <button type="button" onClick={() => setViewMode("table")}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors cursor-pointer ${
                 viewMode === "table"
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200/60 dark:border-zinc-700"
                   : "text-zinc-500 hover:text-zinc-750 dark:hover:text-zinc-350"
@@ -164,7 +169,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
             setSearch(e.target.value);
             setPage(null);
           }}
-          className="pl-9 pr-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
+          className="pl-9 pr-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-colors shadow-sm"
         />
         {search && (
           <button type="button" onClick={() => {
@@ -180,7 +185,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
       </div>
 
       {/* Main View List/Grid */}
-      <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="transition-opacity duration-300">
         {viewMode === "grid" ? (
           <PaquetesGrid
             data={paginatedData}

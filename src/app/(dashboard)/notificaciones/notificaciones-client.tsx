@@ -144,7 +144,7 @@ export function NotificacionesClient({ initialNotificaciones }: NotificacionesCl
             return (
               <div
                 key={n.id}
-                className={`rounded-xl border bg-card transition-all ${
+                className={`rounded-xl border bg-card transition-colors ${
                   n.leida ? "border-border opacity-70" : "border-border"
                 } ${!n.leida ? "shadow-sm" : ""}`}
               >

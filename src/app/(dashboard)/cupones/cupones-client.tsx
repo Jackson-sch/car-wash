@@ -65,7 +65,7 @@ export function CuponesClient({
       {/* KPI Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: Total de Cupones */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-secondary/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -84,11 +84,11 @@ export function CuponesClient({
             <span>Catálogo promocional del negocio</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         {/* Card 2: Cupones Activos */}
-        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md ${
+        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md ${
           activos > 0 
             ? "border-emerald-500/30 hover:border-emerald-500/60" 
             : "border-border hover:border-zinc-350"
@@ -114,7 +114,7 @@ export function CuponesClient({
             {totalCupones > 0 ? (
               <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                 <div 
-                  className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                  className="h-full rounded-full bg-emerald-500 transition-colors duration-500"
                   style={{ width: `${(activos / totalCupones) * 100}%` }}
                 />
               </div>
@@ -128,12 +128,12 @@ export function CuponesClient({
             </p>
           </div>
           {activos > 0 && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent" />
           )}
         </div>
 
         {/* Card 3: Canjes Totales */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -152,7 +152,7 @@ export function CuponesClient({
             <span>Descuentos aplicados a órdenes de lavado</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
       </div>
 

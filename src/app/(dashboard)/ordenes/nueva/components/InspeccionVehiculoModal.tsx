@@ -61,7 +61,7 @@ export function InspeccionVehiculoModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-200">
       <div className="bg-card border border-border w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-4 border-b border-border flex items-center justify-between bg-zinc-900/50">
@@ -69,7 +69,7 @@ export function InspeccionVehiculoModal({
             <ShieldAlert className="h-5 w-5 text-amber-500" />
             <h3 className="text-sm font-bold text-foreground">Inspección de Daños & Recepción</h3>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-muted-foreground hover:text-foreground">
+          <button type="button" onClick={onClose} aria-label="Cerrar modal" className="p-1 rounded-lg text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -78,9 +78,9 @@ export function InspeccionVehiculoModal({
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Selector de Tipo de Hallazgo */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Tipo de Marca a Añadir (Haz clic sobre el gráfico):
-            </label>
+            </span>
             <div className="grid grid-cols-4 gap-2">
               {[
                 { id: "rayon", label: "Rayón / Guadaña", icon: Zap, color: "border-amber-500 text-amber-500" },
@@ -94,7 +94,7 @@ export function InspeccionVehiculoModal({
                     key={t.id}
                     type="button"
                     onClick={() => setTipoSeleccionado(t.id as InspeccionPoint["tipo"])}
-                    className={`h-10 px-3 text-xs font-bold rounded-lg border text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`h-10 px-3 text-xs font-bold rounded-lg border text-center transition-colors cursor-pointer flex items-center justify-center gap-2 ${
                       tipoSeleccionado === t.id
                         ? `${t.color} bg-card shadow-sm font-black`
                         : "border-border text-muted-foreground hover:text-foreground"
@@ -110,7 +110,15 @@ export function InspeccionVehiculoModal({
 
           {/* Gráfico Interactivo de Vehículo (Plano Vectorial Blueprint CAD) */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={handleImageClick}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleImageClick(e as any);
+              }
+            }}
             className="relative w-full h-80 min-h-[300px] bg-slate-950 border-2 border-dashed border-sky-800/80 rounded-2xl flex items-center justify-center cursor-crosshair overflow-hidden group select-none shadow-2xl"
           >
             {/* Componente SVG de Blueprint de Vehículo */}
@@ -145,9 +153,9 @@ export function InspeccionVehiculoModal({
           {/* Lista de Puntos Registrados */}
           {puntos.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Marcas Registradas ({puntos.length}):
-              </label>
+              </span>
               <div className="flex flex-wrap gap-2">
                 {puntos.map((p) => (
                   <span
@@ -159,6 +167,7 @@ export function InspeccionVehiculoModal({
                     <button
                       type="button"
                       onClick={() => handleRemovePoint(p.id)}
+                      aria-label={`Eliminar marca en ${p.zona}`}
                       className="text-muted-foreground hover:text-red-400 ml-1"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -171,10 +180,11 @@ export function InspeccionVehiculoModal({
 
           {/* Observaciones Adicionales */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <label htmlFor="observaciones-vehiculo" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Observaciones del Estado del Vehículo
             </label>
             <Textarea
+              id="observaciones-vehiculo"
               placeholder="Ej. Tapa de combustible suelta, raspones preexistentes en aro delantero derecho, mochila en asiento posterior."
               value={notasGeneral}
               onChange={(e) => setNotasGeneral(e.target.value)}

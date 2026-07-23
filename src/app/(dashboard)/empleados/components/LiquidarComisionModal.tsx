@@ -197,10 +197,11 @@ export function LiquidarComisionModal({
           {/* Método de Pago */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+              <Label htmlFor="metodo-pago-liq" className="text-xs font-bold text-muted-foreground flex items-center gap-1">
                 <CreditCard className="h-3.5 w-3.5" /> Método de Pago
               </Label>
               <select
+                id="metodo-pago-liq"
                 value={metodoPago}
                 onChange={(e) => setMetodoPago(e.target.value)}
                 className="w-full h-9 px-3 rounded-lg border border-border bg-card text-foreground text-xs font-semibold"

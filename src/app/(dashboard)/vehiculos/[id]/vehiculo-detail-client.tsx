@@ -31,11 +31,11 @@ export function VehiculoDetailClient({ data }: { data: DetailData }) {
   const ultimaOrden = ordenes[0];
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8 transition-opacity duration-300">
       {/* Back to Vehicles List Link */}
       <Link
         href="/vehiculos"
-        className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all duration-300"
+        className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors duration-300"
       >
         <div className="h-7 w-7 rounded-lg border border-border/60 bg-card flex items-center justify-center shadow-xs group-hover:border-zinc-350 dark:group-hover:border-zinc-750 transition-colors">
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 duration-300" />

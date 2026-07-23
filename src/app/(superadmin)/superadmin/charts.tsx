@@ -133,6 +133,7 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
       .call(
         d3.axisLeft(yScale)
           .ticks(5)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .tickFormat((d: any) => `S/${d3.format("~s")(d)}`)
       )
       .selectAll("text")
@@ -144,6 +145,7 @@ export function RevenueChart({ data }: { data: RevenueItem[] }) {
     g.append("g")
       .attr("transform", `translate(0,${innerH})`)
       .call(d3.axisBottom(xScale).tickSize(0))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .call((ax: any) => ax.select(".domain").attr("stroke", cBorder).attr("opacity", 0.5))
       .selectAll("text")
       .attr("fill", cMuted)
@@ -354,6 +356,7 @@ export function GrowthChart({ data }: { data: GrowthItem[] }) {
     g.append("g")
       .attr("transform", `translate(0,${innerH})`)
       .call(d3.axisBottom(xScale).tickSize(0))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .call((ax: any) => ax.select(".domain").attr("stroke", cBorder).attr("opacity", 0.5))
       .selectAll("text")
       .attr("fill", cMuted)

@@ -29,7 +29,7 @@ export default async function SuperAdminDashboardPage() {
   const maxCount = Math.max(planMap.free, planMap.pro, planMap.enterprise, 1);
 
   return (
-    <div className="space-y-8 animate-in fade-in-50 duration-300">
+    <div className="space-y-8 -50 transition-opacity duration-300">
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
           Panel de Control Master
@@ -40,8 +40,8 @@ export default async function SuperAdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="relative overflow-hidden bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-secondary/40 group transition-all duration-300">
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-all duration-300">
+        <div className="relative overflow-hidden bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-secondary/40 group transition-colors transition-opacity duration-300">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-colors transition-transform transition-opacity duration-300">
             <Building2 className="size-28 text-secondary" />
           </div>
           <div className="flex items-center gap-4">
@@ -56,15 +56,15 @@ export default async function SuperAdminDashboardPage() {
           <div className="mt-6 flex justify-end">
             <Link 
               href="/superadmin/empresas" 
-              className="text-xs text-secondary hover:text-secondary/80 font-bold flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all"
+              className="text-xs text-secondary hover:text-secondary/80 font-bold flex items-center gap-1.5 group-hover:translate-x-0.5 transition-colors transition-transform"
             >
               Gestionar empresas <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </div>
 
-        <div className="relative overflow-hidden bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-secondary/40 group transition-all duration-300">
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-all duration-300">
+        <div className="relative overflow-hidden bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-secondary/40 group transition-colors transition-opacity duration-300">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-colors transition-transform transition-opacity duration-300">
             <Store className="size-28 text-secondary" />
           </div>
           <div className="flex items-center gap-4">
@@ -83,8 +83,8 @@ export default async function SuperAdminDashboardPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-secondary/40 group transition-all duration-300">
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-all duration-300">
+        <div className="relative overflow-hidden bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-secondary/40 group transition-colors transition-opacity duration-300">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-colors transition-transform transition-opacity duration-300">
             <Users className="size-28 text-secondary" />
           </div>
           <div className="flex items-center gap-4">
@@ -119,7 +119,7 @@ export default async function SuperAdminDashboardPage() {
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-muted-foreground/40 rounded-full transition-all duration-500" 
+                  className="h-full bg-muted-foreground/40 rounded-full transition-colors transition-opacity duration-500" 
                   style={{ width: `${(planMap.free / maxCount) * 100}%` }}
                 />
               </div>
@@ -132,7 +132,7 @@ export default async function SuperAdminDashboardPage() {
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-secondary rounded-full transition-all duration-500" 
+                  className="h-full bg-secondary rounded-full transition-colors transition-opacity duration-500" 
                   style={{ width: `${(planMap.pro / maxCount) * 100}%` }}
                 />
               </div>
@@ -145,7 +145,7 @@ export default async function SuperAdminDashboardPage() {
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-amber-500 rounded-full transition-all duration-500" 
+                  className="h-full bg-amber-500 rounded-full transition-colors transition-opacity duration-500" 
                   style={{ width: `${(planMap.enterprise / maxCount) * 100}%` }}
                 />
               </div>

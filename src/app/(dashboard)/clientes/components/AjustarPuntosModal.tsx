@@ -44,7 +44,7 @@ export function AjustarPuntosModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-card border border-border w-full max-w-sm rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 text-foreground">
+      <div className="bg-card border border-border w-full max-w-sm rounded-xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
         <div className="p-5 border-b border-zinc-200 flex items-center justify-between">
           <h4 className="text-sm font-bold text-zinc-900">Ajustar Puntos Lealtad</h4>
           <button

@@ -82,7 +82,7 @@ export function CreateEmpresaSheet({
         </SheetHeader>
 
         {createdCredentials ? (
-          <div className="space-y-6 animate-in fade-in-50 zoom-in-95 duration-200">
+          <div className="space-y-6 -50 zoom-in-95 transition-opacity duration-200">
             <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl flex flex-col items-center text-center gap-3">
               <div className="p-2.5 bg-emerald-500/20 text-emerald-500 rounded-full">
                 <ShieldCheck className="size-7" />

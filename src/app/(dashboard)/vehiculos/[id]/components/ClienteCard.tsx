@@ -21,7 +21,7 @@ function OwnerAvatar({ nombre, apellido }: { nombre: string; apellido?: string |
 
 export function ClienteCard({ vehiculo }: ClienteCardProps) {
   return (
-    <Card className="p-6 border-border bg-card shadow-sm hover:border-zinc-350 dark:hover:border-zinc-700 transition-all duration-300 rounded-2xl">
+    <Card className="p-6 border-border bg-card shadow-sm hover:border-zinc-350 dark:hover:border-zinc-700 transition-colors duration-300 rounded-2xl">
       <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-5 flex items-center gap-2">
         <User className="h-4 w-4 text-secondary" />
         Propietario / Cliente
@@ -67,14 +67,14 @@ export function ClienteCard({ vehiculo }: ClienteCardProps) {
                 href={`https://wa.me/${vehiculo.clienteTelefono.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[10px] text-emerald-600 hover:text-emerald-700 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-xl font-bold transition-all shadow-xs border border-emerald-500/10 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[10px] text-emerald-600 hover:text-emerald-700 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-xl font-bold transition-colors shadow-xs border border-emerald-500/10 cursor-pointer"
               >
                 <MessageSquare className="h-3.5 w-3.5 fill-emerald-650/10" />
                 WhatsApp
               </a>
               <a
                 href={`tel:${vehiculo.clienteTelefono}`}
-                className="inline-flex items-center gap-1.5 text-[10px] text-secondary hover:text-secondary-foreground hover:bg-secondary/15 bg-secondary/5 px-3 py-2 rounded-xl font-bold transition-all border border-secondary/10 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[10px] text-secondary hover:text-secondary-foreground hover:bg-secondary/15 bg-secondary/5 px-3 py-2 rounded-xl font-bold transition-colors border border-secondary/10 cursor-pointer"
               >
                 <Phone className="h-3.5 w-3.5" />
                 Llamar

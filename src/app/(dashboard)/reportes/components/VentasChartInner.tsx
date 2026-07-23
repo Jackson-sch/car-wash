@@ -75,13 +75,13 @@ export function VentasChartInner({ ventasDiarias }: VentasChartProps) {
                 strokeWidth={hoveredIndex !== null ? 4 : 3}
                 fillOpacity={1}
                 fill="url(#colorSales)"
-                className="transition-all duration-300"
+                className="transition-colors duration-300"
                 activeDot={{
                   r: hoveredIndex !== null ? 7 : 5,
                   fill: "var(--color-chart-1)",
                   stroke: "var(--background)",
                   strokeWidth: 3,
-                  className: "transition-all duration-300",
+                  className: "transition-colors duration-300",
                 }}
               />
             </AreaChart>

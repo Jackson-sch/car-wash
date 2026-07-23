@@ -41,7 +41,7 @@ export function OrdenesToolbar({
           {/* Toggle Vista */}
           <div className="bg-background backdrop-blur-md p-1 rounded-lg border border-border flex items-center shadow-sm">
             <button type="button" onClick={() => { onViewModeChange("patio"); onPageReset(); }}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
                 viewMode === "patio"
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-700"
                   : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
@@ -51,7 +51,7 @@ export function OrdenesToolbar({
               Patio
             </button>
             <button type="button" onClick={() => { onViewModeChange("lista"); onPageReset(); }}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
                 viewMode === "lista"
                   ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm border border-zinc-200 dark:border-zinc-700"
                   : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
@@ -83,7 +83,7 @@ export function OrdenesToolbar({
                 onSearchChange(e.target.value);
                 onPageReset();
               }}
-              className="pl-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
+              className="pl-9 bg-card/60 backdrop-blur-md border-border hover:border-zinc-400 focus-visible:border-secondary focus-visible:ring-secondary/20 text-xs h-9 rounded-lg text-foreground placeholder:text-muted-foreground transition-colors shadow-sm"
             />
           </div>
 

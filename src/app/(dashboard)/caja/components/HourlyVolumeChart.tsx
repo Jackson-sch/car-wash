@@ -91,7 +91,7 @@ export function HourlyVolumeChart({ ventasPorHora }: HourlyVolumeChartProps) {
             {/* Grid lines & Y Axis Ticks */}
             <g className="text-zinc-200/10 dark:text-zinc-800/10">
               {yTicks.map((tick: number) => (
-                <g key={tick} className="transition-all duration-300">
+                <g key={tick} className="transition-colors duration-300">
                   <line
                     x1={CHART_MARGIN.left}
                     x2={CHART_WIDTH - CHART_MARGIN.right}
@@ -193,7 +193,7 @@ export function HourlyVolumeChart({ ventasPorHora }: HourlyVolumeChartProps) {
           {/* Floating interactive tooltip */}
           {hoveredBar && (
             <div
-              className="absolute bg-popover text-popover-foreground border border-border py-1.5 px-2.5 rounded-lg pointer-events-none whitespace-nowrap shadow-xl z-50 transition-all duration-100 flex flex-col items-center gap-0.5"
+              className="absolute bg-popover text-popover-foreground border border-border py-1.5 px-2.5 rounded-lg pointer-events-none whitespace-nowrap shadow-xl z-50 transition-colors duration-100 flex flex-col items-center gap-0.5"
               style={{
                 left: `${(hoveredBar.x / CHART_WIDTH) * 100}%`,
                 top: `${(hoveredBar.y / CHART_HEIGHT) * 100 - 8}%`,

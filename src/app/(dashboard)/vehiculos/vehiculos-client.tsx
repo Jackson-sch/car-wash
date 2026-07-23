@@ -135,7 +135,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: Total Vehículos */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-500/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors transition-opacity duration-300 hover:shadow-md hover:border-blue-500/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -145,7 +145,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
                 {totalVehiculos} <span className="text-sm font-medium text-muted-foreground">vehículos</span>
               </h3>
             </div>
-            <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
+            <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 transition-opacity duration-300">
               <Car className="h-5 w-5" />
             </div>
           </div>
@@ -154,11 +154,11 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
             <span>Vehículos en base de datos</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity transition-opacity duration-300" />
         </div>
 
         {/* Card 2: Con Órdenes */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-500/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors transition-opacity duration-300 hover:shadow-md hover:border-amber-500/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -168,7 +168,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
                 {vehiculosConOrdenes} <span className="text-sm font-medium text-muted-foreground">activos</span>
               </h3>
             </div>
-            <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-500 transition-transform group-hover:scale-110 duration-300">
+            <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-500 transition-transform group-hover:scale-110 transition-opacity duration-300">
               <ClipboardList className="h-5 w-5" />
             </div>
           </div>
@@ -176,7 +176,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
             {totalVehiculos > 0 ? (
               <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                 <div 
-                  className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                  className="h-full rounded-full bg-amber-500 transition-colors transition-opacity duration-500"
                   style={{ width: `${(vehiculosConOrdenes / totalVehiculos) * 100}%` }}
                 />
               </div>
@@ -187,11 +187,12 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
               Vehículos atendidos
             </p>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Subtle gradient glow */}
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity transition-opacity duration-300" />
         </div>
 
         {/* Card 3: Órdenes Generadas */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-emerald-500/50">
+        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors transition-opacity duration-300 hover:shadow-md hover:border-emerald-500/50">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -201,7 +202,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
                 {totalOrdenes} <span className="text-sm font-medium text-muted-foreground">órdenes</span>
               </h3>
             </div>
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110 duration-300">
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110 transition-opacity duration-300">
               <Gauge className="h-5 w-5" />
             </div>
           </div>
@@ -210,7 +211,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
             <span>Total de servicios solicitados</span>
           </div>
           {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity transition-opacity duration-300" />
         </div>
       </div>
 
@@ -232,7 +233,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
               setPage(null);
             }}
             aria-label="Limpiar búsqueda"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer animate-in fade-in zoom-in duration-200"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer zoom-in transition-opacity duration-200"
           >
             <X className="h-4 w-4" />
           </button>
@@ -269,7 +270,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
               </TableRow>
             ) : (
               paginatedData.map((v) => (
-                <TableRow key={v.id} className="group hover:bg-muted/40 transition-colors duration-200">
+                <TableRow key={v.id} className="group hover:bg-muted/40 transition-colors transition-opacity duration-200">
                   <TableCell className="py-4">
                     <span className="inline-flex items-center justify-center font-mono font-bold tracking-wider text-foreground uppercase text-[10px] px-2 py-0.5 rounded-md bg-muted/70 dark:bg-muted/50 border border-border/80 shadow-xs select-all">
                       {v.placa}
@@ -325,7 +326,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
                   </TableCell>
                   <TableCell className="py-4 text-right">
                     <Link href={`/vehiculos/${v.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg cursor-pointer hover:bg-secondary/15 hover:text-secondary text-muted-foreground transition-colors duration-200">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg cursor-pointer hover:bg-secondary/15 hover:text-secondary text-muted-foreground transition-colors transition-opacity duration-200">
                         <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
