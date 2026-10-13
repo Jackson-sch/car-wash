@@ -69,7 +69,7 @@ export function ClientesTable({
           type="button"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="hover:bg-muted font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground"
+          className="hover:bg-transparent font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground cursor-pointer"
         >
           Nombres
           <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -116,7 +116,7 @@ export function ClientesTable({
             type="button"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-muted font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground mx-auto"
+            className="hover:bg-transparent font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground mx-auto cursor-pointer"
           >
             Autos
             <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -137,7 +137,7 @@ export function ClientesTable({
             type="button"
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-muted font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground mx-auto"
+            className="hover:bg-transparent font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground mx-auto cursor-pointer"
           >
             Puntos Acumulados
             <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -164,7 +164,7 @@ export function ClientesTable({
               type="button"
               variant="outline"
               onClick={() => onViewDetails(cli)}
-              className="border-border hover:bg-muted text-foreground/80 text-[10px] font-bold h-7.5 px-2.5"
+              className="border-border hover:bg-muted/80 text-foreground hover:text-foreground text-[10px] font-bold h-7.5 px-2.5 cursor-pointer shadow-2xs"
             >
               Ver Ficha
             </Button>
@@ -214,7 +214,7 @@ export function ClientesTable({
       <Table className="min-w-[800px]">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="bg-muted/30 border-b border-border">
+            <TableRow key={headerGroup.id} className="bg-muted/40 border-b border-border hover:bg-transparent">
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id} className="py-4">
                   {header.isPlaceholder

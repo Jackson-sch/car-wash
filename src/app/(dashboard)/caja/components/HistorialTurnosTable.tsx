@@ -38,7 +38,7 @@ export function HistorialTurnosTable({
     <Card className="border border-border bg-card overflow-hidden p-0">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/30 border-b-border text-xs">
+          <TableRow className="bg-muted/40 border-b border-border hover:bg-transparent text-xs">
             <TableHead className="py-3 pl-4">Apertura</TableHead>
             <TableHead className="py-3">Cierre</TableHead>
             <TableHead className="py-3">Cajero</TableHead>

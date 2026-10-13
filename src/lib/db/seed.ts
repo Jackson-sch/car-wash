@@ -1,4 +1,9 @@
 import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+
+if (fs.existsSync('.env.development.local')) {
+  dotenv.config({ path: '.env.development.local' });
+}
 dotenv.config({ path: '.env.local' });
 
 import { drizzle } from 'drizzle-orm/postgres-js';

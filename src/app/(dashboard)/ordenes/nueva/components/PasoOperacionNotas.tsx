@@ -39,21 +39,21 @@ export function PasoOperacionNotas({
   placa,
 }: PasoOperacionNotasProps) {
   return (
-    <div className="max-w-2xl mx-auto space-y-6 transition-opacity duration-300">
+    <div className="max-w-3xl mx-auto space-y-6 transition-opacity duration-300">
       <Card className="p-6 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4">
         <h2 className="text-xs font-bold uppercase tracking-wider">
           Parámetros Operativos
         </h2>
 
         <div className="space-y-2">
-          <Label htmlFor="lavador" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+          <Label htmlFor="lavador" className="text-xs font-bold text-foreground">
             Asignar Lavador Responsable (Opcional)
           </Label>
           <Select
             value={empleadoId || "unassigned"}
             onValueChange={(val: string | null) => setEmpleadoId(!val || val === "unassigned" ? "" : val)}
           >
-            <SelectTrigger id="lavador" className="w-full bg-card/50 border-border text-foreground rounded-lg text-xs h-9 px-3">
+            <SelectTrigger id="lavador" className="w-full bg-card border-border text-foreground rounded-xl text-xs sm:text-sm h-10 px-3">
               <SelectValue placeholder="Dejar sin asignar (cola de espera)">
                 {(val) => {
                   if (!val || val === "unassigned") return "Dejar sin asignar (cola de espera)";
@@ -74,35 +74,47 @@ export function PasoOperacionNotas({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-zinc-650 dark:text-zinc-400">Prioridad del Lavado</Label>
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
-              <input
-                type="radio"
-                name="priority"
-                checked={prioridad === 0}
-                onChange={() => setPrioridad(0)}
-                className="text-secondary focus:ring-0 h-4 w-4 bg-card border-zinc-300 dark:border-zinc-700"
-              />
-              <span>Normal (Cola de espera estándar)</span>
-            </label>
-            <label className="flex items-center gap-2 text-xs text-zinc-750 dark:text-zinc-350 font-bold cursor-pointer">
-              <input
-                type="radio"
-                name="priority"
-                checked={prioridad === 1}
-                onChange={() => setPrioridad(1)}
-                className="text-secondary focus:ring-0 h-4 w-4 bg-card border-zinc-300 dark:border-zinc-700"
-              />
-              <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-                Express / Prioritario
-              </span>
-            </label>
+          <Label className="text-xs font-bold text-foreground">Prioridad del Lavado</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setPrioridad(0)}
+              className={`p-3 rounded-xl border text-left transition-colors cursor-pointer flex items-center gap-3 ${
+                prioridad === 0
+                  ? "bg-secondary/10 border-secondary text-secondary ring-1 ring-secondary/40 shadow-xs"
+                  : "bg-card border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <div className={`size-4 rounded-full border flex items-center justify-center shrink-0 ${prioridad === 0 ? "border-secondary bg-secondary" : "border-border"}`}>
+                {prioridad === 0 && <div className="size-1.5 rounded-full bg-white" />}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-foreground">Normal</p>
+                <p className="text-[10px] text-muted-foreground">Cola de espera estándar</p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPrioridad(1)}
+              className={`p-3 rounded-xl border text-left transition-colors cursor-pointer flex items-center gap-3 ${
+                prioridad === 1
+                  ? "bg-amber-500/10 border-amber-500 text-amber-500 ring-1 ring-amber-500/40 shadow-xs"
+                  : "bg-card border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <div className={`size-4 rounded-full border flex items-center justify-center shrink-0 ${prioridad === 1 ? "border-amber-500 bg-amber-500" : "border-border"}`}>
+                {prioridad === 1 && <div className="size-1.5 rounded-full bg-white" />}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-amber-600 dark:text-amber-400">Express / Prioritario</p>
+                <p className="text-[10px] text-muted-foreground">Atención preferente en bahía</p>
+              </div>
+            </button>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notes" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+          <Label htmlFor="notes" className="text-xs font-bold text-foreground">
             Notas de Trabajo / Observaciones del Auto
           </Label>
           <textarea
@@ -111,7 +123,7 @@ export function PasoOperacionNotas({
             value={notas}
             onChange={(e) => setNotas(e.target.value)}
             rows={4}
-            className="w-full bg-card border border-zinc-300 dark:border-zinc-700 focus:border-secondary rounded-lg text-xs p-3 outline-none resize-none"
+            className="w-full bg-card border border-border focus:border-secondary rounded-xl text-xs sm:text-sm p-3 outline-none resize-none text-foreground placeholder:text-muted-foreground"
           />
         </div>
       </Card>

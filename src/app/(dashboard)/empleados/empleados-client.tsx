@@ -157,7 +157,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
   );
 
   return (
-    <div suppressHydrationWarning className="space-y-8 text-foreground transition-opacity duration-300">
+    <div suppressHydrationWarning className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground transition-opacity duration-300">
       {/* Header */}
       <div suppressHydrationWarning className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div suppressHydrationWarning>

@@ -27,7 +27,7 @@ interface RecetaModalProps {
   servicioId: string;
   servicioNombre: string;
   insumosDisponibles: InsumoDisponible[];
-  onSuccess?: () => void;
+  onSuccess?: (totalItems: number) => void;
 }
 
 export function RecetaModal({
@@ -95,7 +95,7 @@ export function RecetaModal({
       if (res.success) {
         toast.success("Receta de consumo guardada correctamente");
         onOpenChange(false);
-        if (onSuccess) onSuccess();
+        if (onSuccess) onSuccess(items.length);
       } else {
         toast.error(res.error || "Error al guardar receta");
       }

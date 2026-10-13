@@ -45,9 +45,15 @@ function PaginationLink({
 }: PaginationLinkProps) {
   return (
     <Button
-      variant={isActive ? "outline" : "ghost"}
+      variant="ghost"
       size={size}
-      className={cn(className)}
+      className={cn(
+        "rounded-xl transition-all cursor-pointer font-bold text-xs select-none",
+        isActive
+          ? "bg-secondary text-white font-black hover:bg-secondary/90 hover:text-white shadow-xs"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted",
+        className
+      )}
       nativeButton={false}
       render={
         <a
@@ -63,36 +69,36 @@ function PaginationLink({
 
 function PaginationPrevious({
   className,
-  text = "Previous",
+  text = "Anterior",
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label="Ir a página anterior"
       size="default"
-      className={cn("pl-1.5!", className)}
+      className={cn("px-3 h-8 gap-1 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted", className)}
       {...props}
     >
-      <DynamicIcon name="ChevronLeftIcon" data-icon="inline-start" />
-      <span className="hidden sm:block">{text}</span>
+      <DynamicIcon name="ChevronLeftIcon" data-icon="inline-start" className="size-3.5" />
+      <span className="hidden sm:inline">{text}</span>
     </PaginationLink>
   )
 }
 
 function PaginationNext({
   className,
-  text = "Next",
+  text = "Siguiente",
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label="Ir a página siguiente"
       size="default"
-      className={cn("pr-1.5!", className)}
+      className={cn("px-3 h-8 gap-1 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted", className)}
       {...props}
     >
-      <span className="hidden sm:block">{text}</span>
-      <DynamicIcon name="ChevronRightIcon" data-icon="inline-end" />
+      <span className="hidden sm:inline">{text}</span>
+      <DynamicIcon name="ChevronRightIcon" data-icon="inline-end" className="size-3.5" />
     </PaginationLink>
   )
 }
@@ -106,7 +112,7 @@ function PaginationEllipsis({
       aria-hidden
       data-slot="pagination-ellipsis"
       className={cn(
-        "flex size-8 items-center justify-center [&_svg:not([class*='size-'])]:size-4",
+        "flex size-9 items-center justify-center [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}

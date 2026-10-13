@@ -29,6 +29,20 @@
       "when": 1781310836904,
       "tag": "0003_many_nemesis",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791766090137,
+      "tag": "0004_unique_vulcan",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791766500000,
+      "tag": "0005_missing_tables",
+      "breakpoints": true
     }
   ]
 }

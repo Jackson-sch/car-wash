@@ -21,7 +21,7 @@ export function CierreHeader({ turno, systemStats, onPrint }: CierreHeaderProps)
           >
             <ArrowLeft className="h-3 w-3" /> Volver a Caja
           </button>
-          <h1 className="text-xl sm:text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
             <Wallet className="h-6 w-6 text-secondary" />
             Cierre de Turno (Corte de Caja)
           </h1>
@@ -42,7 +42,7 @@ export function CierreHeader({ turno, systemStats, onPrint }: CierreHeaderProps)
             href={`/api/pdf/cierre/${turno.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg transition-colors shadow-sm"
+            className="inline-flex items-center justify-center gap-1.5 px-3 h-9 text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg transition-colors shadow-xs"
           >
             <Printer className="h-4 w-4" /> PDF Ticket Arqueo
           </a>

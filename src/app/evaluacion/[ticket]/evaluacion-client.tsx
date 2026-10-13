@@ -91,8 +91,8 @@ export function EvaluacionClient({ orden }: EvaluacionClientProps) {
             {orden.sucursalNombre}
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-white">¿Cómo estuvo tu Servicio de Lavado?</h1>
-          <p className="text-xs text-zinc-400">
-            Vehículo Placa <span className="font-mono font-bold text-amber-400 uppercase">{orden.placa || "REGISTRADO"}</span> — Ticket #{orden.nroTicket}
+          <p className="text-xs text-zinc-400 flex items-center justify-center gap-1.5 flex-wrap">
+            Vehículo Placa <span className="inline-flex items-center px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono font-black text-zinc-100 uppercase text-[11px]">{orden.placa || "REGISTRADO"}</span> — Ticket #{orden.nroTicket}
           </p>
         </div>
 

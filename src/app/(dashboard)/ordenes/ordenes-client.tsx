@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { updateOrdenEstado, asignarLavadorAOrden } from "@/lib/actions/ordenes";
 import { cobrarOrden } from "@/lib/actions/caja";
-import { useOrdenesRealtime } from "./hooks/useOrdenesRealtime";
+import { useOrdenesRealtime, broadcastOrdenEvent } from "./hooks/useOrdenesRealtime";
 import { toast } from "sonner";
 import { OrdenesToolbar } from "./components/OrdenesToolbar";
 import { OrdenesKpiCards } from "./components/OrdenesKpiCards";
@@ -22,14 +22,23 @@ import { OrdenesTable } from "./components/OrdenesTable";
 import { OrdenesBoard } from "./components/OrdenesBoard";
 import type { PaymentMethod } from "./components/CobrarModal";
 import { CobrarModal } from "./components/CobrarModal";
+import { getWhatsAppTicketUrl } from "@/lib/whatsapp";
+
+interface SucursalInfo {
+  id: string;
+  nombre: string;
+  telefono?: string | null;
+  config?: unknown;
+}
 
 interface OrdenesClientProps {
   initialOrdenes: Orden[];
   lavadores: Lavador[];
   cajaAbierta: boolean;
+  sucursal?: SucursalInfo | null;
 }
 
-export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: OrdenesClientProps) {
+export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta, sucursal }: OrdenesClientProps) {
   const router = useRouter();
   const [ordenes, setOrdenes] = useState<Orden[]>(initialOrdenes);
 
@@ -75,10 +84,17 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
 
     const estadoAnterior = ordenes.find((o) => o.id === id)?.estado;
 
-    // Actualización optimista instantánea
+    // Actualización optimista instantánea local
     setOrdenes((prev) =>
       prev.map((o) => (o.id === id ? { ...o, estado: nuevoEstado } : o))
     );
+
+    // Notificación inmediata entre pestañas (Modo TV, etc.)
+    broadcastOrdenEvent({
+      type: "UPDATE_ORDEN",
+      orderId: id,
+      estado: nuevoEstado,
+    });
 
     startTransition(async () => {
       const res = await updateOrdenEstado(id, nuevoEstado);
@@ -91,6 +107,11 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
           setOrdenes((prev) =>
             prev.map((o) => (o.id === id ? { ...o, estado: estadoAnterior } : o))
           );
+          broadcastOrdenEvent({
+            type: "UPDATE_ORDEN",
+            orderId: id,
+            estado: estadoAnterior,
+          });
         }
       }
     });
@@ -101,7 +122,7 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
     const ordenAnterior = ordenes.find((o) => o.id === id);
     const lavador = lavadores.find((l) => l.id === empleadoId);
 
-    // Actualización optimista instantánea
+    // Actualización optimista instantánea local
     setOrdenes((prev) =>
       prev.map((o) =>
         o.id === id
@@ -113,6 +134,15 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
           : o
       )
     );
+
+    broadcastOrdenEvent({
+      type: "UPDATE_ORDEN",
+      orderId: id,
+      partial: {
+        lavadorNombre: lavador?.nombre || null,
+        lavadorApellido: lavador?.apellido || null,
+      },
+    });
 
     startTransition(async () => {
       const res = await asignarLavadorAOrden(id, empleadoId);
@@ -137,6 +167,14 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
                 : o
             )
           );
+          broadcastOrdenEvent({
+            type: "UPDATE_ORDEN",
+            orderId: id,
+            partial: {
+              lavadorNombre: ordenAnterior.lavadorNombre,
+              lavadorApellido: ordenAnterior.lavadorApellido,
+            },
+          });
         }
       }
     });
@@ -163,7 +201,25 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
       });
 
       if (res.success) {
-        toast.success("Pago registrado correctamente en caja");
+        toast.success("Pago registrado correctamente en caja", {
+          action: payingOrden.clienteTelefono
+            ? {
+                label: "Enviar WhatsApp",
+                onClick: () => {
+                  const url = getWhatsAppTicketUrl({
+                    clienteNombre: payingOrden.clienteNombre || "Cliente",
+                    clienteTelefono: payingOrden.clienteTelefono,
+                    placa: payingOrden.placa,
+                    total: monto || payingOrden.total,
+                    nroTicket: payingOrden.nroTicket,
+                    ordenId: payingOrden.id,
+                    sucursalNombre: sucursal?.nombre,
+                  });
+                  if (url) window.open(url, "_blank");
+                },
+              }
+            : undefined,
+        });
         setOrdenes((prev) =>
           prev.map((o) =>
             o.id === payingOrden.id ? { ...o, estado: "cobrado" } : o
@@ -204,7 +260,7 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
   );
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header & Controls */}
       <OrdenesToolbar
         searchQuery={searchQuery || ""}
@@ -262,6 +318,7 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta }: Ordene
           onConfirm={handleConfirmPay}
           cajaAbierta={cajaAbierta}
           onOpenCajaSuccess={() => router.refresh()}
+          sucursal={sucursal}
         />
       )}
     </div>

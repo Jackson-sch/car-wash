@@ -13,25 +13,25 @@ interface TurnoResumenCardProps {
 export function TurnoResumenCard({ resumen }: TurnoResumenCardProps) {
   return (
     <Card className="p-5 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4 print:shadow-none print:bg-white">
-      <h2 className="text-xs uppercase font-black text-zinc-700 tracking-wider border-b border-border pb-1">
+      <h2 className="text-xs uppercase font-black text-muted-foreground tracking-wider border-b border-border pb-1">
         Resumen Operativo del Turno
       </h2>
       
-      <div className="space-y-2.5 text-xs text-zinc-700">
+      <div className="space-y-2.5 text-xs text-foreground">
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground font-medium">Servicios Cobrados</span>
-          <span className="font-bold text-zinc-800">{resumen.totalServicios}</span>
+          <span className="font-bold text-foreground">{resumen.totalServicios}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground font-medium">Ventas Brutas</span>
-          <span className="font-bold text-zinc-800">{formatCurrency(resumen.ventasBrutas)}</span>
+          <span className="font-bold text-foreground">{formatCurrency(resumen.ventasBrutas)}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground font-medium">Descuentos Aplicados</span>
-          <span className="font-bold text-rose-600">{formatCurrency(resumen.descuentos)}</span>
+          <span className="font-bold text-rose-600 dark:text-rose-400">{formatCurrency(resumen.descuentos)}</span>
         </div>
         <div className="border-t border-border pt-2.5 flex justify-between items-baseline font-bold">
-          <span className="text-zinc-900">Ingresos Netos del Turno</span>
+          <span className="text-foreground">Ingresos Netos del Turno</span>
           <span className="text-secondary text-sm font-extrabold">{formatCurrency(resumen.ingresosNetos)}</span>
         </div>
       </div>

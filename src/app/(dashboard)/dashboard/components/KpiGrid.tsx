@@ -87,7 +87,7 @@ export function KpiGrid({ kpis }: KpiGridProps) {
               </div>
             </div>
             <div className="mt-2">
-              <span className="text-2xl font-black text-foreground tracking-tight">
+              <span className="text-2xl font-black font-heading text-foreground tracking-tight tabular-nums">
                 {kpi.value}
               </span>
               <p className={`text-[10px] mt-1 font-medium ${kpi.trend === "down" ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground"}`}>

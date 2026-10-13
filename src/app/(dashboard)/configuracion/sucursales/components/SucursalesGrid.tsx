@@ -172,7 +172,7 @@ export function SucursalesGrid({
                     size="sm"
                     disabled={isPending}
                     onClick={() => handleSwitchBranch(s.id)}
-                    className="h-8 text-[11px] font-bold rounded-lg border-border hover:border-zinc-350 hover:bg-muted/50 gap-1.5 cursor-pointer shadow-xs"
+                    className="h-8 text-[11px] font-bold rounded-lg border-border hover:bg-muted/80 text-foreground hover:text-foreground gap-1.5 cursor-pointer shadow-xs"
                   >
                     <Play className="h-3 w-3 text-secondary fill-secondary" />
                     Trabajar Aquí
@@ -187,7 +187,7 @@ export function SucursalesGrid({
                     variant="ghost"
                     size="icon"
                     onClick={() => onSetMain(s.id)}
-                    className="h-8 w-8 rounded-lg hover:bg-card hover:text-amber-500 transition-colors cursor-pointer text-muted-foreground"
+                    className="h-8 w-8 rounded-lg hover:bg-amber-500/10 hover:text-amber-500 transition-colors cursor-pointer text-muted-foreground"
                     title="Establecer como Sucursal Principal"
                   >
                     <Star className="h-4 w-4" />
@@ -197,7 +197,7 @@ export function SucursalesGrid({
                   variant="ghost"
                   size="icon"
                   onClick={() => onEdit(s)}
-                  className="h-8 w-8 rounded-lg hover:bg-card hover:text-primary transition-colors cursor-pointer"
+                  className="h-8 w-8 rounded-lg hover:bg-muted/80 hover:text-foreground text-muted-foreground transition-colors cursor-pointer"
                   title="Editar"
                 >
                   <Pencil className="h-4 w-4" />
@@ -207,7 +207,7 @@ export function SucursalesGrid({
                   size="icon"
                   onClick={() => onToggleStatus(s.id)}
                   disabled={isCurrent}
-                  className={`h-8 w-8 rounded-lg hover:bg-card transition-colors cursor-pointer ${
+                  className={`h-8 w-8 rounded-lg hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors cursor-pointer ${
                     isCurrent && "cursor-not-allowed opacity-50"
                   }`}
                   title={

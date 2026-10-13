@@ -92,7 +92,7 @@ export function EmpleadoDetailClient({ data }: EmpleadoDetailClientProps) {
     : "N/A";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header / Back Action */}
       <div className="flex items-center gap-3">
         <Link

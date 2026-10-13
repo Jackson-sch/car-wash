@@ -153,33 +153,33 @@ export function PasoServiciosCosto({
                         key={serv.id}
                         type="button"
                         onClick={() => onServiceToggle(serv.id)}
-                        className={`p-4 rounded-xl border text-left transition-colors relative overflow-hidden flex flex-col justify-between h-32 cursor-pointer ${
+                        className={`p-4 rounded-xl border text-left transition-colors transition-transform relative overflow-hidden flex flex-col justify-between h-32 cursor-pointer active:scale-[0.99] ${
                           isSelected
-                            ? "bg-secondary/5 border-secondary text-secondary"
-                            : "bg-card border-border/60 text-zinc-750 hover:border-zinc-400/60 dark:hover:border-zinc-650/60 shadow-sm"
+                            ? "bg-secondary/10 border-secondary text-secondary ring-1 ring-secondary/40 shadow-xs"
+                            : "bg-card border-border text-foreground hover:border-zinc-400/60 dark:hover:border-zinc-650/60 shadow-xs"
                         }`}
                       >
                         <div>
-                          <h4 className="text-xs font-bold text-foreground mt-1 line-clamp-1">
+                          <h4 className="text-xs sm:text-sm font-bold text-foreground mt-0.5 line-clamp-1">
                             {serv.nombre}
                           </h4>
-                          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed font-semibold">
+                          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed font-medium">
                             {serv.descripcion || "Sin descripción"}
                           </p>
                         </div>
                         <Separator className="w-full mt-2" />
-                        <div className="flex items-center justify-between w-full pt-2 mt-2">
-                          <span className={`text-[10px] font-extrabold ${isSelected ? "text-secondary" : "text-muted-foreground"}`}>
+                        <div className="flex items-center justify-between w-full pt-1.5 mt-1.5">
+                          <span className={`text-xs sm:text-sm font-black ${isSelected ? "text-secondary" : "text-foreground"}`}>
                             {formatCurrency(parseFloat(calculatedPrice))}
                           </span>
-                          <span className="text-[9px] text-muted-foreground flex items-center gap-1 font-bold">
-                            <Clock className="h-3 w-3" />
+                          <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold">
+                            <Clock className="size-3.5" />
                             {serv.duracionMin} min
                           </span>
                         </div>
                         {isSelected && (
-                          <div className="absolute top-2 right-2 text-secondary">
-                            <CheckCircle className="size-4 fill-secondary/5" />
+                          <div className="absolute top-2.5 right-2.5 text-secondary">
+                            <CheckCircle className="size-4.5 fill-secondary text-primary-foreground" />
                           </div>
                         )}
                       </button>
@@ -198,7 +198,7 @@ export function PasoServiciosCosto({
       </div>
 
       {/* Price Calculations Column */}
-      <Card className="p-6 border-border bg-card shadow-sm h-fit space-y-4">
+      <Card className="p-6 border-border bg-card shadow-sm h-fit space-y-4 sticky top-4">
         <h2 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
           <Coins className="size-4 text-secondary" />
           Resumen de Costos

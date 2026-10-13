@@ -121,6 +121,25 @@ const ticketCss = `
   #print-area .ticket-loyalty * {
     color: #ffffff !important;
   }
+
+  @media print {
+    body {
+      background: #ffffff !important;
+    }
+    .print\\:hidden,
+    [data-print="hidden"],
+    .no-print {
+      display: none !important;
+    }
+    #print-area {
+      border: none !important;
+      box-shadow: none !important;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      width: 80mm !important;
+      max-width: 80mm !important;
+    }
+  }
 `;
 
 export function TicketPreview({ orden, sucursal, hidePrices }: TicketPreviewProps) {

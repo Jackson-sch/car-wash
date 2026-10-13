@@ -38,6 +38,7 @@ export interface Orden {
   vehiculoTipo: "sedan" | "suv" | "pickup" | "moto" | "camion" | "furgon" | "otro" | null;
   clienteNombre: string;
   clienteApellido: string | null;
+  clienteTelefono?: string | null;
   lavadorNombre: string | null;
   lavadorApellido: string | null;
   comprobanteTipo?: string | null;

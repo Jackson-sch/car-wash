@@ -145,7 +145,7 @@ export function LiquidarComisionModal({
                       key={ord.id}
                       type="button"
                       onClick={() => toggleSelect(ord.id)}
-                      className="w-full text-left flex items-center justify-between p-2 hover:bg-card rounded cursor-pointer text-xs"
+                      className="w-full text-left flex items-center justify-between p-2 hover:bg-muted/80 rounded-lg cursor-pointer text-xs transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         {isChecked ? (
@@ -158,7 +158,7 @@ export function LiquidarComisionModal({
                             Ticket #{ord.nroTicket || "S/N"}
                           </span>
                           {ord.placa && (
-                            <span className="ml-1.5 px-1.5 py-0.5 rounded bg-muted text-[10px] font-bold">
+                            <span className="ml-1.5 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-100 font-mono text-[10px] font-black uppercase">
                               {ord.placa}
                             </span>
                           )}

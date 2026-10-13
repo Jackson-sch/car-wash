@@ -1,5 +1,6 @@
 import { getOrdenes, getEmpleadosLavadores } from "@/lib/actions/ordenes";
-import { getTurnoActivo } from "@/lib/actions/caja";
+import { isCajaAbierta } from "@/lib/actions/caja";
+import { getSucursalConfig } from "@/lib/actions/configuracion";
 import { OrdenesClient } from "./ordenes-client";
 
 export const dynamic = "force-dynamic";
@@ -10,17 +11,19 @@ export const metadata = {
 };
 
 export default async function OrdenesPage() {
-  const [ordenesList, lavadoresList, turnoActivo] = await Promise.all([
+  const [ordenesList, lavadoresList, cajaAbierta, sucursal] = await Promise.all([
     getOrdenes(),
     getEmpleadosLavadores(),
-    getTurnoActivo(),
+    isCajaAbierta(),
+    getSucursalConfig(),
   ]);
 
   return (
     <OrdenesClient
       initialOrdenes={ordenesList}
       lavadores={lavadoresList}
-      cajaAbierta={!!turnoActivo}
+      cajaAbierta={cajaAbierta}
+      sucursal={sucursal}
     />
   );
 }

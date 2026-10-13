@@ -4,6 +4,7 @@ import { useState, useMemo, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cerrarTurnoCaja, verificarAutorizacionSupervisor } from "@/lib/actions/caja";
+import { notifyCajaStatusChanged } from "@/lib/events/caja-events";
 import type { TurnoActivo } from "../types";
 import { DENOMINACIONES } from "../types";
 
@@ -220,6 +221,7 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
 
       if (res.success) {
         toast.success("Turno de caja cerrado correctamente");
+        notifyCajaStatusChanged();
         router.push("/caja");
         router.refresh();
       } else {

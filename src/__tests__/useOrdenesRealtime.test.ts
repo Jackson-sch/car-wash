@@ -239,4 +239,18 @@ describe("useOrdenesRealtime", () => {
     expect(mockGetOrdenById).toHaveBeenCalledWith("null-1");
     expect(setOrdenes).not.toHaveBeenCalled();
   });
+
+  it("calls onEventReceived callback when realtime event is received", async () => {
+    const onEventReceived = vi.fn();
+    renderHook(() => useOrdenesRealtime(setOrdenes, onEventReceived));
+
+    const handlers = mockOn.mock.calls;
+    const onHandler = handlers[0][2];
+
+    act(() => {
+      onHandler({ eventType: "DELETE", old: { id: "1" }, new: {} });
+    });
+
+    expect(onEventReceived).toHaveBeenCalledTimes(1);
+  });
 });

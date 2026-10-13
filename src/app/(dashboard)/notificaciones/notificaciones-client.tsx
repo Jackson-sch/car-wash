@@ -86,14 +86,14 @@ export function NotificacionesClient({ initialNotificaciones }: NotificacionesCl
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 max-w-4xl mx-auto text-foreground">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Bell className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+            <Bell className="h-7 w-7 text-secondary" />
             Notificaciones
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Centro de notificaciones y alertas del sistema.
           </p>
         </div>

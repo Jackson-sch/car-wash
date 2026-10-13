@@ -19,7 +19,14 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b border-outline-variant/50", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn(
+      "border-b border-border/60 bg-muted/40 text-muted-foreground [&_tr]:border-b [&_tr]:border-border/60 [&_tr]:hover:bg-transparent [&_tr]:data-[state=selected]:bg-transparent",
+      className
+    )}
+    {...props}
+  />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -42,7 +49,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-[#f0edef]/50 font-medium [&>tr]:last:border-b-0",
+      "border-t border-border/60 bg-muted/40 font-medium text-foreground [&>tr]:last:border-b-0",
       className
     )}
     {...props}
@@ -57,7 +64,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b border-outline-variant/30 transition-colors hover:bg-zinc-50 data-[state=selected]:bg-zinc-100",
+      "border-b border-border/40 transition-colors hover:bg-muted/40 dark:hover:bg-muted/20 data-[state=selected]:bg-muted/60",
       className
     )}
     {...props}
@@ -72,7 +79,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-10 px-4 text-left align-middle font-semibold text-on-surface-variant [&:has([role=checkbox])]:pr-0 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      "h-10 px-4 text-left align-middle font-bold text-[11px] uppercase tracking-wider text-muted-foreground [&:has([role=checkbox])]:pr-0 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       className
     )}
     {...props}
@@ -101,7 +108,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-on-surface-variant", className)}
+    className={cn("mt-4 text-sm text-muted-foreground", className)}
     {...props}
   />
 ));

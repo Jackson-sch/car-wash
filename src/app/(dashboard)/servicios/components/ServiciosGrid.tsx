@@ -4,6 +4,7 @@ import { Clock, Layers, Sparkles, Car, Edit3, Trash2, FlaskConical } from "lucid
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formats";
+import { cn } from "@/lib/utils";
 
 export interface Categoria {
   id: string;
@@ -21,6 +22,7 @@ export interface Servicio {
   activo: boolean | null;
   categoriaId: string | null;
   categoriaNombre: string | null;
+  totalInsumosReceta?: number;
 }
 
 const VEHICULO_OPCIONES = [
@@ -70,13 +72,13 @@ export function ServiciosGrid({
 
   if (filteredServicios.length === 0) {
     return (
-      <div className="p-12 rounded-2xl border border-dashed border-zinc-300 bg-card flex flex-col items-center justify-center text-center max-w-xl mx-auto space-y-4">
-        <div className="h-12 w-12 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center text-muted-foreground">
+      <Card className="p-12 rounded-3xl border border-dashed border-border bg-card flex flex-col items-center justify-center text-center max-w-xl mx-auto space-y-4 shadow-xs">
+        <div className="h-12 w-12 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
           <Layers className="h-6 w-6" />
         </div>
-        <div className="space-y-2">
-          <h3 className="text-sm font-bold text-zinc-900">No se encontraron servicios</h3>
-          <p className="text-xs text-zinc-500 max-w-xs leading-relaxed">
+        <div className="space-y-1.5">
+          <h3 className="text-sm font-bold text-foreground">No se encontraron servicios</h3>
+          <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
             {servicios.length === 0
               ? "Aún no has registrado ningún servicio en este catálogo. Puedes agregar uno manualmente o cargar el catálogo de demostración."
               : "No hay servicios que coincidan con la búsqueda o la categoría seleccionada."}
@@ -89,7 +91,7 @@ export function ServiciosGrid({
               variant="outline"
               disabled={isPending}
               onClick={onLoadDemo}
-              className="border-zinc-300 hover:bg-zinc-50 text-secondary text-xs font-bold h-9 gap-2"
+              className="border-border hover:bg-muted text-secondary text-xs font-bold h-9 gap-2 rounded-xl cursor-pointer"
             >
               <Sparkles className="h-4 w-4" />
               Cargar Catálogo Demo
@@ -97,61 +99,64 @@ export function ServiciosGrid({
             <Button
               type="button"
               onClick={onAddClick}
-              className="bg-black hover:bg-zinc-800 text-white text-xs font-bold h-9"
+              className="bg-secondary hover:bg-secondary/90 text-white text-xs font-bold h-9 rounded-xl cursor-pointer"
             >
               Crear Servicio Manual
             </Button>
           </div>
         )}
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-305">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
       {filteredServicios.map((serv) => (
         <Card
           key={serv.id}
-          className="p-6 border-border bg-card/50 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] flex flex-col justify-between hover:border-zinc-400 hover:shadow-md transition-colors duration-300 relative overflow-hidden"
+          className="group relative p-5 sm:p-6 border-border bg-card rounded-2xl shadow-xs flex flex-col justify-between hover:border-secondary/40 hover:shadow-md transition-all duration-300 overflow-hidden"
         >
+          {/* Subtle top indicator bar on hover */}
+          <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-secondary/50 via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
           <div className="space-y-4">
             {/* Header Card */}
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-secondary tracking-wider bg-blue-50 px-2 py-0.5 rounded border border-blue-150">
-                  {serv.categoriaNombre || "Sin Categoría"}
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase font-extrabold text-secondary tracking-wider bg-secondary/10 px-2.5 py-0.5 rounded-md border border-secondary/20">
+                  {serv.categoriaNombre || "General"}
                 </span>
-                <h3 className="text-base font-bold text-zinc-900 mt-2">
+                <h3 className="text-base font-extrabold text-foreground tracking-tight group-hover:text-secondary transition-colors truncate">
                   {serv.nombre}
                 </h3>
               </div>
-              <div className="text-right">
-                <div className="text-base font-extrabold text-zinc-900">
+              <div className="text-right shrink-0">
+                <div className="text-xl font-black text-foreground font-mono">
                   {formatCurrency(parseFloat(serv.precio))}
                 </div>
-                <div className="text-[10px] text-zinc-500 flex items-center gap-1 justify-end mt-0.5 font-bold">
-                  <Clock className="h-3 w-3" />
-                  {serv.duracionMin} min
+                <div className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end mt-0.5 font-bold">
+                  <Clock className="h-3 w-3 text-amber-500" />
+                  <span>{serv.duracionMin || 30} min</span>
                 </div>
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-xs text-zinc-500 line-clamp-3 leading-relaxed min-h-[50px]">
+            <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed min-h-[48px]">
               {serv.descripcion || "Sin descripción proporcionada para este servicio."}
             </p>
 
             {/* Compatibility Vehicles */}
             {serv.aplicaA && serv.aplicaA.length > 0 && (
-              <div className="pt-2 flex flex-wrap gap-1">
+              <div className="pt-1 flex flex-wrap gap-1.5">
                 {serv.aplicaA.map((type) => {
                   const found = VEHICULO_OPCIONES.find((v) => v.id === type);
                   return (
                     <span
                       key={type}
-                      className="px-2 py-0.5 bg-zinc-50 text-[9px] text-zinc-600 font-bold rounded border border-zinc-200 flex items-center gap-1"
+                      className="px-2 py-0.5 bg-muted/60 text-[10px] text-muted-foreground font-bold rounded-md border border-border/80 flex items-center gap-1"
                     >
-                      <Car className="h-2.5 w-2.5 text-zinc-550" />
+                      <Car className="h-2.5 w-2.5 text-secondary" />
                       {found?.label || type}
                     </span>
                   );
@@ -161,16 +166,23 @@ export function ServiciosGrid({
           </div>
 
           {/* Actions Footer */}
-          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 mt-6">
+          <div className="flex items-center justify-between border-t border-border/70 pt-4 mt-5">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => onReceta(serv)}
-              className="text-[11px] font-bold h-8 gap-1.5 text-purple-600 border-purple-500/30 hover:bg-purple-50"
+              className={cn(
+                "text-[11px] font-extrabold h-8 gap-1.5 rounded-xl cursor-pointer transition-all",
+                (serv.totalInsumosReceta ?? 0) > 0
+                  ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 hover:bg-purple-500/20"
+                  : "text-muted-foreground border-border hover:bg-muted"
+              )}
             >
-              <FlaskConical className="h-3.5 w-3.5 text-purple-600" />
-              Receta Insumos
+              <FlaskConical className="h-3.5 w-3.5" />
+              {(serv.totalInsumosReceta ?? 0) > 0
+                ? `Receta (${serv.totalInsumosReceta} insumo${serv.totalInsumosReceta === 1 ? "" : "s"})`
+                : "Configurar Receta"}
             </Button>
 
             <div className="flex items-center gap-1">
@@ -179,7 +191,8 @@ export function ServiciosGrid({
                 variant="ghost"
                 size="icon"
                 onClick={() => onEdit(serv)}
-                className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg cursor-pointer"
+                title="Editar servicio"
               >
                 <Edit3 className="h-4 w-4" />
               </Button>
@@ -188,7 +201,8 @@ export function ServiciosGrid({
                 variant="ghost"
                 size="icon"
                 onClick={() => onDelete(serv.id)}
-                className="h-8 w-8 text-zinc-500 hover:text-rose-600 hover:bg-rose-50"
+                className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg cursor-pointer"
+                title="Eliminar servicio"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

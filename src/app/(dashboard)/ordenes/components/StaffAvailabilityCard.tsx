@@ -51,7 +51,7 @@ export function StaffAvailabilityCard({ lavadores, ordenes }: StaffAvailabilityC
           staffStatusList.map((staff) => (
             <div
               key={staff.id}
-              className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-500/5 dark:bg-zinc-800/10 border border-zinc-200/20 dark:border-zinc-800/20 hover:bg-zinc-500/10 dark:hover:bg-zinc-800/20 transition-colors duration-200"
+              className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <div

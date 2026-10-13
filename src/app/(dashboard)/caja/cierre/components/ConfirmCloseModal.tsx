@@ -128,7 +128,7 @@ export function ConfirmCloseModal({
             type="button"
             variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="flex-1 text-xs font-semibold h-10 rounded-xl border border-zinc-200"
+            className="flex-1 text-xs font-semibold h-10 rounded-xl border border-border"
           >
             Revisar montos
           </Button>

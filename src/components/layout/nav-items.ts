@@ -12,6 +12,10 @@ import {
   BadgeDollarSign,
   History,
   Tv,
+  Car,
+  Sparkles,
+  Boxes,
+  CalendarDays,
 } from "lucide-react";
 import { canDo } from "@/lib/auth/permissions";
 
@@ -71,6 +75,18 @@ export function getMainNavItems(rol: string): NavItem[] {
       show: canDo(rol, "ordenes", "ver"),
     },
     {
+      label: "Órdenes",
+      href: "/ordenes",
+      icon: ClipboardList,
+      show: canDo(rol, "ordenes", "ver"),
+    },
+    {
+      label: "Reservas",
+      href: "/reservas",
+      icon: CalendarDays,
+      show: canDo(rol, "ordenes", "ver"),
+    },
+    {
       label: "Clientes",
       href: "/clientes",
       icon: Users,
@@ -79,20 +95,14 @@ export function getMainNavItems(rol: string): NavItem[] {
     {
       label: "Vehículos",
       href: "/vehiculos",
-      icon: Layers,
+      icon: Car,
       show: canDo(rol, "clientes", "ver"),
     },
     {
       label: "Servicios",
       href: "/servicios",
-      icon: Layers,
+      icon: Sparkles,
       show: canDo(rol, "configuracion", "ver") || canDo(rol, "ordenes", "crear"),
-    },
-    {
-      label: "Órdenes",
-      href: "/ordenes",
-      icon: ClipboardList,
-      show: canDo(rol, "ordenes", "ver"),
     },
   ];
 }
@@ -132,7 +142,7 @@ export function getAdminNavItems(rol: string): NavItem[] {
     {
       label: "Inventario",
       href: "/inventario",
-      icon: Package,
+      icon: Boxes,
       show: canDo(rol, "configuracion", "ver") || rol === "supervisor",
     },
     {

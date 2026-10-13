@@ -163,7 +163,7 @@ export function HistorialServicios({ vehiculoId, ordenes }: HistorialServiciosPr
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 text-[10px] font-bold rounded-lg border-border hover:border-zinc-350 hover:bg-muted/50 gap-1.5 cursor-pointer shadow-xs text-muted-foreground hover:text-foreground"
+                          className="h-8 text-[10px] font-bold rounded-lg border-border hover:bg-muted/80 gap-1.5 cursor-pointer shadow-xs text-foreground hover:text-foreground"
                         >
                           <Printer className="h-3.5 w-3.5" />
                           Ver Ticket

@@ -134,7 +134,7 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
 
       <div className="p-4 bg-muted/40 border-t border-border/50 flex items-center justify-end gap-1.5">
         <Button variant="outline" size="sm" onClick={() => onEdit(plan)}
-          className="h-8 text-[10px] font-bold rounded-lg border-border hover:border-zinc-350 hover:bg-muted/50 gap-1.5 cursor-pointer text-muted-foreground hover:text-foreground shadow-xs px-3">
+          className="h-8 text-[10px] font-bold rounded-lg border-border hover:bg-muted/80 gap-1.5 cursor-pointer text-foreground hover:text-foreground shadow-xs px-3">
           <Pencil className="size-3.5" />
           Editar
         </Button>

@@ -196,7 +196,7 @@ export function ServiciosClient({
   };
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -208,12 +208,20 @@ export function ServiciosClient({
             Administra los tipos de lavado, precios y tiempos de atención de tu sucursal.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="outline"
+            onClick={() => setIsCatModalOpen(true)}
+            className="font-bold gap-2 cursor-pointer h-10 rounded-xl border-border hover:bg-muted/80 text-foreground hover:text-foreground text-xs shadow-2xs"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva Categoría
+          </Button>
           <Button
             onClick={handleOpenCreate}
-            className="font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
+            className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm text-xs"
           >
-            <Plus className="h-4.5 w-4.5" />
+            <Plus className="h-4 w-4" />
             Agregar Servicio
           </Button>
         </div>
@@ -235,7 +243,7 @@ export function ServiciosClient({
             placeholder="Buscar por nombre o descripción..."
             value={searchQuery || ""}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-card border-zinc-300 hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-lg"
+            className="bg-card border-border hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-xl text-foreground"
           />
         </div>
       </div>
@@ -282,6 +290,15 @@ export function ServiciosClient({
           servicioId={recetaServicio.id}
           servicioNombre={recetaServicio.nombre}
           insumosDisponibles={insumosDisponibles}
+          onSuccess={(totalItems) => {
+            setServicios((prev) =>
+              prev.map((s) =>
+                s.id === recetaServicio.id
+                  ? { ...s, totalInsumosReceta: totalItems }
+                  : s
+              )
+            );
+          }}
         />
       )}
     </div>

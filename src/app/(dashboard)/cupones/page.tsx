@@ -29,10 +29,8 @@ export default async function CuponesPage() {
   }));
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Cargando cupones...</div>}>
-        <CuponesClient initialCupones={cupones} servicios={servicios} />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Cargando cupones...</div>}>
+      <CuponesClient initialCupones={cupones} servicios={servicios} />
+    </Suspense>
   );
 }

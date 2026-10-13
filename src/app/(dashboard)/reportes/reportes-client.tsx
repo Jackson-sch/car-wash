@@ -117,15 +117,15 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
   const horasPico = useDemo ? DEMO_HORAS_PICO : (initialData.horasPico || []);
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
             <BarChart3 className="h-7 w-7 text-secondary" />
             Reportes e Indicadores
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Análisis de ingresos, servicios estrella y flujos financieros de tu autolavado.
           </p>
         </div>
@@ -133,12 +133,12 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
           <div className="flex items-center gap-2">
             <div className="relative group">
               <button type="button" disabled={exporting}
-                className="text-[10px] font-bold bg-card border border-zinc-350 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                className="text-[10px] font-bold bg-card border border-border hover:bg-muted text-foreground h-9 px-3 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors disabled:opacity-50"
               >
                 <Download className="h-3.5 w-3.5 text-secondary" />
                 {exporting ? "Exportando..." : "Exportar"}
               </button>
-              <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-colors z-50 overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
                 <button type="button" onClick={() => handleExport("ventas")}
                   className="w-full text-left px-3 py-2 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
                 >
@@ -158,7 +158,7 @@ export function ReportesClient({ initialData }: ReportesClientProps) {
             </div>
 
             <button type="button" onClick={() => setUseDemo(!useDemo)}
-              className="text-[10px] font-bold bg-card border border-zinc-350 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="text-[10px] font-bold bg-card border border-border hover:bg-muted text-foreground h-9 px-3 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
             >
               <Sparkles className="h-3.5 w-3.5 text-secondary" />
               {useDemo ? "Ver Datos Reales" : "Ver Simulación Demo"}

@@ -55,9 +55,14 @@ export function OrdenesColaTable({ ordenes }: OrdenesColaTableProps) {
                 <tr key={ord.ticket} className="hover:bg-muted/45 transition-colors">
                   <td className="py-3.5 pl-3 font-bold text-foreground">{ord.ticket}</td>
                   <td className="py-3.5">
-                    <span className="px-2 py-0.5 bg-muted text-foreground font-mono font-bold rounded border border-border">
-                      {ord.placa}
-                    </span>
+                    <div className="inline-flex flex-col items-center justify-center bg-zinc-900 border border-zinc-700/80 rounded px-2 py-0.5 shadow-2xs font-mono select-all">
+                      <span className="text-[6px] uppercase font-bold text-zinc-400 tracking-widest leading-none">
+                        PERÚ
+                      </span>
+                      <span className="text-[11px] font-black text-zinc-100 tracking-wider leading-none mt-0.5 uppercase">
+                        {ord.placa}
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3.5">
                     <div className="font-semibold text-foreground">{ord.vehiculo}</div>

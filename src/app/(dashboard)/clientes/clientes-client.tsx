@@ -161,7 +161,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
   );
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -198,7 +198,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
               setSearchQuery(e.target.value);
               setPage(null);
             }}
-            className="pl-9 bg-card border-zinc-300 hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
+            className="pl-9 bg-card border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 focus:border-secondary text-xs h-9 rounded-lg text-foreground shadow-xs"
           />
 
         </div>

@@ -16,6 +16,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { SidebarNavMenu } from "./SidebarNavMenu";
 import { SidebarUserFooter } from "./SidebarUserFooter";
@@ -30,6 +31,7 @@ interface SidebarProps extends React.ComponentProps<typeof ShadcnSidebar> {
 }
 
 export function Sidebar({ className, userRole, ...props }: SidebarProps) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const { data: session } = useSession();
   const serverRol = session?.user?.rol || userRole;
   const rol = serverRol || "cajero";
@@ -59,12 +61,19 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               className="data-[slot=sidebar-menu-button]:p-1.5! hover:bg-transparent focus:bg-transparent active:bg-transparent"
-              render={<Link href="/dashboard" />}
+              render={
+                <Link
+                  href="/dashboard"
+                  onClick={() => {
+                    if (isMobile) setOpenMobile(false);
+                  }}
+                />
+              }
             >
               <div className="size-5 flex items-center justify-center shrink-0 relative overflow-hidden">
                 <Image src={logoUrl} alt="Logo" fill className="object-contain rounded-md" sizes="20px" />
               </div>
-              <span className="text-base font-semibold text-white/90 truncate group-data-[collapsible=icon]:hidden">
+              <span className="text-base font-heading font-bold tracking-tight text-white/90 truncate group-data-[collapsible=icon]:hidden">
                 {empresaNombre}
               </span>
             </SidebarMenuButton>
@@ -80,11 +89,18 @@ export function Sidebar({ className, userRole, ...props }: SidebarProps) {
               <SidebarMenuItem className="px-1">
                 <SidebarMenuButton
                   tooltip="Nueva Orden"
-                  render={<Link href="/ordenes/nueva" />}
-                  className="w-full bg-secondary text-secondary-foreground transition-opacity duration-200 ease-linear hover:bg-secondary/90 hover:text-secondary-foreground active:bg-secondary/90 active:text-secondary-foreground font-bold h-8 rounded-md shadow-md shadow-secondary/15"
+                  render={
+                    <Link
+                      href="/ordenes/nueva"
+                      onClick={() => {
+                        if (isMobile) setOpenMobile(false);
+                      }}
+                    />
+                  }
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold h-9.5 rounded-xl shadow-sm border border-secondary/30 transition-all duration-200 active:scale-[0.98]"
                 >
                   <PlusCircle className="size-4" />
-                  <span className="group-data-[collapsible=icon]:hidden text-sm">Nueva Orden</span>
+                  <span className="group-data-[collapsible=icon]:hidden text-xs">Nueva Orden</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

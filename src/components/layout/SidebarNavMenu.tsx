@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import type { NavItem } from "./nav-items";
 
@@ -16,11 +17,12 @@ interface SidebarNavMenuProps {
 
 export function SidebarNavMenu({ items }: SidebarNavMenuProps) {
   const pathname = usePathname();
+  const { setOpenMobile, isMobile } = useSidebar();
 
   const visibleItems = useMemo(() => items.filter((item) => item.show), [items]);
 
   return (
-    <SidebarMenu className="gap-0.5">
+    <SidebarMenu className="gap-1">
       {visibleItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
@@ -30,10 +32,17 @@ export function SidebarNavMenu({ items }: SidebarNavMenuProps) {
               <SidebarMenuButton
                 isActive={isActive}
                 tooltip={item.label}
-                render={<Link href={item.href} />}
-                className={`w-full group/btn transition-colors transition-transform duration-200 active:scale-[0.98] h-8.5 px-2.5 rounded-md ${
+                render={
+                  <Link
+                    href={item.href}
+                    onClick={() => {
+                      if (isMobile) setOpenMobile(false);
+                    }}
+                  />
+                }
+                className={`w-full group/btn transition-colors transition-transform duration-200 active:scale-[0.98] h-9.5 px-3 rounded-lg ${
                   isActive
-                    ? "bg-secondary/10 text-secondary! font-bold"
+                    ? "bg-secondary/15 text-secondary! font-bold"
                     : "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent/50"
                 }`}
               >

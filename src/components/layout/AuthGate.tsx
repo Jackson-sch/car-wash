@@ -29,23 +29,29 @@ export default async function AuthGate({ children }: AuthGateProps) {
     redirect("/login");
   }
 
-  // Verificar modo mantenimiento global
-  const [globalConfig] = await db.select().from(configGlobal).limit(1);
+  // Verificar modo mantenimiento global y estado de empresa en paralelo
+  const [globalConfigResult, empresaResult] = await Promise.all([
+    db
+      .select({ mantenimientoActivo: configGlobal.mantenimientoActivo })
+      .from(configGlobal)
+      .limit(1),
+    session.user.empresaId
+      ? db
+          .select({ activo: empresas.activo })
+          .from(empresas)
+          .where(eq(empresas.id, session.user.empresaId))
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
+
+  const globalConfig = globalConfigResult[0];
   if (globalConfig?.mantenimientoActivo && session.user.rol !== "superadmin") {
     redirect("/mantenimiento");
   }
 
-  // Verificar que la empresa del usuario esté activa
-  if (session.user.empresaId) {
-    const [empresa] = await db
-      .select({ activo: empresas.activo })
-      .from(empresas)
-      .where(eq(empresas.id, session.user.empresaId))
-      .limit(1);
-
-    if (!empresa?.activo) {
-      redirect("/suspendido");
-    }
+  const empresa = empresaResult[0];
+  if (session.user.empresaId && empresa && !empresa.activo) {
+    redirect("/suspendido");
   }
 
   return <>{children}</>;

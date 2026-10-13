@@ -13,6 +13,7 @@ import { CajaCerradaBanner } from "./CajaCerradaBanner";
 import { validarCupon } from "@/lib/actions/cupones";
 import { formatCurrency } from "@/lib/formats";
 import { getClientePuntosByOrdenId } from "@/lib/actions/clientes";
+import { notifyCajaStatusChanged } from "@/lib/events/caja-events";
 
 export type PaymentMethod =
   | "efectivo"
@@ -29,6 +30,7 @@ export interface OrdenResumen {
   total: string | null;
   clienteNombre?: string;
   clienteApellido?: string | null;
+  clienteTelefono?: string | null;
   vehiculoMarca?: string | null;
   vehiculoModelo?: string | null;
   vehiculoTipo?: string | null;
@@ -78,6 +80,12 @@ interface CobrarModalProps {
   ) => Promise<void>;
   cajaAbierta: boolean;
   onOpenCajaSuccess: () => void;
+  sucursal?: {
+    id: string;
+    nombre: string;
+    telefono?: string | null;
+    config?: unknown;
+  } | null;
 }
 
 const COBRO_FORM_INITIAL: CobroFormState = {
@@ -130,6 +138,7 @@ export function CobrarModal({
   onConfirm,
   cajaAbierta,
   onOpenCajaSuccess,
+  sucursal,
 }: CobrarModalProps) {
   const [validatingCoupon, startValidateTransition] = useTransition();
   const [montoApertura, setMontoApertura] = useState("250.00");
@@ -242,7 +251,7 @@ export function CobrarModal({
       const res = await abrirTurnoCaja(montoApertura);
       if (res.success) {
         toast.success("Caja abierta con éxito. Ahora puede registrar el cobro.");
-        window.dispatchEvent(new Event("caja-status-changed"));
+        notifyCajaStatusChanged();
         onOpenCajaSuccess();
       } else {
         toast.error(res.error || "Ocurrió un error al abrir la caja");
@@ -266,6 +275,7 @@ export function CobrarModal({
       couponApplied?.cuponId,
       pts
     );
+    notifyCajaStatusChanged();
   };
 
   const quickCashOptions = (() => {
@@ -283,19 +293,19 @@ export function CobrarModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-md transition-opacity duration-200 p-4">
-      <div className="bg-card border border-zinc-200 w-full max-w-md rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-transform duration-200 text-zinc-900 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-200 p-3 sm:p-4 md:p-6">
+      <div className="bg-card border border-border w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl transition-all duration-200 text-foreground flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-5 border-b border-zinc-150 flex items-center justify-between bg-zinc-50/50 dark:bg-black/20">
+        <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-zinc-100 text-zinc-900 shadow-sm border border-zinc-200/50">
+            <div className="p-2.5 rounded-2xl bg-secondary/10 text-secondary shadow-xs border border-secondary/20">
               <Receipt className="size-5 text-secondary" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-zinc-900">
+              <h3 className="text-base font-extrabold text-foreground tracking-tight">
                 Registrar Cobro
               </h3>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-0.5">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
                 Ticket: {orden.nroTicket || "S/N"}
               </p>
             </div>
@@ -304,7 +314,7 @@ export function CobrarModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 flex items-center justify-center transition-colors duration-200"
+            className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="size-4.5" />
           </button>
@@ -313,82 +323,120 @@ export function CobrarModal({
         {/* Form Body */}
         <form
           onSubmit={cajaAbierta ? handleSubmit : handleQuickOpenCaja}
-          className="p-5 space-y-5 flex-1 overflow-y-auto max-h-[80vh]"
+          className="flex flex-col flex-1 min-h-0 overflow-hidden"
         >
-          <CobroResumen
-            orden={orden}
-            totalNum={totalNum}
-            descuentoCoupon={descuentoCoupon}
-            descuentoPuntos={descuentoPuntos}
-          />
-
           {!cajaAbierta ? (
-            <CajaCerradaBanner
-              montoApertura={montoApertura}
-              setMontoApertura={setMontoApertura}
-              isOpeningCaja={isOpeningCaja}
-              onClose={onClose}
-            />
+            <div className="p-6 overflow-y-auto max-w-md mx-auto w-full">
+              <CajaCerradaBanner
+                montoApertura={montoApertura}
+                setMontoApertura={setMontoApertura}
+                isOpeningCaja={isOpeningCaja}
+                onClose={onClose}
+              />
+            </div>
           ) : (
-            // Formulario normal de Cobro
             <>
-              <CouponSection
-                cuponCode={cuponCode}
-                setCuponCode={(code: string) => dispatchForm({ type: "SET_CUPON_CODE", code })}
-                cuponError={cuponError}
-                setCuponError={(error: string) => dispatchForm({ type: "SET_CUPON_ERROR", error })}
-                couponApplied={couponApplied}
-                setCouponApplied={(coupon: CouponApplied | null) => dispatchForm({ type: "SET_COUPON_APPLIED", coupon })}
-                onValidate={handleValidateCupon}
-                validatingCoupon={validatingCoupon}
-              />
+              {/* 2-Column Responsive Body */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-start">
+                  {/* Columna Izquierda: Resumen de Orden, Cupón y Fidelidad */}
+                  <div className="space-y-4">
+                    <CobroResumen
+                      orden={orden}
+                      totalNum={totalNum}
+                      descuentoCoupon={descuentoCoupon}
+                      descuentoPuntos={descuentoPuntos}
+                    />
 
-              {clienteFidelidad && clienteFidelidad.totalPuntos > 0 && (
-                <LoyaltySection
-                  clienteFidelidad={clienteFidelidad}
-                  canjearPuntos={canjearPuntos}
-                  setCanjearPuntos={(v: boolean) => dispatchForm({ type: "SET_CANJEAR_PUNTOS", canjear: v })}
-                  puntosACanjear={puntosACanjear}
-                  setPuntosACanjear={(v: string) => dispatchForm({ type: "SET_PUNTOS_A_CANJEAR", puntos: v })}
-                  totalNum={totalNum}
-                  descuentoCoupon={descuentoCoupon}
-                />
-              )}
+                    <CouponSection
+                      cuponCode={cuponCode}
+                      setCuponCode={(code: string) => dispatchForm({ type: "SET_CUPON_CODE", code })}
+                      cuponError={cuponError}
+                      setCuponError={(error: string) => dispatchForm({ type: "SET_CUPON_ERROR", error })}
+                      couponApplied={couponApplied}
+                      setCouponApplied={(coupon: CouponApplied | null) => dispatchForm({ type: "SET_COUPON_APPLIED", coupon })}
+                      onValidate={handleValidateCupon}
+                      validatingCoupon={validatingCoupon}
+                    />
 
-              <MetodoPagoSelector
-                paymentMethod={paymentMethod}
-                setPaymentMethod={handlePaymentMethodChange}
-                totalNum={totalConDescuento}
-                cashReceived={cashReceived}
-                setCashReceived={(v: string) => dispatchForm({ type: "SET_CASH_RECEIVED", received: v })}
-                quickCashOptions={quickCashOptions}
-                paymentReference={paymentReference}
-                setPaymentReference={(v: string) => dispatchForm({ type: "SET_PAYMENT_REFERENCE", reference: v })}
-                cashReceivedNum={cashReceivedNum}
-                change={change}
-              />
+                    {clienteFidelidad && clienteFidelidad.totalPuntos > 0 && (
+                      <LoyaltySection
+                        clienteFidelidad={clienteFidelidad}
+                        canjearPuntos={canjearPuntos}
+                        setCanjearPuntos={(v: boolean) => dispatchForm({ type: "SET_CANJEAR_PUNTOS", canjear: v })}
+                        puntosACanjear={puntosACanjear}
+                        setPuntosACanjear={(v: string) => dispatchForm({ type: "SET_PUNTOS_A_CANJEAR", puntos: v })}
+                        totalNum={totalNum}
+                        descuentoCoupon={descuentoCoupon}
+                      />
+                    )}
+                  </div>
 
-              {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 mt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={onClose}
-                  className="text-xs font-bold text-zinc-500 hover:text-zinc-950 h-9 px-4 rounded-xl cursor-pointer"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isPending || isCashInsufficient}
-                  className={`font-black text-xs h-9 px-5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 transition-colors transition-transform active:scale-95 ${
-                    isCashInsufficient
-                      ? "border border-zinc-200 cursor-not-allowed opacity-50 bg-muted text-muted-foreground"
-                      : "bg-secondary text-white hover:bg-secondary/80"
-                  }`}
-                >
-                  {isPending ? "Procesando..." : "Confirmar Cobro"}
-                </Button>
+                  {/* Columna Derecha: Método de Pago, Denominaciones y Vuelto */}
+                  <div className="space-y-4 bg-muted/20 p-4 sm:p-5 rounded-2xl border border-border/70">
+                    <MetodoPagoSelector
+                      paymentMethod={paymentMethod}
+                      setPaymentMethod={handlePaymentMethodChange}
+                      totalNum={totalConDescuento}
+                      cashReceived={cashReceived}
+                      setCashReceived={(v: string) => dispatchForm({ type: "SET_CASH_RECEIVED", received: v })}
+                      quickCashOptions={quickCashOptions}
+                      paymentReference={paymentReference}
+                      setPaymentReference={(v: string) => dispatchForm({ type: "SET_PAYMENT_REFERENCE", reference: v })}
+                      cashReceivedNum={cashReceivedNum}
+                      change={change}
+                      sucursal={sucursal}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Actions Footer - Siempre Visible y Fijo */}
+              <div className="p-4 sm:px-6 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/30 shrink-0">
+                {/* Resumen rápido para el cajero */}
+                <div className="flex items-center gap-4 text-xs">
+                  <div>
+                    <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider block">
+                      Total a Cobrar
+                    </span>
+                    <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(totalConDescuento)}
+                    </span>
+                  </div>
+                  {paymentMethod === "efectivo" && cashReceived.trim() !== "" && change >= 0 && (
+                    <div className="border-l border-border pl-4">
+                      <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider block">
+                        Vuelto a Dar
+                      </span>
+                      <span className="text-base sm:text-lg font-black font-mono text-emerald-500">
+                        {formatCurrency(change)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Botones de acción */}
+                <div className="flex items-center justify-end gap-2.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={onClose}
+                    className="text-xs font-bold text-muted-foreground hover:text-foreground h-10 px-4 rounded-xl cursor-pointer"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isPending || isCashInsufficient}
+                    className={`font-black text-xs sm:text-sm h-10 px-6 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95 ${
+                      isCashInsufficient
+                        ? "border border-border cursor-not-allowed opacity-50 bg-muted text-muted-foreground"
+                        : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-950/20"
+                    }`}
+                  >
+                    {isPending ? "Procesando..." : "Confirmar Cobro"}
+                  </Button>
+                </div>
               </div>
             </>
           )}

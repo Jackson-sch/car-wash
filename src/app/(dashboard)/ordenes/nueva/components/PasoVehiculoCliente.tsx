@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, startTransition } from "react";
-import { Car, User, Loader2, CheckCircle2, AlertCircle, Star, ShieldAlert } from "lucide-react";
+import { Car, User, Loader2, CheckCircle2, AlertCircle, Star, ShieldAlert, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -164,7 +164,7 @@ export function PasoVehiculoCliente({
         </h2>
 
         <div className="space-y-2">
-          <Label htmlFor="placa" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+          <Label htmlFor="placa" className="text-xs font-bold text-foreground">
             Número de Placa *
           </Label>
           <Input
@@ -173,25 +173,25 @@ export function PasoVehiculoCliente({
             value={placa}
             onChange={(e) => setPlaca(e.target.value.toUpperCase())}
             required
-            className="bg-card/60 backdrop-blur-md border-border focus:border-secondary font-mono font-bold tracking-widest text-xs h-9 rounded-lg text-foreground"
+            className="bg-card border-border focus:border-secondary font-mono font-black tracking-widest text-sm sm:text-base h-11 rounded-xl text-foreground uppercase"
           />
           
           {/* Indicadores de Búsqueda */}
           <div className="min-h-[20px] flex items-center mt-1">
             {isSearching && (
-              <p className="text-[10px] text-zinc-500 animate-pulse flex items-center gap-1.5">
-                <Loader2 className="size-3 animate-spin text-secondary" />
+              <p className="text-xs text-muted-foreground animate-pulse flex items-center gap-1.5">
+                <Loader2 className="size-3.5 animate-spin text-secondary" />
                 Buscando placa en el sistema...
               </p>
             )}
             {!isSearching && vehiculoEncontrado && (
               <div className="space-y-1">
-                <p className="text-[10px] text-emerald-600 dark:text-emerald-450 font-bold flex items-center gap-1 transition-opacity duration-300">
-                  <CheckCircle2 className="size-3.5 text-emerald-500" />
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 transition-opacity duration-300">
+                  <CheckCircle2 className="size-4 text-emerald-500" />
                   Vehículo registrado — Cliente: {vehiculoEncontrado.clienteNombre} {vehiculoEncontrado.clienteApellido || ""}
                 </p>
                 {vehiculoEncontrado.puntosAcumulados !== undefined && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-bold text-amber-400">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-md text-xs font-bold text-amber-500 dark:text-amber-400">
                     <Star className="size-3 fill-amber-400 text-amber-400" />
                     Saldo: {vehiculoEncontrado.puntosAcumulados} Puntos de Fidelidad
                   </span>
@@ -199,8 +199,8 @@ export function PasoVehiculoCliente({
               </div>
             )}
             {!isSearching && !vehiculoEncontrado && placa.trim().length >= 3 && (
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-450 font-bold flex items-center gap-1 transition-opacity duration-300">
-                <AlertCircle className="size-3.5 text-zinc-400" />
+              <p className="text-xs text-muted-foreground font-semibold flex items-center gap-1 transition-opacity duration-300">
+                <AlertCircle className="size-3.5 text-muted-foreground" />
                 Vehículo nuevo (se registrará automáticamente)
               </p>
             )}
@@ -208,8 +208,8 @@ export function PasoVehiculoCliente({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-zinc-650 dark:text-zinc-400">Tipo de Vehículo *</Label>
-          <div className="grid grid-cols-3 gap-2">
+          <Label className="text-xs font-bold text-foreground">Tipo de Vehículo *</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {VEHICULOS_TYPES.map((v) => {
               const multiplier = dbMultipliers[v.id] ?? defaultMultipliers[v.id] ?? 1.0;
               const isSelected = vehiculoTipo === v.id;
@@ -218,14 +218,14 @@ export function PasoVehiculoCliente({
                   key={v.id}
                   type="button"
                   onClick={() => setVehiculoTipo(v.id as VehiculoTipo)}
-                  className={`py-2 text-[10px] font-bold rounded-lg border transition-colors cursor-pointer ${
+                  className={`py-2 px-2 text-xs font-bold rounded-xl border transition-colors transition-transform cursor-pointer active:scale-95 ${
                     isSelected
-                      ? "bg-secondary/10 border-secondary text-secondary"
-                      : "bg-card border-border text-zinc-600 dark:text-zinc-400 hover:border-zinc-400/70 dark:hover:border-zinc-600/70"
+                      ? "bg-secondary/15 border-secondary text-secondary ring-1 ring-secondary/40 shadow-xs font-black"
+                      : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-zinc-400/70 dark:hover:border-zinc-600/70"
                   }`}
                 >
                   {v.label}
-                  <span className="block text-[8px] text-zinc-500 font-normal mt-0.5">
+                  <span className="block text-[10px] text-muted-foreground font-medium mt-0.5">
                     (x{multiplier.toFixed(1)})
                   </span>
                 </button>
@@ -236,7 +236,7 @@ export function PasoVehiculoCliente({
 
         <div className="grid grid-cols-3 gap-2">
           <div className="space-y-1">
-            <Label htmlFor="marca" className="text-[10px] font-bold text-zinc-650 dark:text-zinc-400">
+            <Label htmlFor="marca" className="text-xs font-bold text-muted-foreground">
               Marca
             </Label>
             <Input
@@ -244,11 +244,11 @@ export function PasoVehiculoCliente({
               placeholder="Toyota"
               value={vehiculoMarca}
               onChange={(e) => setVehiculoMarca(e.target.value)}
-              className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-8 rounded-lg text-foreground animate-none"
+              className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-9 rounded-lg text-foreground"
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="modelo" className="text-[10px] font-bold text-zinc-650 dark:text-zinc-400">
+            <Label htmlFor="modelo" className="text-xs font-bold text-muted-foreground">
               Modelo
             </Label>
             <Input
@@ -256,11 +256,11 @@ export function PasoVehiculoCliente({
               placeholder="Corolla"
               value={vehiculoModelo}
               onChange={(e) => setVehiculoModelo(e.target.value)}
-              className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-8 rounded-lg text-foreground animate-none"
+              className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-9 rounded-lg text-foreground"
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="color" className="text-[10px] font-bold text-zinc-650 dark:text-zinc-400">
+            <Label htmlFor="color" className="text-xs font-bold text-muted-foreground">
               Color
             </Label>
             <Input
@@ -268,7 +268,7 @@ export function PasoVehiculoCliente({
               placeholder="Negro"
               value={vehiculoColor}
               onChange={(e) => setVehiculoColor(e.target.value)}
-              className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-8 rounded-lg text-foreground animate-none"
+              className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-9 rounded-lg text-foreground"
             />
           </div>
         </div>
@@ -309,9 +309,9 @@ export function PasoVehiculoCliente({
           Información del Cliente
         </h2>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="cNombre" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="cNombre" className="text-xs font-bold text-foreground">
               Nombres *
             </Label>
             <Input
@@ -320,11 +320,11 @@ export function PasoVehiculoCliente({
               value={clienteNombre}
               onChange={(e) => setClienteNombre(e.target.value)}
               required
-              className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-9 rounded-lg text-foreground"
+              className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-10 rounded-xl text-foreground"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="cApellido" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+          <div className="space-y-1.5">
+            <Label htmlFor="cApellido" className="text-xs font-bold text-foreground">
               Apellidos
             </Label>
             <Input
@@ -332,13 +332,13 @@ export function PasoVehiculoCliente({
               placeholder="Gómez"
               value={clienteApellido}
               onChange={(e) => setClienteApellido(e.target.value)}
-              className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-9 rounded-lg text-foreground"
+              className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-10 rounded-xl text-foreground"
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="cTel" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+        <div className="space-y-1.5">
+          <Label htmlFor="cTel" className="text-xs font-bold text-foreground">
             Teléfono Celular
           </Label>
           <Input
@@ -347,15 +347,15 @@ export function PasoVehiculoCliente({
             placeholder="987654321"
             value={clienteTelefono}
             onChange={(e) => setClienteTelefono(e.target.value)}
-            className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-9 rounded-lg text-foreground"
+            className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-10 rounded-xl text-foreground font-mono"
           />
-          <p className="text-[9px] text-zinc-500 dark:text-zinc-400 font-bold">
-            Si ingresa un celular registrado, el sistema buscará el cliente de forma automática.
+          <p className="text-[10px] text-muted-foreground font-medium">
+            Si ingresa un celular registrado, el sistema completará los datos del cliente automáticamente.
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="cEmail" className="text-xs font-bold text-zinc-650 dark:text-zinc-400">
+        <div className="space-y-1.5">
+          <Label htmlFor="cEmail" className="text-xs font-bold text-foreground">
             Correo Electrónico
           </Label>
           <Input
@@ -364,8 +364,33 @@ export function PasoVehiculoCliente({
             placeholder="cliente@correo.com"
             value={clienteEmail}
             onChange={(e) => setClienteEmail(e.target.value)}
-            className="bg-card/60 backdrop-blur-md border-border focus:border-secondary text-xs h-9 rounded-lg text-foreground"
+            className="bg-card border-border focus:border-secondary text-xs sm:text-sm h-10 rounded-xl text-foreground"
           />
+        </div>
+
+        {/* Info card / Beneficios de Fidelidad */}
+        <div className="pt-2">
+          {vehiculoEncontrado ? (
+            <div className="p-3 rounded-xl border border-secondary/30 bg-secondary/10 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Star className="size-4.5 text-amber-500 fill-amber-400 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-foreground">Cliente Registrado</p>
+                  <p className="text-[10px] text-muted-foreground">Datos cargados desde la base de datos</p>
+                </div>
+              </div>
+              <span className="text-xs font-extrabold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                {vehiculoEncontrado.puntosAcumulados ?? 0} pts
+              </span>
+            </div>
+          ) : (
+            <div className="p-3 rounded-xl border border-dashed border-border/80 bg-muted/20 flex items-center gap-2 text-muted-foreground">
+              <Sparkles className="size-4 text-secondary shrink-0" />
+              <p className="text-[11px] leading-relaxed">
+                Los clientes acumulan puntos de lealtad automáticamente por cada orden de lavado.
+              </p>
+            </div>
+          )}
         </div>
       </Card>
     </div>

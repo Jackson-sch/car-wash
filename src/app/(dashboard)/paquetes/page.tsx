@@ -20,10 +20,8 @@ export default async function PaquetesPage() {
   ]);
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Cargando paquetes...</div>}>
-        <PaquetesClient initialPaquetes={paquetes} servicios={servicios} />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Cargando paquetes...</div>}>
+      <PaquetesClient initialPaquetes={paquetes} servicios={servicios} />
+    </Suspense>
   );
 }

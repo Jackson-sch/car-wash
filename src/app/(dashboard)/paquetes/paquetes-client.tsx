@@ -108,7 +108,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -189,6 +189,7 @@ export function PaquetesClient({ initialPaquetes, servicios }: PaquetesClientPro
         {viewMode === "grid" ? (
           <PaquetesGrid
             data={paginatedData}
+            servicios={servicios}
             searchQuery={search}
             onEdit={openEdit}
             onToggleStatus={handleToggle}

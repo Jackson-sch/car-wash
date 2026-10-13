@@ -69,7 +69,7 @@ export function TransactionsTable({ transacciones }: TransactionsTableProps) {
               setSearchQuery(e.target.value);
               setCurrentPage(null);
             }}
-            className="pl-8 pr-8 h-8 text-xs w-full bg-card border-border focus:border-secondary"
+            className="pl-8 pr-8 h-9 text-xs w-full bg-card border-border focus:border-secondary"
           />
           {searchQuery && (
             <button type="button" onClick={() => {
@@ -88,7 +88,7 @@ export function TransactionsTable({ transacciones }: TransactionsTableProps) {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/30">
+            <TableRow className="bg-muted/40 border-b border-border hover:bg-transparent">
               <TableHead>Hora</TableHead>
               <TableHead>Ticket</TableHead>
               <TableHead>Servicios Realizados</TableHead>

@@ -98,7 +98,7 @@ export function SucursalesClient({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -115,7 +115,7 @@ export function SucursalesClient({
           <Button
             variant="outline"
             onClick={() => router.push("/configuracion")}
-            className="h-10 rounded-lg border-border hover:border-zinc-350 hover:bg-muted/50 gap-1.5 cursor-pointer shadow-xs font-bold text-xs text-muted-foreground hover:text-foreground"
+            className="h-10 rounded-lg border-border hover:bg-muted/80 gap-1.5 cursor-pointer shadow-xs font-bold text-xs text-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver a Configuración

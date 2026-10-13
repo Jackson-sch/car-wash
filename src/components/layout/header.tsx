@@ -12,7 +12,7 @@ import {
   getEmpresaSucursales,
   switchActiveBranch,
 } from "@/lib/actions/branch-switcher";
-import { getTurnoActivo } from "@/lib/actions/caja";
+import { getTurnoActivoHeader } from "@/lib/actions/caja";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -30,7 +30,7 @@ const emptySubscribe = () => () => {};
 const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
 
-type TurnoActivo = Awaited<ReturnType<typeof getTurnoActivo>>;
+type TurnoActivo = Awaited<ReturnType<typeof getTurnoActivoHeader>>;
 
 export function Header() {
   const pathname = usePathname();
@@ -53,11 +53,12 @@ export function Header() {
   const userId = session?.user?.id;
   const sucursalId = session?.user?.sucursalId;
   const userRol = session?.user?.rol;
+  const currentBranchId = activeBranch?.id || sucursalId;
 
   const fetchCajaStatus = useCallback(async () => {
     if (session?.user && userRol !== "superadmin") {
       try {
-        const turno = await getTurnoActivo();
+        const turno = await getTurnoActivoHeader(currentBranchId);
         setTurnoActivo(turno);
       } catch {
         setTurnoActivo(null);
@@ -67,7 +68,7 @@ export function Header() {
     } else {
       setLoadingCaja(false);
     }
-  }, [session, userRol]);
+  }, [session, userRol, currentBranchId]);
 
   useEffect(() => {
     if (userId && userRol !== "superadmin") {
@@ -89,16 +90,28 @@ export function Header() {
         fetchCajaStatus();
       });
     }
-  }, [userId, sucursalId, userRol, fetchCajaStatus]);
+  }, [userId, currentBranchId, userRol, pathname, fetchCajaStatus]);
 
   useEffect(() => {
     const handleCajaChange = () => {
-      fetchCajaStatus();
+      startTransition(() => {
+        fetchCajaStatus();
+      });
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "caja-status-updated") {
+        startTransition(() => {
+          fetchCajaStatus();
+        });
+      }
     };
 
     window.addEventListener("caja-status-changed", handleCajaChange);
+    window.addEventListener("storage", handleStorageChange);
     return () => {
       window.removeEventListener("caja-status-changed", handleCajaChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [fetchCajaStatus]);
 
@@ -140,11 +153,11 @@ export function Header() {
           size="icon-lg"
           className="size-9 text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-xl cursor-pointer"
         />
-        <Separator orientation="vertical" className="h-9 bg-border" />
+        <Separator orientation="vertical" className="h-9 bg-border hidden sm:block" />
 
         {/* Breadcrumbs Navigation */}
         <nav
-          className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
+          className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
           aria-label="Breadcrumb"
         >
           <Link
@@ -250,7 +263,8 @@ export function Header() {
                 <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                 <span className="whitespace-nowrap">Caja: S/ {(() => {
                   const efectivoPago = turnoActivo.pagos?.find((p) => p.metodo === "efectivo")?.total || 0;
-                  return (parseFloat(turnoActivo.montoInicial || "0") + efectivoPago).toFixed(2);
+                  const egresos = turnoActivo.totalEgresos || 0;
+                  return Math.max(0, parseFloat(turnoActivo.montoInicial || "0") + efectivoPago - egresos).toFixed(2);
                 })()}</span>
               </Button>
             </Link>

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { servicios, categoriasServicio, sucursales, servicioRecetas, inventario } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth/config";
 import type { PERMISSIONS } from "@/lib/auth/permissions";
 import { canDo } from "@/lib/auth/permissions";
@@ -86,6 +86,7 @@ export async function getServicios() {
         activo: servicios.activo,
         categoriaId: servicios.categoriaId,
         categoriaNombre: categoriasServicio.nombre,
+        totalInsumosReceta: sql<number>`coalesce((select count(*) from servicio_recetas where servicio_recetas.servicio_id = ${servicios.id}), 0)::int`,
       })
       .from(servicios)
       .leftJoin(categoriasServicio, eq(servicios.categoriaId, categoriasServicio.id))

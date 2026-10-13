@@ -49,7 +49,6 @@ interface KioscoClientProps {
   lavadores: Lavador[];
 }
 
-// react-doctor-disable-next-line no-giant-component
 export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
   const [ordenesList, setOrdenesList] = useState<OrdenItem[]>(initialOrdenes);
   const [now, setNow] = useState<number>(Date.now());
@@ -57,7 +56,7 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Actualizar el reloj cada 10 segundos para actualizar los tiempos transcurridos en vivo
+  // Actualizar el reloj cada 10 segundos
   useEffect(() => {
     setTimeStr(new Date().toLocaleTimeString("es-PE"));
     const timer = setInterval(() => {
@@ -68,7 +67,7 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // Sincronización en tiempo real (Auto-polling cada 3 segundos para Smart TVs)
+  // Sincronización en tiempo real (Auto-polling cada 3 segundos)
   useEffect(() => {
     const pollTimer = setInterval(async () => {
       try {
@@ -84,7 +83,7 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
     return () => clearInterval(pollTimer);
   }, []);
 
-  // Escuchar cambios de fullscreen del navegador (ESC key o botón exit)
+  // Escuchar cambios de fullscreen del navegador
   useEffect(() => {
     const handleFullscreenChange = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -184,315 +183,376 @@ export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
       suppressHydrationWarning
       className={
         isFullscreen
-          ? "fixed inset-0 z-[999999] bg-slate-950 text-slate-50 dark:bg-[#070b14] dark:text-foreground p-6 md:p-8 overflow-y-auto w-screen h-screen min-h-screen space-y-6 isolate transition-opacity duration-300"
-          : "space-y-6 text-foreground transition-opacity duration-300"
+          ? "fixed inset-0 z-50 bg-background text-foreground p-6 md:p-8 overflow-y-auto w-screen h-screen min-h-screen space-y-6 transition-colors duration-200"
+          : "space-y-6 md:space-y-8 text-foreground transition-colors duration-200"
       }
     >
-      {/* Header Kiosco TV (Estilo V2 Premium Adaptable Light/Dark) */}
-      <Card suppressHydrationWarning className="bg-card border-border dark:bg-slate-900/90 dark:border-slate-800 p-5 md:p-6 shadow-xl dark:shadow-2xl rounded-3xl relative overflow-hidden">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="p-3.5 bg-cyan-500/10 rounded-2xl border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-              <Tv className="h-8 w-8 text-cyan-600 dark:text-cyan-400 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground dark:text-white uppercase font-mono">
-                  Kiosco Live — Bahías de Lavado
-                </h1>
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">
-                  <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-ping" />
-                  EN VIVO 3S
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground dark:text-zinc-400 font-bold mt-1 flex items-center gap-2">
-                <span>Monitor Taller & Smart TV</span>
-                <span>•</span>
-                <span className="font-mono text-cyan-600 dark:text-cyan-400 font-black">{timeStr || "--:--:--"}</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end flex-wrap">
-            {/* Stats Pills */}
-            <div className="flex items-center gap-2 bg-muted/80 dark:bg-slate-950/80 border border-border dark:border-slate-800 rounded-2xl p-1.5 shadow-inner">
-              <div className="px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center">
-                <span className="text-[9px] uppercase font-black tracking-wider text-emerald-600 dark:text-emerald-400 block">EN BAHÍA</span>
-                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono">{enProcesoList.length} Autos</span>
-              </div>
-              <div className="px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
-                <span className="text-[9px] uppercase font-black tracking-wider text-amber-600 dark:text-amber-400 block">EN COLA</span>
-                <span className="text-sm font-black text-amber-600 dark:text-amber-400 font-mono">{pendientesList.length} Autos</span>
-              </div>
-            </div>
-
-            {/* Fullscreen Toggle */}
-            <Button
-              type="button"
-              onClick={toggleFullscreen}
-              className="h-11 px-4 font-extrabold text-xs gap-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30 rounded-2xl cursor-pointer shadow-sm transition-colors"
-            >
-              {isFullscreen ? (
-                <>
-                  <Minimize2 className="h-4 w-4" />
-                  Salir Pantalla Completa
-                </>
-              ) : (
-                <>
-                  <Maximize2 className="h-4 w-4" />
-                  Modo TV Pantalla Completa
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-        {/* Subtle background ambient glow */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      </Card>
-
-      {/* Grid Principal de Bahías */}
-      <div className="space-y-8">
-        {/* 1. SECCIÓN: EN PROCESO (LAVANDO AHORA) */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 flex items-center gap-2 font-mono">
-              <Sparkles className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-              Vehículos en Bahía de Lavado ({enProcesoList.length})
-            </h2>
-            <span className="text-xs font-bold text-muted-foreground dark:text-zinc-500 uppercase tracking-wider">
-              Temporizadores en tiempo real
+      {/* Header Limpio y Sólido */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+              <Tv className="size-7 text-secondary" />
+              Kiosco Live — Bahías de Lavado
+            </h1>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              En Vivo
             </span>
           </div>
+          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2 font-medium">
+            <span>Monitor de taller y control de bahías en tiempo real</span>
+            <span>•</span>
+            <span className="font-mono font-bold text-foreground">{timeStr || "--:--:--"}</span>
+          </p>
+        </div>
 
-          {enProcesoList.length === 0 ? (
-            <Card className="bg-card/60 dark:bg-slate-900/40 border-2 border-dashed border-border dark:border-slate-800 rounded-3xl p-10 text-center text-muted-foreground text-xs font-semibold space-y-2">
-              <Car className="h-10 w-10 text-muted-foreground/60 mx-auto" />
-              <p className="text-foreground dark:text-zinc-300 font-bold">No hay vehículos lavándose en este momento.</p>
-              <p className="text-muted-foreground dark:text-zinc-500">Selecciona un auto de la cola de espera para iniciar su lavado.</p>
-            </Card>
+        {/* Botón de Pantalla Completa */}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={toggleFullscreen}
+          className="h-10 px-4 font-bold text-xs gap-2 rounded-xl border-border bg-card hover:bg-muted text-foreground cursor-pointer shadow-xs transition-colors shrink-0"
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize2 className="h-4 w-4" />
+              Salir Pantalla Completa
+            </>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enProcesoList.map((ord) => {
-                const startTimeMs = ord.updatedAt
-                  ? new Date(ord.updatedAt).getTime()
-                  : ord.createdAt
-                  ? new Date(ord.createdAt).getTime()
-                  : now;
-                const elapsedMins = Math.max(1, Math.floor((now - startTimeMs) / 60000));
-                const duracionEstimada = 30; // 30 min estándar
-                const isOverdue = elapsedMins > duracionEstimada;
-                const isNearEnd = elapsedMins >= duracionEstimada - 5 && !isOverdue;
+            <>
+              <Maximize2 className="h-4 w-4 text-secondary" />
+              Modo TV Pantalla Completa
+            </>
+          )}
+        </Button>
+      </div>
 
-                return (
-                  <Card
-                    key={ord.id}
-                    className={`bg-card border-2 rounded-3xl p-6 shadow-xl dark:bg-slate-900/95 dark:shadow-2xl transition-colors transition-shadow relative overflow-hidden flex flex-col justify-between ${
-                      isOverdue
-                        ? "border-rose-500 bg-rose-500/10 dark:bg-rose-950/20 dark:border-rose-500 shadow-rose-500/10"
-                        : isNearEnd
-                        ? "border-amber-500 bg-amber-500/10 dark:bg-amber-950/20 dark:border-amber-500 shadow-amber-500/10"
-                        : "border-cyan-500/70 dark:border-cyan-500/80 dark:shadow-[0_0_25px_rgba(6,182,212,0.15)]"
-                    }`}
-                  >
-                    <div className="space-y-4">
-                      {/* Badge Placa Top (Estilo Metálico Plateado) */}
-                      <div className="flex justify-between items-start gap-2">
-                        <div>
-                          <span className="inline-block font-black text-2xl tracking-widest bg-linear-to-b from-slate-100 via-slate-200 to-slate-300 text-slate-950 px-4 py-1.5 rounded-xl shadow-md border border-slate-400 uppercase font-mono">
+      {/* KPI Cards Sólidos y Compactos */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <Card className="bg-card border-border px-4 py-3 rounded-xl flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block leading-tight">
+                En Bahía (Lavándose)
+              </span>
+              <p className="text-[11px] text-muted-foreground/80 leading-tight mt-0.5">Vehículos en proceso activo</p>
+            </div>
+          </div>
+          <div className="text-2xl font-black text-foreground font-mono pl-3 shrink-0">
+            {enProcesoList.length}
+          </div>
+        </Card>
+
+        <Card className="bg-card border-border px-4 py-3 rounded-xl flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block leading-tight">
+                En Cola de Espera
+              </span>
+              <p className="text-[11px] text-muted-foreground/80 leading-tight mt-0.5">Pendientes de inicio</p>
+            </div>
+          </div>
+          <div className="text-2xl font-black text-foreground font-mono pl-3 shrink-0">
+            {pendientesList.length}
+          </div>
+        </Card>
+
+        <Card className="bg-card border-border px-4 py-3 rounded-xl flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block leading-tight">
+                Listos para Retiro
+              </span>
+              <p className="text-[11px] text-muted-foreground/80 leading-tight mt-0.5">Lavado finalizado</p>
+            </div>
+          </div>
+          <div className="text-2xl font-black text-foreground font-mono pl-3 shrink-0">
+            {completadosRecientes.length}
+          </div>
+        </Card>
+      </div>
+
+      {/* 1. SECCIÓN: VEHÍCULOS EN BAHÍA DE LAVADO */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+            <Car className="h-4.5 w-4.5 text-secondary" />
+            <span>Vehículos en Bahía de Lavado</span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/20">
+              {enProcesoList.length}
+            </span>
+          </h2>
+          <span className="text-xs font-medium text-muted-foreground">
+            Temporizadores en tiempo real
+          </span>
+        </div>
+
+        {enProcesoList.length === 0 ? (
+          <Card className="bg-card border border-dashed border-border rounded-2xl p-10 text-center text-muted-foreground text-xs font-medium space-y-2">
+            <Car className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+            <p className="text-foreground font-bold text-sm">No hay vehículos lavándose en este momento.</p>
+            <p className="text-muted-foreground">Selecciona un vehículo de la cola de espera para iniciar su lavado.</p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {enProcesoList.map((ord) => {
+              const startTimeMs = ord.updatedAt
+                ? new Date(ord.updatedAt).getTime()
+                : ord.createdAt
+                ? new Date(ord.createdAt).getTime()
+                : now;
+              const elapsedMins = Math.max(1, Math.floor((now - startTimeMs) / 60000));
+              const duracionEstimada = 30; // 30 min estándar
+              const isOverdue = elapsedMins > duracionEstimada;
+              const isNearEnd = elapsedMins >= duracionEstimada - 5 && !isOverdue;
+
+              return (
+                <Card
+                  key={ord.id}
+                  className={`bg-card border rounded-2xl p-5 shadow-xs transition-colors flex flex-col justify-between ${
+                    isOverdue
+                      ? "border-rose-500/50 bg-rose-500/5"
+                      : isNearEnd
+                      ? "border-amber-500/50 bg-amber-500/5"
+                      : "border-border"
+                  }`}
+                >
+                  <div className="space-y-4">
+                    {/* Fila Placa + Ticket */}
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        {/* Placa Estilo Perú Sólida */}
+                        <div className="inline-flex flex-col items-center justify-center bg-card border-2 border-foreground/80 rounded-xl px-4 py-1 font-mono shadow-xs select-all">
+                          <span className="text-[7.5px] uppercase font-bold text-muted-foreground tracking-widest leading-none">
+                            PERÚ
+                          </span>
+                          <span className="text-xl md:text-2xl font-black text-foreground tracking-wider leading-none mt-1 uppercase">
                             {ord.placa}
                           </span>
-                          <p className="text-xs font-extrabold text-foreground dark:text-white mt-2 flex items-center gap-1.5">
-                            <Car className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-                            {ord.vehiculoMarca} {ord.vehiculoModelo}
-                            {ord.vehiculoTipo && (
-                              <span className="text-[10px] text-muted-foreground dark:text-zinc-400 uppercase font-bold">({ord.vehiculoTipo})</span>
-                            )}
-                          </p>
                         </div>
-
-                        <div className="text-right">
-                          <span className="text-[10px] uppercase font-black text-muted-foreground dark:text-zinc-400 block tracking-wider font-mono">TICKET</span>
-                          <span className="text-sm font-black text-cyan-600 dark:text-cyan-400 font-mono">#{ord.nroTicket || "S/N"}</span>
-                        </div>
+                        <p className="text-xs font-bold text-foreground mt-2 flex items-center gap-1.5">
+                          <Car className="h-3.5 w-3.5 text-secondary" />
+                          <span>{ord.vehiculoMarca} {ord.vehiculoModelo}</span>
+                          {ord.vehiculoTipo && (
+                            <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+                              ({ord.vehiculoTipo})
+                            </span>
+                          )}
+                        </p>
                       </div>
 
-                      {/* Cliente info */}
-                      <div className="py-2.5 px-3 bg-muted/60 dark:bg-slate-950/70 border border-border dark:border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                        <div className="space-y-0.5">
-                          <span className="text-[9px] uppercase font-bold text-muted-foreground dark:text-zinc-400 block">Cliente</span>
-                          <p className="font-extrabold text-foreground dark:text-white truncate">
-                            {ord.clienteNombre} {ord.clienteApellido || ""}
-                          </p>
-                        </div>
-                        <div className="text-right space-y-0.5">
-                          <span className="text-[9px] uppercase font-bold text-muted-foreground dark:text-zinc-400 block">Lavador Asignado</span>
-                          <p className="font-extrabold text-cyan-600 dark:text-cyan-400 flex items-center justify-end gap-1">
-                            <User className="h-3.5 w-3.5" />
-                            {ord.lavadorNombre ? `${ord.lavadorNombre}` : "Sin Asignar"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Timer Display */}
-                      <div className="flex justify-between items-center py-2.5 px-3.5 rounded-2xl bg-muted/80 dark:bg-slate-950 border border-border dark:border-slate-800 text-xs">
-                        <span className="text-[11px] font-bold text-muted-foreground dark:text-zinc-400 uppercase tracking-wider font-mono">
-                          TIEMPO EN BAHÍA
+                      <div className="text-right">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block font-mono">
+                          TICKET
                         </span>
-
-                        <div className={`flex items-center gap-1.5 font-black text-sm font-mono ${
-                          isOverdue
-                            ? "text-rose-600 dark:text-rose-400 animate-pulse"
-                            : isNearEnd
-                            ? "text-amber-600 dark:text-amber-400"
-                            : "text-emerald-600 dark:text-emerald-400"
-                        }`}>
-                          <Clock className="h-4 w-4" />
-                          <span>{elapsedMins} min</span>
-                          {isOverdue && <span className="text-[10px] uppercase text-rose-600 dark:text-rose-500 font-extrabold">(EXCEDIDO)</span>}
-                        </div>
+                        <span className="text-xs font-bold text-secondary font-mono bg-secondary/10 border border-secondary/20 px-2 py-0.5 rounded-md inline-block">
+                          #{ord.nroTicket || "S/N"}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Botón de Finalización */}
-                    <div className="pt-4">
-                      <Button
-                        type="button"
-                        disabled={isPending}
-                        onClick={() => handleCambiarEstado(ord.id, "completado")}
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs md:text-sm h-12 rounded-2xl gap-2 cursor-pointer shadow-md transition-colors"
-                      >
-                        <CheckCircle2 className="h-5 w-5" />
-                        FINALIZAR LAVADO
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* 2. SECCIÓN: COLA DE ESPERA (PENDIENTES - STITCH V2 STYLING) */}
-        <section>
-          <h2 className="text-sm font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2 font-mono">
-            <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            Vehículos en Cola de Espera ({pendientesList.length})
-          </h2>
-
-          {pendientesList.length === 0 ? (
-            <Card className="bg-card border border-border dark:bg-[#0b0f17] dark:border-[#1e293b] rounded-3xl p-6 text-center text-xs text-muted-foreground dark:text-zinc-400 font-semibold">
-              No hay vehículos esperando en la cola de recepción.
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {pendientesList.map((ord, idx) => {
-                const isFirstTurn = idx === 0;
-
-                return (
-                  <Card
-                    key={ord.id}
-                    className="bg-card border border-border dark:bg-[#0b0f17] dark:border-[#1e293b] rounded-2xl p-5 flex flex-col justify-between hover:border-amber-500/60 transition-colors shadow-md dark:shadow-2xl relative overflow-hidden"
-                  >
-                    <div className="space-y-4">
-                      {/* Top Row: Plate + Turn Badge */}
-                      <div className="flex justify-between items-center gap-2">
-                        {/* Metal License Plate */}
-                        <div
-                          className={`font-mono font-black text-base md:text-lg tracking-widest px-4 py-1.5 rounded-xl shadow-sm border-2 uppercase flex items-center justify-center ${
-                            isFirstTurn
-                              ? "bg-linear-to-b from-slate-100 via-slate-200 to-slate-300 text-slate-950 border-slate-400 shadow-slate-400/20"
-                              : "bg-linear-to-b from-amber-300 via-amber-400 to-amber-500 text-amber-950 border-amber-400 shadow-amber-400/20"
-                          }`}
-                        >
-                          {ord.placa}
-                        </div>
-
-                        {/* Turn Badge */}
-                        <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 font-mono text-xs font-black uppercase tracking-wider rounded-xl shadow-xs">
-                          TURNO #{idx + 1}
+                    {/* Cliente y Lavador Asignado */}
+                    <div className="p-3 bg-muted/40 border border-border rounded-xl grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-0.5 min-w-0">
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground block">
+                          Cliente
                         </span>
+                        <p className="font-bold text-foreground truncate">
+                          {ord.clienteNombre} {ord.clienteApellido || ""}
+                        </p>
                       </div>
-
-                      {/* Vehicle & Client Info */}
-                      <div className="space-y-1 pt-1">
-                        <h3 className="text-sm md:text-base font-extrabold text-foreground dark:text-white">
-                          {ord.vehiculoMarca} {ord.vehiculoModelo}
-                        </h3>
-                        <p className="text-xs text-muted-foreground dark:text-zinc-400 font-medium">
-                          Cliente: <span className="text-foreground dark:text-zinc-200 font-semibold">{ord.clienteNombre} {ord.clienteApellido || ""}</span>
+                      <div className="space-y-0.5 text-right min-w-0">
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground block">
+                          Lavador
+                        </span>
+                        <p className="font-bold text-foreground flex items-center justify-end gap-1 truncate">
+                          <User className="h-3 w-3 text-secondary shrink-0" />
+                          <span className="truncate">{ord.lavadorNombre ? ord.lavadorNombre : "Sin Asignar"}</span>
                         </p>
                       </div>
                     </div>
 
-                    {/* Action Button: Glowing Solid Orange */}
-                    <div className="pt-5">
-                      <Button
-                        type="button"
-                        disabled={isPending}
-                        onClick={() => handleCambiarEstado(ord.id, "en_proceso")}
-                        className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-slate-950 font-black text-xs md:text-sm h-11 rounded-xl gap-2 cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] border border-amber-400 uppercase tracking-wider transition-colors"
+                    {/* Temporizador */}
+                    <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-muted/30 border border-border text-xs">
+                      <span className="text-[11px] font-bold text-muted-foreground uppercase font-mono">
+                        Tiempo en Bahía
+                      </span>
+                      <div
+                        className={`flex items-center gap-1.5 font-mono font-bold text-xs ${
+                          isOverdue
+                            ? "text-rose-600 dark:text-rose-400 font-extrabold"
+                            : isNearEnd
+                            ? "text-amber-600 dark:text-amber-400 font-extrabold"
+                            : "text-foreground"
+                        }`}
                       >
-                        <Play className="h-4 w-4 fill-slate-950 text-slate-950" />
-                        INICIAR LAVADO
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* 3. SECCIÓN: RECIÉMENTE COMPLETADOS (AVISO WHATSAPP) */}
-        {completadosRecientes.length > 0 && (
-          <section>
-            <h2 className="text-sm font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-4 flex items-center gap-2 font-mono">
-              <CheckCircle2 className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-              Listos para Retiro — Avisar al Cliente ({completadosRecientes.length})
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {completadosRecientes.map((ord) => {
-                const totalNum = parseFloat(ord.total || "0") || 0;
-                const clienteTel = ord.clienteTelefono || null;
-                const msg = formatWhatsAppMessage({
-                  clienteNombre: ord.clienteNombre,
-                  clienteTelefono: clienteTel,
-                  placa: ord.placa,
-                  vehiculoInfo: `${ord.vehiculoMarca || ""} ${ord.vehiculoModelo || ""}`.trim(),
-                  servicioNombre: "Servicio de Lavado",
-                  total: totalNum,
-                  sucursalNombre: "WashMaster Pro",
-                  nroTicket: ord.nroTicket,
-                });
-                const waUrl = buildWhatsAppUrl(clienteTel, msg);
-
-                return (
-                  <Card key={ord.id} className="bg-card border border-border dark:bg-slate-900/90 dark:border-slate-800 rounded-2xl p-3.5 text-xs flex flex-col justify-between shadow-sm">
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center font-bold text-foreground dark:text-white">
-                        <span className="font-mono font-black text-sm">{ord.placa}</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">S/ {totalNum.toFixed(2)}</span>
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{elapsedMins} min</span>
+                        {isOverdue && (
+                          <span className="text-[9px] uppercase text-rose-600 dark:text-rose-400 font-black">
+                            (EXCEDIDO)
+                          </span>
+                        )}
                       </div>
-                      <p className="text-[10px] text-muted-foreground dark:text-zinc-400 truncate font-medium">{ord.clienteNombre}</p>
+                    </div>
+                  </div>
+
+                  {/* Botón de Finalización */}
+                  <div className="pt-4">
+                    <Button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => handleCambiarEstado(ord.id, "completado")}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs h-10 rounded-xl gap-2 cursor-pointer shadow-xs transition-colors"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Finalizar Lavado
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* 2. SECCIÓN: COLA DE ESPERA */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+            <Clock className="h-4.5 w-4.5 text-amber-500" />
+            <span>Vehículos en Cola de Espera</span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              {pendientesList.length}
+            </span>
+          </h2>
+        </div>
+
+        {pendientesList.length === 0 ? (
+          <Card className="bg-card border border-border rounded-2xl p-6 text-center text-xs text-muted-foreground font-medium">
+            No hay vehículos esperando en la cola de recepción.
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {pendientesList.map((ord, idx) => (
+              <Card
+                key={ord.id}
+                className="bg-card border border-border rounded-2xl p-4.5 flex flex-col justify-between shadow-xs hover:border-border transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="inline-flex flex-col items-center justify-center bg-card border-2 border-foreground/80 rounded-xl px-3 py-1 font-mono shadow-xs select-all">
+                      <span className="text-[7px] uppercase font-bold text-muted-foreground tracking-widest leading-none">
+                        PERÚ
+                      </span>
+                      <span className="text-base font-black text-foreground tracking-wider leading-none mt-0.5 uppercase">
+                        {ord.placa}
+                      </span>
                     </div>
 
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] h-8 rounded-xl transition-colors shadow-sm"
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      WhatsApp
-                    </a>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
+                    <span className="px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 font-mono text-xs font-bold uppercase rounded-lg">
+                      Turno #{idx + 1}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-foreground truncate">
+                      {ord.vehiculoMarca} {ord.vehiculoModelo}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Cliente: <span className="text-foreground font-medium">{ord.clienteNombre} {ord.clienteApellido || ""}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => handleCambiarEstado(ord.id, "en_proceso")}
+                    className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold text-xs h-10 rounded-xl gap-2 cursor-pointer shadow-xs transition-colors"
+                  >
+                    <Play className="h-3.5 w-3.5 fill-white text-white" />
+                    Iniciar Lavado
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
-      </div>
+      </section>
+
+      {/* 3. SECCIÓN: LISTOS PARA RETIRO (AVISO WHATSAPP) */}
+      {completadosRecientes.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+              <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+              <span>Listos para Retiro</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                {completadosRecientes.length}
+              </span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {completadosRecientes.map((ord) => {
+              const totalNum = parseFloat(ord.total || "0") || 0;
+              const clienteTel = ord.clienteTelefono || null;
+              const msg = formatWhatsAppMessage({
+                clienteNombre: ord.clienteNombre,
+                clienteTelefono: clienteTel,
+                placa: ord.placa,
+                vehiculoInfo: `${ord.vehiculoMarca || ""} ${ord.vehiculoModelo || ""}`.trim(),
+                servicioNombre: "Servicio de Lavado",
+                total: totalNum,
+                sucursalNombre: "WashMaster Pro",
+                nroTicket: ord.nroTicket,
+              });
+              const waUrl = buildWhatsAppUrl(clienteTel, msg);
+
+              return (
+                <Card
+                  key={ord.id}
+                  className="bg-card border border-border rounded-xl p-3 text-xs flex flex-col justify-between shadow-xs"
+                >
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center font-bold text-foreground">
+                      <span className="font-mono font-black text-sm">{ord.placa}</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">
+                        S/ {totalNum.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground truncate font-medium">
+                      {ord.clienteNombre}
+                    </p>
+                  </div>
+
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] h-8 rounded-lg transition-colors shadow-xs"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    WhatsApp
+                  </a>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

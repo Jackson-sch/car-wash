@@ -64,29 +64,55 @@ function mapRealtimeRecordToOrden(
   return partial;
 }
 
+// ─── BroadcastChannel Constantes & Helpers ─────────────────────────────────────
+
+export const BCAST_CHANNEL_NAME = "car-wash-ordenes-realtime";
+
+export interface BroadcastOrdenPayload {
+  type: "UPDATE_ORDEN" | "INSERT_ORDEN" | "DELETE_ORDEN";
+  orderId: string;
+  estado?: Orden["estado"];
+  partial?: Partial<Orden>;
+}
+
+/**
+ * Emite un evento en BroadcastChannel para sincronización inmediata (0ms)
+ * entre pestañas/ventanas abiertas en el mismo navegador (ej. /ordenes y /patio).
+ */
+export function broadcastOrdenEvent(payload: BroadcastOrdenPayload) {
+  if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+    try {
+      const bc = new BroadcastChannel(BCAST_CHANNEL_NAME);
+      bc.postMessage(payload);
+      bc.close();
+    } catch (e) {
+      console.warn("Error broadcasting orden event:", e);
+    }
+  }
+}
+
 /**
  * Determina si un payload de UPDATE contiene un cambio de estado, lo que
  * permite una actualización parcial sin fetch completo.
- *
- * NOTA: Solo hacemos merge parcial cuando el estado cambia. Para otros
- * cambios (asignación de lavador, notas, etc.) necesitamos fetch completo,
- * porque el payload de Realtime solo contiene columnas raw de la BD,
- * sin los datos JOINeados (nombre de lavador, cliente, vehículo, etc.).
  */
 function hasEstadoChanged(
   oldRecord: Partial<OrdenRealtimeRecord>,
   newRecord: Partial<OrdenRealtimeRecord>,
 ): boolean {
-  return oldRecord.estado !== undefined &&
-    newRecord.estado !== undefined &&
-    oldRecord.estado !== newRecord.estado;
+  if (newRecord.estado !== undefined) {
+    if (oldRecord.estado !== undefined) {
+      return oldRecord.estado !== newRecord.estado;
+    }
+    return true;
+  }
+  return false;
 }
 
 // ─── Hook ──────────────────────────────────────────────────────────────────────
 
 /**
  * Hook que se suscribe a cambios en tiempo real en la tabla `ordenes` vía
- * Supabase Realtime.
+ * Supabase Realtime y BroadcastChannel para pestañas locales.
  *
  * - **DELETE**: filtra la orden de la lista local.
  * - **INSERT**: obtiene el detalle completo y lo agrega al inicio.
@@ -97,18 +123,74 @@ function hasEstadoChanged(
  */
 export function useOrdenesRealtime(
   setOrdenes: React.Dispatch<React.SetStateAction<Orden[]>>,
+  onEventReceived?: () => void,
 ) {
   // Evita llamar a setOrdenes después de desmontar el componente
   const isMountedRef = useRef(true);
 
   useEffect(() => {
     isMountedRef.current = true;
-    const supabase = createClient();
 
+    // ── BroadcastChannel (0ms entre pestañas de la misma máquina) ──────────────
+    let bc: BroadcastChannel | null = null;
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        bc = new BroadcastChannel(BCAST_CHANNEL_NAME);
+        bc.onmessage = (event: MessageEvent<BroadcastOrdenPayload>) => {
+          if (!isMountedRef.current || !event.data) return;
+          const { type, orderId, estado, partial } = event.data;
+
+          if (type === "DELETE_ORDEN") {
+            setOrdenes((prev) => prev.filter((o) => o.id !== orderId));
+            onEventReceived?.();
+          } else if (type === "UPDATE_ORDEN") {
+            if (estado || partial) {
+              setOrdenes((prev) =>
+                prev.map((o) =>
+                  o.id === orderId
+                    ? { ...o, ...(estado ? { estado } : {}), ...partial }
+                    : o
+                )
+              );
+              onEventReceived?.();
+            }
+            getOrdenById(orderId)
+              .then((detail) => {
+                if (!isMountedRef.current || !detail) return;
+                const updatedOrden: Orden = buildOrdenFromDetail(detail);
+                setOrdenes((prev) =>
+                  prev.map((o) => (o.id === orderId ? updatedOrden : o))
+                );
+                onEventReceived?.();
+              })
+              .catch(() => {});
+          } else if (type === "INSERT_ORDEN") {
+            getOrdenById(orderId)
+              .then((detail) => {
+                if (!isMountedRef.current || !detail) return;
+                const updatedOrden: Orden = buildOrdenFromDetail(detail);
+                setOrdenes((prev) => {
+                  if (prev.some((o) => o.id === orderId)) {
+                    return prev.map((o) => (o.id === orderId ? updatedOrden : o));
+                  }
+                  return [updatedOrden, ...prev];
+                });
+                onEventReceived?.();
+              })
+              .catch(() => {});
+          }
+        };
+      } catch (err) {
+        console.warn("BroadcastChannel no disponible:", err);
+      }
+    }
+
+    // ── Supabase Realtime (WebSocket a través de la red / Smart TVs) ───────────
+    const supabase = createClient();
     const channel = supabase.channel(REALTIME_CHANNEL);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const subscription = channel.on("postgres_changes" as any, // El tipado de Supabase para channel.on no exporta correctamente los overloads de Realtime
+    const subscription = channel.on("postgres_changes" as any,
       {
         event: "*",
         schema: "public",
@@ -116,6 +198,7 @@ export function useOrdenesRealtime(
       },
       (payload: RealtimePostgresChangesPayload<OrdenRealtimeRecord>) => {
         if (!isMountedRef.current) return;
+        onEventReceived?.();
 
         switch (payload.eventType) {
           // ── DELETE ──────────────────────────────────────────────────────────
@@ -160,10 +243,6 @@ export function useOrdenesRealtime(
             const orderId = payload.new.id;
             if (!orderId) return;
 
-            // Merge parcial solo cuando cambia el estado (para mover tarjetas
-            // en el Kanban instantáneamente). Para otros cambios (lavador,
-            // notas, etc.) hacemos fetch completo porque el payload no
-            // contiene datos JOINeados.
             if (hasEstadoChanged(payload.old, payload.new)) {
               const partial = mapRealtimeRecordToOrden(payload.new);
               setOrdenes((prev) =>
@@ -204,8 +283,11 @@ export function useOrdenesRealtime(
     return () => {
       isMountedRef.current = false;
       subscription.unsubscribe();
+      if (bc) {
+        bc.close();
+      }
     };
-  }, [setOrdenes]);
+  }, [setOrdenes, onEventReceived]);
 }
 
 // ─── Util ──────────────────────────────────────────────────────────────────────

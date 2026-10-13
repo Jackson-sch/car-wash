@@ -32,7 +32,7 @@ export function CierreCajaClient({
   const c = useCierreCaja(turno);
 
   return (
-    <div className="space-y-6 pb-12 print:p-0 print:space-y-4">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 pb-12 print:p-0 print:space-y-4 text-foreground">
       <CierreHeader
         turno={turno}
         systemStats={c.systemStats}

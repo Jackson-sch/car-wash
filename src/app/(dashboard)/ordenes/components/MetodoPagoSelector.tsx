@@ -1,4 +1,4 @@
-import { Check, Coins, Smartphone, CreditCard, Landmark, HelpCircle, AlertCircle } from "lucide-react";
+import { Check, Coins, Smartphone, CreditCard, Landmark, HelpCircle, AlertCircle, Copy, QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   InputGroup,
@@ -7,6 +7,7 @@ import {
   InputGroupText,
 } from "@/components/ui/input-group";
 import { formatCurrency } from "@/lib/formats";
+import { toast } from "sonner";
 import type { PaymentMethod } from "./CobrarModal";
 
 interface MetodoPagoSelectorProps {
@@ -21,6 +22,12 @@ interface MetodoPagoSelectorProps {
   cashReceivedNum: number;
   change: number;
   disabled?: boolean;
+  sucursal?: {
+    id?: string;
+    nombre?: string;
+    telefono?: string | null;
+    config?: unknown;
+  } | null;
 }
 
 // Métodos de pago con su respectivo diseño temático
@@ -75,9 +82,9 @@ const PAYMENT_METHODS = [
     label: "Otro",
     icon: HelpCircle,
     colorClass:
-      "border-zinc-200 bg-zinc-50/20 hover:bg-zinc-50/50 hover:border-zinc-400 text-zinc-700 dark:border-zinc-650/20 dark:bg-zinc-650/5 dark:text-zinc-400 dark:hover:border-zinc-500",
+      "border-border bg-muted/20 hover:bg-muted/50 hover:border-border text-foreground dark:border-border dark:bg-muted/10 dark:text-foreground dark:hover:border-border",
     activeClass:
-      "ring-1 ring-zinc-500 border-zinc-500 bg-zinc-500/10 text-zinc-800 dark:text-zinc-350 dark:bg-zinc-500/20",
+      "ring-1 ring-border border-border bg-muted text-foreground dark:text-foreground dark:bg-muted",
   },
 ];
 
@@ -93,6 +100,7 @@ export function MetodoPagoSelector({
   cashReceivedNum,
   change,
   disabled = false,
+  sucursal,
 }: MetodoPagoSelectorProps) {
   return (
     <>
@@ -135,23 +143,23 @@ export function MetodoPagoSelector({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <label
                 htmlFor="montoRecibido"
-                className="text-xs font-bold text-zinc-600"
+                className="text-xs font-bold text-foreground"
               >
                 Monto Recibido *
               </label>
 
               {/* Botones de Denominación Rápida */}
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {quickCashOptions.map((opt) => (
                   <button
                     key={opt}
                     type="button"
                     onClick={() => setCashReceived(opt.toFixed(2))}
                     disabled={disabled}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                    className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors transition-transform cursor-pointer active:scale-95 ${
                       cashReceivedNum === opt
-                        ? "bg-emerald-600 border-emerald-600 text-white"
-                        : "bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100"
+                        ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                        : "bg-muted/50 border-border text-foreground hover:bg-muted"
                     } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {opt === totalNum ? "Exacto" : `S/ ${opt}`}
@@ -161,9 +169,9 @@ export function MetodoPagoSelector({
             </div>
 
             <div className="relative">
-              <InputGroup className="pl-2 bg-card border-zinc-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 text-xs font-bold h-9 rounded-lg">
+              <InputGroup className="pl-3 bg-card border-border focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500 text-sm font-black h-10 rounded-xl text-foreground">
                 <InputGroupAddon>
-                  <InputGroupText>S/</InputGroupText>
+                  <InputGroupText className="font-bold text-muted-foreground">S/</InputGroupText>
                 </InputGroupAddon>
                 <InputGroupInput
                   id="montoRecibido"
@@ -173,9 +181,10 @@ export function MetodoPagoSelector({
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
                   disabled={disabled}
+                  className="font-black text-sm"
                 />
                 <InputGroupAddon align="inline-end">
-                  <InputGroupText>PEN</InputGroupText>
+                  <InputGroupText className="text-xs font-semibold text-muted-foreground">PEN</InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
             </div>
@@ -184,20 +193,20 @@ export function MetodoPagoSelector({
             {cashReceived.trim() !== "" && (
               <div className="mt-2">
                 {change >= 0 ? (
-                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between shadow-sm">
-                    <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
+                  <div className="p-3.5 bg-emerald-500/15 border border-emerald-500/30 rounded-xl flex items-center justify-between shadow-xs">
+                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
                       Vuelto a Entregar
                     </span>
-                    <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
+                    <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
                       {formatCurrency(change)}
                     </span>
                   </div>
                 ) : (
-                  <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-between shadow-sm">
-                    <span className="text-[10px] font-bold text-rose-800 dark:text-rose-450 uppercase tracking-wider flex items-center gap-1">
-                      <AlertCircle className="size-3.5" /> Monto Insuficiente
+                  <div className="p-3.5 bg-rose-500/15 border border-rose-500/30 rounded-xl flex items-center justify-between shadow-xs">
+                    <span className="text-xs font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <AlertCircle className="size-4 shrink-0" /> Monto Insuficiente
                     </span>
-                    <span className="text-base font-black text-rose-600 dark:text-rose-400">
+                    <span className="text-lg sm:text-xl font-black text-rose-600 dark:text-rose-400">
                       Falta {formatCurrency(Math.abs(change))}
                     </span>
                   </div>
@@ -205,11 +214,94 @@ export function MetodoPagoSelector({
               </div>
             )}
           </div>
+        ) : paymentMethod === "yape" || paymentMethod === "plin" ? (
+          <div className="space-y-3 transition-opacity duration-300">
+            {/* Banner Yape / Plin */}
+            <div
+              className={`p-3.5 rounded-xl border ${
+                paymentMethod === "yape"
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-950 dark:text-purple-200"
+                  : "bg-cyan-500/10 border-cyan-500/30 text-cyan-950 dark:text-cyan-200"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-[11px] font-black uppercase px-2 py-0.5 rounded-md text-white ${
+                      paymentMethod === "yape" ? "bg-purple-600" : "bg-cyan-600"
+                    }`}
+                  >
+                    {paymentMethod === "yape" ? "Yape" : "Plin"}
+                  </span>
+                  <span className="text-xs font-bold text-foreground">
+                    {sucursal?.telefono || "Teléfono no configurado"}
+                  </span>
+                </div>
+
+                {sucursal?.telefono && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(sucursal.telefono || "");
+                      toast.success(`Número copiado: ${sucursal.telefono}`);
+                    }}
+                    className="flex items-center gap-1 text-[11px] font-bold text-muted-foreground hover:text-foreground cursor-pointer px-2 py-0.5 rounded hover:bg-muted/50 transition-colors"
+                  >
+                    <Copy className="size-3" />
+                    <span>Copiar</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  Monto a recibir:
+                </span>
+                <span
+                  className={`text-base font-black font-heading tracking-tight ${
+                    paymentMethod === "yape"
+                      ? "text-purple-600 dark:text-purple-400"
+                      : "text-cyan-600 dark:text-cyan-400"
+                  }`}
+                >
+                  {formatCurrency(totalNum)}
+                </span>
+              </div>
+            </div>
+
+            {/* Input para Código de Operación */}
+            <div className="space-y-1">
+              <label
+                htmlFor="referencia"
+                className="text-xs font-bold text-foreground flex items-center justify-between"
+              >
+                <span>Código de Aprobación / Operación</span>
+                <span className="text-[10px] text-muted-foreground font-normal">
+                  Últimos dígitos o N° comprobante
+                </span>
+              </label>
+              <Input
+                id="referencia"
+                placeholder="Ej. 748291"
+                value={paymentReference}
+                onChange={(e) => setPaymentReference(e.target.value)}
+                disabled={disabled}
+                className={`bg-card border-border text-xs h-9 rounded-lg transition-colors focus-visible:ring-1 ${
+                  paymentMethod === "yape"
+                    ? "focus-visible:border-purple-500 focus-visible:ring-purple-500/20"
+                    : "focus-visible:border-cyan-500 focus-visible:ring-cyan-500/20"
+                }`}
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Verifica la notificación de pago en la app antes de liberar el vehículo.
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="space-y-2 transition-opacity duration-300">
             <label
               htmlFor="referencia"
-              className="text-xs font-bold text-zinc-650"
+              className="text-xs font-bold text-foreground"
             >
               Número de Referencia / Operación
             </label>
@@ -219,21 +311,16 @@ export function MetodoPagoSelector({
               value={paymentReference}
               onChange={(e) => setPaymentReference(e.target.value)}
               disabled={disabled}
-              className={`bg-card border-zinc-200 text-xs h-9 rounded-lg transition-colors focus-visible:ring-1 ${
-                paymentMethod === "yape"
-                  ? "focus-visible:border-purple-500 focus-visible:ring-purple-500/20"
-                  : paymentMethod === "plin"
-                    ? "focus-visible:border-cyan-500 focus-visible:ring-cyan-500/20"
-                    : paymentMethod === "tarjeta"
-                      ? "focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
-                      : paymentMethod === "transferencia"
-                        ? "focus-visible:border-amber-500 focus-visible:ring-amber-500/20"
-                        : "focus-visible:border-secondary focus-visible:ring-secondary/20"
+              className={`bg-card border-border text-xs h-9 rounded-lg transition-colors focus-visible:ring-1 ${
+                paymentMethod === "tarjeta"
+                  ? "focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                  : paymentMethod === "transferencia"
+                    ? "focus-visible:border-amber-500 focus-visible:ring-amber-500/20"
+                    : "focus-visible:border-secondary focus-visible:ring-secondary/20"
               }`}
             />
-            <p className="text-[9px] text-zinc-400">
-              Opcional. Código útil para validación de transacciones y
-              auditoría.
+            <p className="text-[9px] text-muted-foreground">
+              Opcional. Código útil para validación de transacciones y auditoría.
             </p>
           </div>
         )}

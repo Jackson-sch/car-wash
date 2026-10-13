@@ -15,9 +15,9 @@ const globalForDb = globalThis as unknown as {
 const isDev = process.env.NODE_ENV === 'development';
 
 const client = globalForDb.client ??= postgres(connectionString, {
-  max: isDev ? 5 : 1, // En Serverless (Vercel), 1 conexión por instancia evita agotar el pooler de Supabase
-  idle_timeout: 10, // Liberar conexiones inactivas rápidamente
-  max_lifetime: 60 * 2,
+  max: isDev ? 10 : 1, // En dev mantenemos hasta 10 para soportar requests paralelos sin bloquear
+  idle_timeout: 30, // Mantener conexiones calientes por 30s para evitar TLS handshake repetitivo
+  max_lifetime: 60 * 30, // 30 minutos de vida máxima por conexión
   connect_timeout: 10,
   prepare: false,
 });

@@ -52,13 +52,31 @@ export function CajaCerrada({ isPending, onOpenCaja }: CajaCerradaProps) {
             step="0.10"
             value={montoApertura}
             onChange={(e) => setMontoApertura(e.target.value)}
-            className="bg-card border-border focus:border-secondary focus-visible:ring-1 focus-visible:ring-secondary text-center font-bold text-base h-10 rounded-lg text-secondary"
+            className="bg-card border-border focus:border-secondary focus-visible:ring-1 focus-visible:ring-secondary text-center font-black font-mono text-xl h-11 rounded-xl text-foreground"
           />
+
+          {/* Presets Rápidos de Apertura */}
+          <div className="flex flex-wrap gap-1.5 pt-1 justify-center">
+            {["100.00", "150.00", "200.00", "250.00", "300.00"].map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setMontoApertura(preset)}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                  montoApertura === preset
+                    ? "bg-secondary text-secondary-foreground border-secondary shadow-xs"
+                    : "bg-muted/40 hover:bg-muted text-muted-foreground border-border"
+                }`}
+              >
+                S/ {preset}
+              </button>
+            ))}
+          </div>
         </div>
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full font-bold text-xs h-10 rounded-lg gap-2 cursor-pointer shadow-sm bg-primary hover:bg-primary/95 text-primary-foreground transition-colors transition-transform duration-200 hover:scale-[1.01]"
+          className="w-full font-bold text-sm h-11 rounded-xl gap-2 cursor-pointer shadow-sm bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-200 active:scale-[0.98]"
         >
           <Unlock className="h-4 w-4" />
           {isPending ? "Abriendo..." : "Abrir Turno de Caja"}

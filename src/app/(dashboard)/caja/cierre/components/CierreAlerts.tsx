@@ -33,15 +33,15 @@ export function CierreAlerts({
 }: CierreAlertsProps) {
   return (
     <Card className="p-5 border-border bg-card shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] space-y-4 print:shadow-none print:bg-white">
-      <h2 className="text-xs uppercase font-black text-zinc-700 tracking-wider border-b border-border pb-1">
+      <h2 className="text-xs uppercase font-black text-muted-foreground tracking-wider border-b border-border pb-1">
         Estado de Caja y Justificación
       </h2>
 
       {!reconciliado ? (
         // Estado inicial: Arqueo a Ciegas
         <div className="space-y-4">
-          <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl text-zinc-700 dark:text-zinc-300 space-y-1 text-[11px] leading-normal font-semibold">
-            <div className="flex items-center gap-1 text-blue-600 font-bold uppercase tracking-wider text-[9px]">
+          <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl text-foreground space-y-1 text-[11px] leading-normal font-semibold">
+            <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider text-[9px]">
               <Sparkles className="size-3.5" /> Arqueo a Ciegas
             </div>
             <p>
@@ -77,7 +77,7 @@ export function CierreAlerts({
                 <p>
                   Hay una diferencia total de <span className="font-extrabold">{formatCurrency(totalDiferencia)}</span>.
                 </p>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-[10px] text-muted-foreground">
                   Debes ingresar una explicación obligatoria en las observaciones justificando el descuadre.
                 </p>
               </div>
@@ -106,7 +106,7 @@ export function CierreAlerts({
                     type="button"
                     onClick={onSolicitarAprobacion}
                     size="sm"
-                    className="w-full text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-lg h-7 mt-1 cursor-pointer"
+                    className="w-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-lg h-9 mt-1 cursor-pointer"
                   >
                     Autorizar con Supervisor
                   </Button>
@@ -124,8 +124,8 @@ export function CierreAlerts({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="obs" className="text-xs font-bold text-zinc-750 flex items-center gap-0.5 print:hidden">
-              <FileText className="size-3.5 text-zinc-400" /> Observaciones del Cierre
+            <Label htmlFor="obs" className="text-xs font-bold text-foreground flex items-center gap-0.5 print:hidden">
+              <FileText className="size-3.5 text-muted-foreground" /> Observaciones del Cierre
               {tieneDescuadre && <span className="text-rose-600 font-bold ml-0.5">*</span>}
             </Label>
             <textarea
@@ -139,10 +139,10 @@ export function CierreAlerts({
               }
               value={obsCierre}
               onChange={(e) => onObsChange(e.target.value)}
-              className="w-full bg-card border border-zinc-350 focus:border-secondary focus:ring-0 rounded-lg text-xs p-2.5 text-zinc-800 outline-none resize-none font-medium placeholder:text-muted-foreground/60 print:hidden"
+              className="w-full bg-card border border-border focus:border-secondary focus:ring-0 rounded-lg text-xs p-2.5 text-foreground outline-none resize-none font-medium placeholder:text-muted-foreground/60 print:hidden"
             />
             {obsCierre && (
-              <p className="hidden print:block text-xs text-zinc-800 leading-relaxed whitespace-pre-wrap">
+              <p className="hidden print:block text-xs text-foreground leading-relaxed whitespace-pre-wrap">
                 {obsCierre}
               </p>
             )}

@@ -20,6 +20,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { Clock, Sparkles, CheckCircle2 } from "lucide-react";
 import { OrderCard } from "./OrderCard";
 import { SortableItem } from "./SortableItem";
 
@@ -51,43 +52,72 @@ function DroppableColumnBody({ id, children, isAnyDragging }: DroppableColumnBod
 
 // ─── Empty Column Placeholder ────────────────────────────────────────────────
 
+interface EmptyColumnPlaceholderProps {
+  isOver: boolean;
+  isAnyDragging: boolean;
+  columnId: "pendiente" | "en_proceso" | "completado";
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+const EMPTY_MESSAGES = {
+  pendiente: {
+    title: "Cola Despejada",
+    description: "No hay vehículos en espera de turno.",
+  },
+  en_proceso: {
+    title: "Bahía Disponible",
+    description: "Arrastra una orden aquí para iniciar el lavado.",
+  },
+  completado: {
+    title: "Zona Despejada",
+    description: "Todos los vehículos listos fueron entregados.",
+  },
+};
+
 function EmptyColumnPlaceholder({
   isOver,
   isAnyDragging,
-}: {
-  isOver: boolean;
-  isAnyDragging: boolean;
-}) {
+  columnId,
+  icon: Icon = Clock,
+}: EmptyColumnPlaceholderProps) {
+  const content = EMPTY_MESSAGES[columnId] || {
+    title: "Cola vacía",
+    description: "No hay órdenes en esta bahía.",
+  };
+
   if (!isAnyDragging && !isOver) {
     return (
-      <div className="h-48 rounded-xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-2 text-xs font-bold text-zinc-400 dark:text-zinc-500 w-full select-none">
-        <div className="w-8 h-0.5 rounded-full bg-border/40" />
-        <span>Cola vacía</span>
+      <div className="h-44 rounded-2xl border border-dashed border-border/60 bg-muted/10 flex flex-col items-center justify-center gap-2 p-4 text-center w-full select-none transition-colors">
+        <div className="p-2.5 rounded-full bg-muted/40 border border-border/40 text-muted-foreground/60">
+          <Icon className="size-5" />
+        </div>
+        <span className="text-xs font-bold text-foreground/80">{content.title}</span>
+        <span className="text-[11px] text-muted-foreground/70 max-w-[210px] leading-tight">
+          {content.description}
+        </span>
       </div>
     );
   }
 
   return (
     <div
-      className={`h-48 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 text-xs font-bold w-full select-none transition-colors transition-transform duration-300 ${
+      className={`h-44 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 p-4 text-center w-full select-none transition-all duration-200 ${
         isOver
-          ? "border-secondary/60 bg-secondary/10 text-secondary scale-[1.02] shadow-lg shadow-secondary/10"
-          : "border-zinc-300/40 dark:border-zinc-600/40 text-zinc-400 dark:text-zinc-500 bg-zinc-50/20 dark:bg-zinc-800/10"
+          ? "border-secondary bg-secondary/15 text-secondary scale-[1.02] shadow-xl shadow-secondary/10"
+          : "border-border/60 text-muted-foreground/70 bg-muted/20"
       }`}
     >
-      <div
-        className={`w-8 h-0.5 rounded-full transition-colors duration-300 ${
-          isOver ? "bg-secondary/60 w-12" : "bg-border/40"
-        }`}
-      />
-      <span className="transition-colors duration-300">
-        {isOver ? "¡Suelta aquí!" : "Soltar tarjeta aquí"}
+      <div className={`p-2.5 rounded-full transition-colors ${isOver ? "bg-secondary/20 text-secondary" : "bg-muted/40 text-muted-foreground/60"}`}>
+        <Icon className="size-5" />
+      </div>
+      <span className="text-xs font-black tracking-tight">
+        {isOver ? "¡Soltar en esta bahía!" : "Mover vehículo aquí"}
       </span>
-      {isOver && (
-        <span className="text-[10px] font-normal text-muted-foreground animate-fade-in">
-          La tarjeta se moverá a esta columna
-        </span>
-      )}
+      <span className="text-[10px] text-muted-foreground max-w-[200px] leading-tight">
+        {isOver
+          ? "El estado de la orden se actualizará automáticamente"
+          : "Arrastra para cambiar de estado"}
+      </span>
     </div>
   );
 }
@@ -130,35 +160,35 @@ export function OrdenesBoard({
     {
       id: "pendiente" as const,
       title: "Cola de Espera",
+      subtitle: "Vehículos esperando asignación",
       count: pendientes.length,
       items: pendientes,
-      color: "bg-amber-500",
-      borderColor: "border-amber-500/30",
-      headerBg:
-        "bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400",
-      emptyIcon: "🕐",
+      dotColor: "bg-amber-500",
+      pillClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+      accentBorder: "border-amber-500/30",
+      icon: Clock,
     },
     {
       id: "en_proceso" as const,
       title: "Bahía de Lavado",
+      subtitle: "En proceso de lavado activo",
       count: enProceso.length,
       items: enProceso,
-      color: "bg-sky-500",
-      borderColor: "border-sky-500/30",
-      headerBg:
-        "bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400",
-      emptyIcon: "🚗",
+      dotColor: "bg-sky-500",
+      pillClass: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30",
+      accentBorder: "border-sky-500/30",
+      icon: Sparkles,
     },
     {
       id: "completado" as const,
       title: "Zona de Entrega",
+      subtitle: "Listos para cobro y retiro",
       count: completados.length,
       items: completados,
-      color: "bg-emerald-500",
-      borderColor: "border-emerald-500/30",
-      headerBg:
-        "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400",
-      emptyIcon: "✅",
+      dotColor: "bg-emerald-500",
+      pillClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+      accentBorder: "border-emerald-500/30",
+      icon: CheckCircle2,
     },
   ];
 
@@ -256,7 +286,7 @@ export function OrdenesBoard({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start w-full overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-start w-full overflow-hidden">
         {columns.map((col) => {
           const isColumnHovered = dragOverColumnId === col.id;
 
@@ -264,22 +294,26 @@ export function OrdenesBoard({
             <div key={col.id} className="flex flex-col gap-3 min-w-0 w-full">
               {/* Column Header */}
               <div
-                className={`flex items-center justify-between p-3 rounded-xl border backdrop-blur-sm shadow-sm w-full min-w-0 transition-colors duration-300 ${
+                className={`flex items-center justify-between p-3.5 rounded-2xl border bg-card/80 backdrop-blur-md shadow-xs w-full min-w-0 transition-all duration-200 ${
                   isColumnHovered && isAnyDragging
-                    ? `${col.borderColor} ${col.headerBg} ring-2 ring-secondary/40 scale-[1.02]`
-                    : `${col.borderColor} ${col.headerBg}`
+                    ? `${col.accentBorder} ring-2 ring-secondary/50 scale-[1.01] bg-card`
+                    : "border-border/70"
                 }`}
               >
-                <h3 className="font-black uppercase tracking-wider text-xs flex items-center gap-2 truncate">
-                  <div className={`w-2 h-2 rounded-full ${col.color} shrink-0`} />
-                  <span className="truncate">{col.title}</span>
-                </h3>
+                <div className="flex flex-col min-w-0 gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className={`size-2 rounded-full ${col.dotColor} shrink-0`} />
+                    <h3 className="font-extrabold text-xs text-foreground uppercase tracking-wider truncate">
+                      {col.title}
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/70 font-medium truncate pl-4">
+                    {col.subtitle}
+                  </span>
+                </div>
+
                 <span
-                  className={`font-black text-sm px-2 py-0.5 rounded-md shrink-0 transition-colors transition-transform duration-300 ${
-                    isColumnHovered && isAnyDragging
-                      ? "bg-secondary text-secondary-foreground shadow-sm scale-110"
-                      : "bg-white/50 dark:bg-black/20"
-                  }`}
+                  className={`font-mono font-bold text-xs px-2.5 py-0.5 rounded-full border shrink-0 transition-transform ${col.pillClass}`}
                 >
                   {col.count}
                 </span>
@@ -307,6 +341,8 @@ export function OrdenesBoard({
                     <EmptyColumnPlaceholder
                       isOver={isColumnHovered}
                       isAnyDragging={isAnyDragging}
+                      columnId={col.id}
+                      icon={col.icon}
                     />
                   )}
                 </DroppableColumnBody>

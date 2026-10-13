@@ -1,10 +1,10 @@
-"use client";
+import { Info } from "lucide-react";
 
 export function CierreGuideBox() {
   return (
     <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed print:hidden">
       <p className="font-bold text-secondary flex items-center gap-1.5">
-        🔍 Guía de Conciliación y Arqueo de Caja
+        <Info className="size-4 shrink-0" /> Guía de Conciliación y Arqueo de Caja
       </p>
       <p className="text-muted-foreground">
         Para realizar un cierre correcto, el cajero debe contar físicamente el dinero en efectivo y el saldo de las transacciones digitales antes de verificar las cifras del sistema:

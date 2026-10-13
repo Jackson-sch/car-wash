@@ -26,9 +26,12 @@ export function SunatControlPanel({
   onSave,
 }: SunatControlPanelProps) {
   return (
-    <div className="w-full max-w-md bg-zinc-50 dark:bg-card p-6 rounded-3xl border border-border space-y-5 shadow-xs transition-colors shrink-0">
+    <div
+      className="w-full max-w-md bg-card p-6 rounded-3xl border border-border space-y-5 shadow-xs transition-colors shrink-0 print:hidden"
+      data-print="hidden"
+    >
       <div className="flex items-start gap-3">
-        <div className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-350 border border-zinc-200/50 dark:border-zinc-700/50 shrink-0">
+        <div className="p-2.5 rounded-xl bg-secondary/10 text-secondary border border-secondary/20 shrink-0">
           <ShieldCheck className="h-5 w-5 text-secondary" />
         </div>
         <div>
@@ -41,8 +44,8 @@ export function SunatControlPanel({
         </div>
       </div>
 
-      <div className="text-xs bg-zinc-100/60 dark:bg-zinc-950/20 border border-zinc-200/40 dark:border-zinc-850/50 rounded-xl p-3 flex gap-2.5">
-        <Info className="h-4 w-4 text-zinc-400 shrink-0 mt-0.5" />
+      <div className="text-xs bg-muted/40 border border-border/60 text-muted-foreground rounded-xl p-3 flex gap-2.5">
+        <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
         <p className="leading-normal">
           Usa este panel para registrar los datos del comprobante que hayas emitido
           formalmente en el portal SOL de SUNAT. El ticket impreso y el PDF se
@@ -62,9 +65,9 @@ export function SunatControlPanel({
                 key={t}
                 type="button"
                 onClick={() => onTipoChange(t)}
-                className={`py-2 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg border text-center transition-colors cursor-pointer ${
+                className={`py-2.5 px-3 min-h-[38px] text-[10px] font-black uppercase tracking-wider rounded-lg border text-center transition-colors cursor-pointer ${
                   tipo === t
-                    ? "bg-secondary border-secondary text-secondary-foreground shadow-sm"
+                    ? "bg-secondary border-secondary text-secondary-foreground shadow-xs"
                     : "bg-background border-border text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -87,7 +90,7 @@ export function SunatControlPanel({
                 onChange={(e) => onSerieChange(e.target.value.toUpperCase().slice(0, 4))}
                 placeholder={tipo === "boleta" ? "B001" : "F001"}
                 maxLength={4}
-                className="text-xs h-9 uppercase font-bold"
+                className="text-xs h-10 uppercase font-bold"
               />
             </div>
             <div className="space-y-1.5">
@@ -100,7 +103,7 @@ export function SunatControlPanel({
                 onChange={(e) => onNumeroChange(e.target.value.replace(/\D/g, "").slice(0, 8))}
                 placeholder="00000045"
                 maxLength={8}
-                className="text-xs h-9 font-mono"
+                className="text-xs h-10 font-mono"
               />
             </div>
           </div>
@@ -110,7 +113,7 @@ export function SunatControlPanel({
         <Button
           onClick={onSave}
           disabled={isPending || (tipo !== "ninguno" && (!serie || !numero))}
-          className="w-full font-bold gap-2 text-xs rounded-xl shadow-sm h-10 mt-2 cursor-pointer animate-none"
+          className="w-full font-bold gap-2 text-xs rounded-xl shadow-xs h-11 mt-2 cursor-pointer active:scale-[0.98]"
         >
           {isPending ? (
             <>

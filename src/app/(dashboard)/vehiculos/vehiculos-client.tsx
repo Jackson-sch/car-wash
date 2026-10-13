@@ -114,7 +114,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
   const totalOrdenes = initialVehiculos.reduce((acc, v) => acc + v.totalOrdenes, 0);
 
   return (
-    <div className="relative space-y-8 text-foreground" suppressHydrationWarning>
+    <div className="relative space-y-5 sm:space-y-6 md:space-y-8 text-foreground" suppressHydrationWarning>
       {/* Background Decorative Glow Orbs */}
       <div className="absolute top-0 right-0 -z-10 h-72 w-72 rounded-full bg-secondary/5 dark:bg-secondary/10 blur-3xl" />
       <div className="absolute top-40 left-10 -z-10 h-72 w-72 rounded-full bg-primary/5 dark:bg-primary/10 blur-3xl" />
@@ -244,7 +244,7 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
       <div className="rounded-xl border border-border bg-card/60 backdrop-blur-md overflow-hidden shadow-xs">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/30 border-b border-border">
+            <TableRow className="bg-muted/40 border-b border-border hover:bg-transparent">
               <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Placa</TableHead>
               <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Vehículo</TableHead>
               <TableHead className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider py-3">Propietario</TableHead>
@@ -272,9 +272,14 @@ export function VehiculosClient({ initialVehiculos }: VehiculosClientProps) {
               paginatedData.map((v) => (
                 <TableRow key={v.id} className="group hover:bg-muted/40 transition-colors transition-opacity duration-200">
                   <TableCell className="py-4">
-                    <span className="inline-flex items-center justify-center font-mono font-bold tracking-wider text-foreground uppercase text-[10px] px-2 py-0.5 rounded-md bg-muted/70 dark:bg-muted/50 border border-border/80 shadow-xs select-all">
-                      {v.placa}
-                    </span>
+                    <div className="inline-flex flex-col items-center justify-center bg-zinc-900 border border-zinc-700/80 rounded px-2 py-0.5 shadow-2xs font-mono select-all">
+                      <span className="text-[6px] uppercase font-bold text-zinc-400 tracking-widest leading-none">
+                        PERÚ
+                      </span>
+                      <span className="text-[11px] font-black text-zinc-100 tracking-wider leading-none mt-0.5 uppercase">
+                        {v.placa}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">

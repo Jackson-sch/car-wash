@@ -7,14 +7,12 @@ import {
   CheckCircle2,
   Sparkles,
   MapPin,
-  Phone,
   MessageCircle,
   ShieldCheck,
   RefreshCw,
   Star,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export interface OrdenConsulta {
   id: string;
@@ -58,7 +56,10 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
   const [lastRefresh, setLastRefresh] = useState<string>("");
 
   useEffect(() => {
-    setLastRefresh(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    const timer = setTimeout(() => {
+      setLastRefresh(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const getStepStatus = (stepEstado: "pendiente" | "en_proceso" | "completado") => {
@@ -90,9 +91,14 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
 
         {/* Card Placa Destacada */}
         <Card className="bg-card/90 border-border p-6 shadow-xl rounded-2xl text-center space-y-4">
-          <span className="inline-block bg-amber-400 text-amber-950 font-black text-3xl tracking-widest px-6 py-2 rounded-xl shadow-md border-2 border-amber-500/60 uppercase">
-            {orden.placa}
-          </span>
+          <div className="inline-flex flex-col items-center justify-center bg-zinc-900 border-2 border-zinc-700/80 rounded-2xl px-8 py-3 shadow-md font-mono select-all">
+            <span className="text-[8.5px] uppercase font-bold text-zinc-400 tracking-widest leading-none">
+              PERÚ
+            </span>
+            <span className="text-3xl md:text-4xl font-black text-zinc-100 tracking-wider leading-none mt-1 uppercase">
+              {orden.placa}
+            </span>
+          </div>
           <div className="text-sm font-bold text-foreground">
             <Car className="h-4 w-4 inline-block mr-1.5 text-muted-foreground" />
             {orden.marca} {orden.modelo}
@@ -147,7 +153,7 @@ export function ConsultaClient({ orden }: { orden: OrdenConsulta }) {
                     state === 'completed'
                       ? 'bg-emerald-500 text-emerald-950 border-emerald-400 font-bold'
                       : state === 'active'
-                      ? 'bg-amber-400 text-amber-950 border-amber-500 animate-bounce'
+                      ? 'bg-amber-400 text-amber-950 border-amber-500 ring-4 ring-amber-400/20'
                       : 'bg-card text-muted-foreground border-border'
                   }`}>
                     <Icon className="h-5 w-5" />

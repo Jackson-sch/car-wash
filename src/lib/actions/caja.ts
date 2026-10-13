@@ -1,14 +1,74 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad, egresosCaja } from "@/lib/db/schema";
-import { eq, and, desc, sql, or } from "drizzle-orm";
+import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad, egresosCaja, servicioRecetas, inventario, inventarioMovimientos } from "@/lib/db/schema";
+import { eq, and, desc, sql, or, inArray } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getErrorMessage } from "./action-utils";
 import { calcularDesgloseIGV, generarHashComprobante } from "@/lib/sunat/facturacion";
 
-// Obtener el turno de caja abierto actual de la sucursal
+// Verificación ultrarrápida de caja abierta (index scan en turnos_caja sin uniones pesadas)
+export async function isCajaAbierta(): Promise<boolean> {
+  try {
+    const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
+    const sucursalId = session.user.sucursalId!;
+
+    const [active] = await db
+      .select({ id: turnosCaja.id })
+      .from(turnosCaja)
+      .where(and(eq(turnosCaja.sucursalId, sucursalId), sql`${turnosCaja.cierre} IS NULL`))
+      .limit(1);
+
+    return !!active;
+  } catch {
+    return false;
+  }
+}
+
+// Resumen ligero de turno activo para el Header (solo saldo efectivo inicial + ventas en efectivo - egresos)
+export async function getTurnoActivoHeader(sucursalIdParam?: string | null) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
+    const sucursalId = sucursalIdParam || session.user.sucursalId!;
+
+    const [activeTurno] = await db
+      .select({
+        id: turnosCaja.id,
+        montoInicial: turnosCaja.montoInicial,
+      })
+      .from(turnosCaja)
+      .where(and(eq(turnosCaja.sucursalId, sucursalId), sql`${turnosCaja.cierre} IS NULL`))
+      .limit(1);
+
+    if (!activeTurno) return null;
+
+    const [efectivo] = await db
+      .select({
+        total: sql<string>`coalesce(sum(${pagos.monto}), 0)`,
+      })
+      .from(pagos)
+      .where(and(eq(pagos.turnoId, activeTurno.id), eq(pagos.metodo, "efectivo")));
+
+    const [egresos] = await db
+      .select({
+        total: sql<string>`coalesce(sum(${egresosCaja.monto}), 0)`,
+      })
+      .from(egresosCaja)
+      .where(eq(egresosCaja.turnoId, activeTurno.id));
+
+    return {
+      id: activeTurno.id,
+      montoInicial: activeTurno.montoInicial,
+      pagos: [{ metodo: "efectivo", total: parseFloat(efectivo?.total || "0") }],
+      totalEgresos: parseFloat(egresos?.total || "0"),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Obtener el turno de caja abierto actual de la sucursal (para /caja detallado)
 export async function getTurnoActivo() {
   try {
     const session = await getSessionOrThrow({ modulo: "caja", accion: "abrir" });
@@ -321,6 +381,7 @@ export async function cobrarOrden(data: {
         descuento: ordenes.descuento,
         nroTicket: ordenes.nroTicket,
         vehiculoId: ordenes.vehiculoId,
+        estado: ordenes.estado,
       })
       .from(ordenes)
       .where(eq(ordenes.id, data.ordenId))
@@ -328,6 +389,50 @@ export async function cobrarOrden(data: {
 
     if (!orden) {
       throw new Error("Orden no encontrada.");
+    }
+
+    // Descuento automático de Kardex de Insumos si la orden aún no había sido completada
+    if (orden.estado !== "completado" && orden.estado !== "cobrado") {
+      const serviciosOrden = await db
+        .select({ servicioId: ordenServicios.servicioId })
+        .from(ordenServicios)
+        .where(eq(ordenServicios.ordenId, data.ordenId));
+
+      const servicioIds = serviciosOrden.map((s) => s.servicioId);
+
+      if (servicioIds.length > 0) {
+        const recetas = await db
+          .select({
+            itemId: servicioRecetas.itemId,
+            cantidadConsumo: servicioRecetas.cantidadConsumo,
+          })
+          .from(servicioRecetas)
+          .where(inArray(servicioRecetas.servicioId, servicioIds));
+
+        await Promise.all(
+          recetas.map(async (receta) => {
+            const cantidad = parseFloat(receta.cantidadConsumo) || 0;
+            if (cantidad > 0) {
+              await db
+                .update(inventario)
+                .set({
+                  stock: sql`${inventario.stock} - ${cantidad}`,
+                  updatedAt: new Date(),
+                })
+                .where(eq(inventario.id, receta.itemId));
+
+              await db.insert(inventarioMovimientos).values({
+                itemId: receta.itemId,
+                tipo: "salida",
+                cantidad: receta.cantidadConsumo,
+                motivo: `Consumo automático por Cobro #${orden.nroTicket || data.ordenId.substring(0, 8).toUpperCase()}`,
+                usuarioId: cajeroId,
+              });
+            }
+          })
+        );
+        revalidateTag("inventario", { expire: 600 });
+      }
     }
 
     // Buscar cliente asociado al vehículo de la orden
@@ -423,6 +528,7 @@ export async function cobrarOrden(data: {
     revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/caja");
     revalidatePath("/ordenes");
+    revalidatePath("/patio");
     revalidatePath("/dashboard");
     revalidatePath("/clientes");
 

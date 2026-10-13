@@ -5,6 +5,7 @@ import {
   Printer,
   ArrowLeft,
   Download,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -15,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { registrarComprobanteSunat, getSiguienteCorrelativoComprobante } from "@/lib/actions/ordenes";
 import { TicketPreview } from "./components/TicketPreview";
 import { SunatControlPanel } from "./components/SunatControlPanel";
+import { getWhatsAppTicketUrl } from "@/lib/whatsapp";
 
 interface ServicioAsociado {
   id: string;
@@ -149,8 +151,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
   };
 
   const handlePrint = () => {
-    const query = hidePrices ? "?mode=work" : "";
-    window.open(`/api/pdf/ticket/${orden.id}${query}`, "_blank");
+    window.print();
   };
 
   useEffect(() => {
@@ -164,7 +165,7 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
 
       {/* ── Header Actions ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
@@ -172,23 +173,22 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
           <Link href="/ordenes" passHref>
             <Button
               variant="outline"
-              className="border-zinc-300 hover:bg-zinc-50 text-zinc-700 h-9 px-3 rounded-lg cursor-pointer animate-none"
+              className="border-border hover:bg-muted text-foreground h-9 px-3 rounded-lg cursor-pointer"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-zinc-900 flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-foreground flex items-center gap-2">
               Ticket de Servicio
             </h1>
-            <p className="text-xs text-zinc-500">
-              Imprime el ticket físico para el parabrisas del auto o registro
-              del cliente.
+            <p className="text-xs text-muted-foreground">
+              Imprime el ticket físico para el parabrisas del auto o registro del cliente.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 mr-2 bg-muted/45 border border-border px-3.5 py-1.5 rounded-xl h-10 select-none">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+          <div className="flex items-center gap-2 bg-muted/45 border border-border px-3.5 py-1.5 rounded-xl h-10 select-none">
             <Switch
               id="hide-prices-toggle"
               checked={hidePrices}
@@ -196,13 +196,37 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
               className="data-[state=checked]:bg-secondary focus-visible:ring-ring/40"
             />
             <Label htmlFor="hide-prices-toggle" className="text-xs font-bold text-foreground cursor-pointer select-none">
-              Ocultar precios (Personal)
+              Ocultar precios
             </Label>
           </div>
           <Button
+            onClick={() => {
+              if (!orden.clienteTelefono) {
+                toast.error("El cliente no tiene teléfono celular registrado");
+                return;
+              }
+              const url = getWhatsAppTicketUrl({
+                clienteNombre: orden.clienteNombre,
+                clienteTelefono: orden.clienteTelefono,
+                placa: orden.placa,
+                nroTicket: orden.nroTicket,
+                total: orden.total,
+                ordenId: orden.id,
+                sucursalNombre: sucursal?.nombre,
+              });
+              if (url) window.open(url, "_blank");
+            }}
+            variant="outline"
+            className="border-emerald-600/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 h-10 rounded-lg gap-2 cursor-pointer px-3.5 font-bold"
+            title="Enviar comprobante por WhatsApp"
+          >
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
+          </Button>
+          <Button
             onClick={() => window.open(`/api/pdf/ticket/${orden.id}${hidePrices ? "?mode=work" : ""}`, "_blank")}
             variant="outline"
-            className="border-zinc-300 hover:bg-zinc-50 text-zinc-700 h-10 rounded-lg gap-2 cursor-pointer px-4"
+            className="border-border hover:bg-muted text-foreground h-10 rounded-lg gap-2 cursor-pointer px-4"
           >
             <Download className="h-4 w-4" />
             PDF
@@ -220,25 +244,27 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
       {/* ── Ticket Preview & Control Panel ──────────────────────────────────── */}
       <div className="flex flex-col lg:flex-row justify-center items-start gap-8 p-6 bg-card rounded-3xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.05)] print:bg-transparent print:border-none print:shadow-none print:p-0 print:gap-0">
         {/* Ticket Preview */}
-      <TicketPreview
-        orden={orden}
-        sucursal={sucursal}
-        hidePrices={hidePrices}
-      />
-
-      {/* SUNAT Control Panel */}
-      {(orden.estado === "cobrado" || orden.estado === "completado") && (
-        <SunatControlPanel
-          tipo={tipo}
-          serie={serie}
-          numero={numero}
-          isPending={isPending}
-          onTipoChange={handleTipoChange}
-          onSerieChange={handleSerieChange}
-          onNumeroChange={(v) => setNumero(v.replace(/\D/g, "").slice(0, 8))}
-          onSave={handleSaveComprobante}
+        <TicketPreview
+          orden={orden}
+          sucursal={sucursal}
+          hidePrices={hidePrices}
         />
-      )}
+
+        {/* SUNAT Control Panel (Solo visible en pantalla, nunca en impresión) */}
+        {(orden.estado === "cobrado" || orden.estado === "completado") && (
+          <div className="print:hidden w-full max-w-md shrink-0" data-print="hidden">
+            <SunatControlPanel
+              tipo={tipo}
+              serie={serie}
+              numero={numero}
+              isPending={isPending}
+              onTipoChange={handleTipoChange}
+              onSerieChange={handleSerieChange}
+              onNumeroChange={(v) => setNumero(v.replace(/\D/g, "").slice(0, 8))}
+              onSave={handleSaveComprobante}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

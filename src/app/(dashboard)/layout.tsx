@@ -45,7 +45,7 @@ export default function DashboardLayout({
             <Header />
 
             {/* Content Page wrapper */}
-            <main className="flex-1 overflow-y-auto p-6">
+            <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6">
               <AmbientBackground />
               <div className="max-w-7xl mx-auto w-full transition-opacity duration-500">
                 <Suspense fallback={<PageSkeleton />}>

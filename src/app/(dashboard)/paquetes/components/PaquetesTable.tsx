@@ -32,7 +32,7 @@ export function PaquetesTable({
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
       <Table>
-        <TableHeader className="bg-muted/20 dark:bg-muted/10">
+        <TableHeader className="bg-muted/40">
           <TableRow className="border-b border-border/80 hover:bg-transparent">
             <TableHead className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground h-11">
               Paquete

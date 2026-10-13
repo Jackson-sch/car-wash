@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { Wallet } from "lucide-react";
 import { abrirTurnoCaja } from "@/lib/actions/caja";
+import { notifyCajaStatusChanged } from "@/lib/events/caja-events";
 import { toast } from "sonner";
 import { CajaCerrada } from "./components/CajaCerrada";
 import { CajaAbierta } from "./components/CajaAbierta";
@@ -51,6 +52,11 @@ export function CajaClient({ turnoActivo, initialHistorial }: CajaClientProps) {
   const historial = initialHistorial;
   const [isPending, startTransition] = useTransition();
 
+  // Sincronizar el estado de caja con el Header cada vez que se carga la página o cambia de turno
+  useEffect(() => {
+    notifyCajaStatusChanged();
+  }, [turnoActivo]);
+
   // Acción: Abrir Caja
   const handleAbrirCaja = async (monto: string) => {
     return new Promise<void>((resolve) => {
@@ -58,6 +64,7 @@ export function CajaClient({ turnoActivo, initialHistorial }: CajaClientProps) {
         const res = await abrirTurnoCaja(monto);
         if (res.success && res.data) {
           toast.success("Caja abierta con éxito");
+          notifyCajaStatusChanged();
           window.location.reload();
         } else {
           toast.error(res.error || "Ocurrió un error");
@@ -68,7 +75,7 @@ export function CajaClient({ turnoActivo, initialHistorial }: CajaClientProps) {
   };
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">

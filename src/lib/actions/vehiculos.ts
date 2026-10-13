@@ -38,13 +38,13 @@ export async function getVehiculos(search?: string) {
         clienteNombre: clientes.nombre,
         clienteApellido: clientes.apellido,
         clienteTelefono: clientes.telefono,
-        totalOrdenes: sql<number>`
-          (SELECT COUNT(*)::int FROM ${ordenes} WHERE ${ordenes.vehiculoId} = ${vehiculos.id})
-        `,
+        totalOrdenes: sql<number>`COALESCE(COUNT(${ordenes.id}), 0)::int`,
       })
       .from(vehiculos)
       .innerJoin(clientes, eq(vehiculos.clienteId, clientes.id))
+      .leftJoin(ordenes, eq(ordenes.vehiculoId, vehiculos.id))
       .where(conditions)
+      .groupBy(vehiculos.id, clientes.id)
       .orderBy(desc(vehiculos.createdAt));
 
     return rows;

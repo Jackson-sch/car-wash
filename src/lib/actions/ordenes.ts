@@ -45,6 +45,7 @@ export async function getOrdenes() {
         vehiculoTipo: vehiculos.tipo,
         clienteNombre: clientes.nombre,
         clienteApellido: clientes.apellido,
+        clienteTelefono: clientes.telefono,
         lavadorNombre: usuarios.nombre,
         lavadorApellido: usuarios.apellido,
         comprobanteTipo: ordenes.comprobanteTipo,
@@ -374,6 +375,7 @@ export async function createOrden(data: {
 
     revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/ordenes");
+    revalidatePath("/patio");
     revalidatePath("/dashboard");
     return { success: true, data: newOrden };
   } catch (error: unknown) {
@@ -484,6 +486,7 @@ export async function updateOrdenEstado(id: string, nuevoEstado: "pendiente" | "
     revalidateTag("dashboard", { expire: 0 });
     revalidateTag("ordenes", { expire: 0 });
     revalidatePath("/ordenes");
+    revalidatePath("/patio");
     revalidatePath("/kiosco");
     revalidatePath("/caja");
     revalidatePath("/inventario");
@@ -530,6 +533,7 @@ export async function asignarLavadorAOrden(id: string, empleadoId: string | null
 
     revalidateTag("dashboard", { expire: 300 });
     revalidatePath("/ordenes");
+    revalidatePath("/patio");
     return { success: true, data: updated };
   } catch (error: unknown) {
     console.error("Error al asignar lavador:", error);

@@ -420,6 +420,7 @@ async function _getCachedServicios(sucursalId: string) {
       activo: servicios.activo,
       categoriaId: servicios.categoriaId,
       categoriaNombre: categoriasServicio.nombre,
+      totalInsumosReceta: sql<number>`coalesce((select count(*) from servicio_recetas where servicio_recetas.servicio_id = ${servicios.id}), 0)::int`,
     })
     .from(servicios)
     .leftJoin(categoriasServicio, eq(servicios.categoriaId, categoriasServicio.id))

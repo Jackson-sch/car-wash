@@ -87,7 +87,7 @@ export function PaginationControls({
     if (showInfo && totalItems !== undefined && totalItems > 0) {
       return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
-          <span className="text-xs text-zinc-500 font-medium">
+          <span className="text-xs text-muted-foreground font-medium">
             Mostrando 1–{totalItems} de {totalItems} registros
           </span>
         </div>
@@ -99,7 +99,7 @@ export function PaginationControls({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
       {showInfo && totalItems !== undefined && itemsPerPage && (
-        <span className="text-xs text-zinc-500 font-medium">
+        <span className="text-xs text-muted-foreground font-medium">
           Mostrando {(activePage - 1) * itemsPerPage + 1}–
           {Math.min(activePage * itemsPerPage, totalItems)} de {totalItems} registros
         </span>

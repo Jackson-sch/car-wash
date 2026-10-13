@@ -101,8 +101,8 @@ export function TurnoCierreDetailSheet({ selectedTurno, onClose }: TurnoCierreDe
                 </h3>
                 <div className="border border-border rounded-xl overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-muted/10 text-[10px]">
-                      <TableRow className="border-b-border">
+                    <TableHeader className="bg-muted/40 text-[10px]">
+                      <TableRow className="border-b border-border hover:bg-transparent">
                         <TableHead className="py-2 pl-3">Método</TableHead>
                         <TableHead className="py-2 text-right">Esperado</TableHead>
                         <TableHead className="py-2 text-right">Declarado</TableHead>
@@ -111,7 +111,7 @@ export function TurnoCierreDetailSheet({ selectedTurno, onClose }: TurnoCierreDe
                     </TableHeader>
                     <TableBody className="text-[11px] font-medium text-foreground">
                       {parsedDetails.metodos.map((m: MetodoPagoConciliacion) => (
-                        <TableRow key={m.nombre} className="border-b-border/40">
+                        <TableRow key={m.nombre} className="border-b border-border/40 hover:bg-muted/30 transition-colors">
                           <TableCell className="py-2 pl-3 font-semibold text-muted-foreground">
                             {m.nombre}
                           </TableCell>

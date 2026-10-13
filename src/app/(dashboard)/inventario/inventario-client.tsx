@@ -99,6 +99,30 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
     });
   };
 
+  const handleQuickAdjust = (item: Insumo, tipo: "entrada" | "salida", delta: number) => {
+    startTransition(async () => {
+      const res = await registrarMovimientoStock({
+        itemId: item.id,
+        tipo,
+        cantidad: delta.toFixed(3),
+        motivo: tipo === "entrada" ? "Ingreso rápido (+1)" : "Despacho rápido (-1)",
+      });
+
+      if (res.success && res.data) {
+        toast.success(
+          tipo === "entrada"
+            ? `+${delta} ${item.unidad || "uds"} agregado a ${item.nombre}`
+            : `-${delta} ${item.unidad || "uds"} descontado de ${item.nombre}`
+        );
+        setInventarioList((prev) =>
+          prev.map((i) => (i.id === item.id ? (res.data as Insumo) : i))
+        );
+      } else {
+        toast.error(res.error || "No se pudo actualizar el stock");
+      }
+    });
+  };
+
   const totalItems = inventarioList.length;
 
   const lowStockItems = inventarioList.filter((item) => {
@@ -113,7 +137,7 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
   }).length;
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -246,7 +270,11 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
       </div>
 
       {/* Inventory Table */}
-      <InventarioTable insumos={inventarioList} onAdjustStock={handleOpenAjuste} />
+      <InventarioTable
+        insumos={inventarioList}
+        onAdjustStock={handleOpenAjuste}
+        onQuickAdjust={handleQuickAdjust}
+      />
 
       {/* Modals */}
       <CrearInsumoModal

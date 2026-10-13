@@ -52,7 +52,7 @@ export function useOrdenesColumns({
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="hover:bg-muted/50 dark:hover:bg-muted/50 font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+          className="hover:bg-transparent font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           Ticket
           <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
@@ -105,7 +105,7 @@ export function useOrdenesColumns({
                 className="text-[9px] text-muted-foreground font-medium flex items-center gap-1 mt-0.5"
                 suppressHydrationWarning
               >
-                <Clock className="size-2.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
+                <Clock className="size-2.5 shrink-0 text-muted-foreground" />
                 {formatTime(ord.createdAt)}
               </span>
             )}
@@ -117,10 +117,12 @@ export function useOrdenesColumns({
       accessorKey: "placa",
       header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Placa</span>,
       cell: ({ row }) => (
-        <div className="inline-flex w-16 items-center bg-muted/65 dark:bg-muted/40 border border-border rounded px-1.5 py-0.5 shadow-2xs select-none font-mono">
-          <div className="h-1 w-1 rounded-full bg-zinc-400 dark:bg-zinc-650 mr-1 shadow-2xs" />
-          <span className="text-[10px] font-bold text-foreground  uppercase">
-            {row.getValue("placa")}
+        <div className="inline-flex flex-col items-center justify-center bg-zinc-900 border border-zinc-700/80 rounded px-2 py-0.5 shadow-2xs select-all font-mono min-w-[70px]">
+          <span className="text-[6px] uppercase font-bold text-zinc-400 tracking-widest leading-none">
+            PERÚ
+          </span>
+          <span className="text-[11px] font-black text-zinc-100 tracking-wider leading-none mt-0.5 uppercase">
+            {String(row.getValue("placa") || "")}
           </span>
         </div>
       ),
@@ -137,11 +139,11 @@ export function useOrdenesColumns({
           
         const getVehicleIcon = (tipo: string | null) => {
           switch (tipo) {
-            case "suv": return <CarFront className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />;
-            case "pickup": case "camion": case "furgon": return <Truck className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />;
-            case "moto": return <Bike className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />;
-            case "otro": return <Sparkles className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />;
-            default: return <Car className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />;
+            case "suv": return <CarFront className="h-3 w-3 text-muted-foreground shrink-0" />;
+            case "pickup": case "camion": case "furgon": return <Truck className="h-3 w-3 text-muted-foreground shrink-0" />;
+            case "moto": return <Bike className="h-3 w-3 text-muted-foreground shrink-0" />;
+            case "otro": return <Sparkles className="h-3 w-3 text-muted-foreground shrink-0" />;
+            default: return <Car className="h-3 w-3 text-muted-foreground shrink-0" />;
           }
         };
         
@@ -159,7 +161,7 @@ export function useOrdenesColumns({
                 <span className="truncate max-w-36.25">
                   {ord.vehiculoMarca} {ord.vehiculoModelo}
                   {ord.vehiculoTipo && (
-                    <span className="text-zinc-450 dark:text-zinc-500 font-normal ml-0.5">
+                    <span className="text-muted-foreground font-normal ml-0.5">
                       ({ord.vehiculoTipo})
                     </span>
                   )}
@@ -181,7 +183,7 @@ export function useOrdenesColumns({
               Detalle en ticket
             </span>
             {ord.notas && (
-              <span className="text-[8.5px] text-zinc-550 dark:text-zinc-400 italic truncate max-w-32.5" title={ord.notas}>
+              <span className="text-[8.5px] text-muted-foreground italic truncate max-w-32.5" title={ord.notas}>
                 Nota: {ord.notas}
               </span>
             )}
@@ -208,7 +210,7 @@ export function useOrdenesColumns({
             onValueChange={(val: string | null) => onAssignLavador(ord.id, !val || val === "unassigned" ? null : val)}
           >
             <SelectTrigger 
-              className={`rounded-lg text-[10px] h-7 px-2.5 select-none transition-colors duration-150 outline-none w-52 shrink-0 ${
+              className={`rounded-lg text-[11px] h-8 px-2.5 select-none transition-colors duration-150 outline-none w-52 shrink-0 ${
                 isUnassigned
                   ? "border border-dashed border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 hover:border-amber-500/60"
                   : "border border-border bg-card/60 hover:bg-card/90 text-foreground hover:border-zinc-400 dark:hover:border-zinc-650"
@@ -218,7 +220,7 @@ export function useOrdenesColumns({
                 {(val) => {
                   if (!val || val === "unassigned") return (
                     <span className="flex items-center gap-1.5 font-semibold text-amber-600 dark:text-amber-400 min-w-0">
-                      <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
                       <span className="truncate">Sin Asignar</span>
                     </span>
                   );
@@ -226,7 +228,7 @@ export function useOrdenesColumns({
                   const nombreCompleto = lavador ? `${lavador.nombre} ${lavador.apellido || ""}` : val;
                   return (
                     <span className="flex items-center gap-1.5 font-medium text-foreground min-w-0">
-                      <User className="h-3 w-3 text-zinc-400 dark:text-zinc-500 shrink-0" />
+                      <User className="h-3 w-3 text-muted-foreground shrink-0" />
                       <span className="truncate">{nombreCompleto}</span>
                     </span>
                   );
@@ -305,7 +307,7 @@ export function useOrdenesColumns({
               onValueChange={(val: string | null) => val && onStatusChange(ord.id, val as Orden["estado"])}
             >
               <SelectTrigger
-                className={`text-[10px] font-extrabold h-7 rounded-full px-2.5 border outline-none cursor-pointer w-28 justify-between select-none shadow-xs transition-colors duration-200 shrink-0 ${config.style}`}
+                className={`text-[10.5px] font-extrabold h-8 rounded-full px-2.5 border outline-none cursor-pointer w-28 justify-between select-none shadow-xs transition-colors duration-200 shrink-0 ${config.style}`}
               >
                 <span className="flex items-center gap-1 min-w-0">
                   {config.icon}
@@ -317,7 +319,7 @@ export function useOrdenesColumns({
                   <>
                     <SelectItem value="cobrado" className="text-[10px]">
                       <span className="flex items-center gap-2">
-                        <BadgeCheck className="h-3.5 w-3.5 text-zinc-500" />
+                        <BadgeCheck className="h-3.5 w-3.5 text-muted-foreground" />
                         <span>Cobrado</span>
                       </span>
                     </SelectItem>
@@ -357,7 +359,7 @@ export function useOrdenesColumns({
                     </SelectItem>
                     <SelectItem value="cobrado" className="text-[10px]">
                       <span className="flex items-center gap-2">
-                        <BadgeCheck className="h-3.5 w-3.5 text-zinc-500" />
+                        <BadgeCheck className="h-3.5 w-3.5 text-muted-foreground" />
                         <span>Cobrado</span>
                       </span>
                     </SelectItem>
@@ -382,7 +384,7 @@ export function useOrdenesColumns({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="hover:bg-muted/50 dark:hover:bg-muted/50 font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+            className="hover:bg-transparent font-bold p-0 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
             Total
             <ArrowUpDown className="ml-1 h-3 w-3 text-muted-foreground" />
@@ -409,13 +411,13 @@ export function useOrdenesColumns({
                   variant="outline"
                   size="icon"
                   title={ord.comprobanteTipo ? "Ver Comprobante SUNAT registrado" : "Registrar Comprobante SUNAT"}
-                  className={`h-7 w-7 cursor-pointer shadow-xs rounded-lg transition-colors border ${
+                  className={`size-8 cursor-pointer shadow-xs rounded-lg transition-colors border ${
                     ord.comprobanteTipo
                       ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-emerald-500/5 hover:bg-emerald-500/15 border-emerald-500/30 hover:border-emerald-500/50"
                       : "text-amber-500 dark:text-amber-400 hover:text-amber-600 bg-amber-500/5 hover:bg-amber-500/15 border-amber-500/30 hover:border-amber-500/50 animate-pulse"
                   }`}
                 >
-                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <ShieldCheck className="h-4 w-4" />
                 </Button>
               </Link>
             )}
@@ -424,9 +426,9 @@ export function useOrdenesColumns({
                 variant="outline"
                 size="icon"
                 title="Ver detalle / Emitir Comprobante"
-                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-colors"
+                className="size-8 text-foreground hover:bg-muted/80 border-border cursor-pointer shadow-xs rounded-lg transition-colors"
               >
-                <Eye className="h-3.5 w-3.5" />
+                <Eye className="h-4 w-4" />
               </Button>
             </Link>
 
@@ -437,9 +439,9 @@ export function useOrdenesColumns({
                     variant="outline"
                     size="icon"
                     title="Imprimir ticket..."
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted border-border hover:border-zinc-400 dark:hover:border-zinc-650 cursor-pointer shadow-xs rounded-lg transition-colors"
+                    className="size-8 text-foreground hover:bg-muted/80 border-border cursor-pointer shadow-xs rounded-lg transition-colors"
                   >
-                    <Printer className="h-3.5 w-3.5" />
+                    <Printer className="h-4 w-4" />
                   </Button>
                 }
               />

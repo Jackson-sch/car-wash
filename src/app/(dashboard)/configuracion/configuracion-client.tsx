@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { useQueryState, parseAsString } from "nuqs";
-import { Settings, Building, Car, Gift, Database } from "lucide-react";
+import { Settings, Building, Car, Gift, Database, Printer } from "lucide-react";
 import Link from "next/link";
 import { updateSucursalInfo, updateSucursalConfigJSON } from "@/lib/actions/configuracion";
 import { toast } from "sonner";
@@ -10,6 +10,8 @@ import { GeneralPanel } from "./components/GeneralPanel";
 import { PreciosPanel } from "./components/PreciosPanel";
 import { LealtadPanel } from "./components/LealtadPanel";
 import { BackupPanel } from "./components/BackupPanel";
+import { ImpresoraPanel } from "./components/ImpresoraPanel";
+import type { ImpresoraConfig } from "./components/impresora-types";
 
 interface Sucursal {
   id: string;
@@ -28,6 +30,7 @@ interface SucursalConfig {
     puntosPorSol?: number;
     solesPorPunto?: number;
   };
+  impresora?: ImpresoraConfig;
   [key: string]: unknown;
 }
 
@@ -102,12 +105,33 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
     });
   };
 
+  const handleSaveImpresoraConfig = async (impresoraConfig: ImpresoraConfig) => {
+    return new Promise<void>((resolve) => {
+      startTransition(async () => {
+        const res = await updateSucursalConfigJSON({ impresora: impresoraConfig });
+        if (res.success && res.data) {
+          toast.success("Configuración de impresora térmica guardada");
+          setSucursal((prev) => ({ ...prev, ...res.data }));
+        } else {
+          toast.error(res.error || "Ocurrió un error al guardar");
+        }
+        resolve();
+      });
+    });
+  };
+
   const tabs = useMemo(() => [
     {
       id: "general" as const,
       label: "General Sucursal",
       description: "Datos de la sucursal y contacto",
       icon: Building,
+    },
+    {
+      id: "impresora" as const,
+      label: "Impresora de Tickets",
+      description: "Calibración térmica 80mm / 58mm",
+      icon: Printer,
     },
     {
       id: "precios" as const,
@@ -137,7 +161,7 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
   ], []);
 
   return (
-    <div className="space-y-8 text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
@@ -213,6 +237,14 @@ export function ConfiguracionClient({ initialSucursal }: ConfiguracionClientProp
           <div className="transition-opacity duration-300">
             {activeTab === "general" && (
               <GeneralPanel sucursal={sucursal} isPending={isPending} onSave={handleSaveInfo} />
+            )}
+
+            {activeTab === "impresora" && (
+              <ImpresoraPanel
+                initialConfig={config.impresora}
+                isPending={isPending}
+                onSave={handleSaveImpresoraConfig}
+              />
             )}
 
             {activeTab === "precios" && (

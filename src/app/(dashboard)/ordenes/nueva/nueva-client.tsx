@@ -31,7 +31,7 @@ export function NuevaOrdenClient({
   const o = useNuevaOrden({ servicios, sucursalConfig, cajaAbierta });
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto text-foreground">
+    <div className="space-y-5 sm:space-y-6 md:space-y-8 max-w-6xl mx-auto text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -60,23 +60,26 @@ export function NuevaOrdenClient({
 
       {/* Alerta de Caja Cerrada */}
       {!cajaAbierta && (
-        <div className="flex items-start gap-3.5 p-4.5 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-2xl text-red-700 dark:text-red-400">
-          <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-red-500 animate-pulse" />
-          <div className="text-xs space-y-1.5">
-            <h4 className="font-black text-sm leading-none flex items-center gap-1.5">
-              Control de Caja Requerido
-            </h4>
-            <p className="font-semibold text-zinc-600 dark:text-zinc-400 leading-normal">
-              No es posible registrar nuevas órdenes de servicio en este momento porque el turno de caja de la sucursal se encuentra cerrado. Para habilitar el registro, debe realizar la apertura correspondiente.
-            </p>
-            <div className="pt-1">
-              <Link href="/caja" passHref>
-                <Button size="sm" variant="destructive" className="font-bold text-[10px] uppercase tracking-wider h-7 px-3.5 rounded-lg cursor-pointer bg-red-600 hover:bg-red-700 text-white shadow-xs border-0">
-                  Ir a Apertura de Caja
-                </Button>
-              </Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-amber-500/10 dark:bg-amber-500/10 border border-amber-500/25 rounded-xl text-foreground shadow-xs">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div>
+              <h4 className="font-bold text-sm leading-tight text-foreground">
+                Turno de Caja Cerrado
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Para confirmar y cobrar órdenes de servicio, la sucursal debe tener un turno activo.
+              </p>
             </div>
           </div>
+          <Link href="/caja" passHref className="shrink-0">
+            <Button
+              size="sm"
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-9 px-4 rounded-lg cursor-pointer shadow-xs border-0 w-full sm:w-auto"
+            >
+              Abrir Caja Ahora
+            </Button>
+          </Link>
         </div>
       )}
 
@@ -141,14 +144,14 @@ export function NuevaOrdenClient({
           />
         )}
 
-        {/* Form Footer Buttons */}
-        <div className="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800/30 pt-4 mt-8">
-          <div className="flex items-center gap-2.5">
+        {/* Sticky Action Footer Buttons */}
+        <div className="sticky bottom-0 z-30 bg-background/95 backdrop-blur-md border-t border-border py-3.5 sm:py-4 mt-6 -mx-3 px-3 sm:-mx-6 sm:px-6 flex items-center justify-between rounded-b-2xl shadow-lg shadow-black/5">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/ordenes" passHref>
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs font-bold h-9 gap-1.5 cursor-pointer"
+                className="text-xs sm:text-sm font-bold h-10 px-3.5 sm:px-4 rounded-xl gap-1.5 cursor-pointer text-foreground hover:bg-muted/80 hover:text-foreground border-border shadow-2xs"
               >
                 <X className="size-4" />
                 Cancelar
@@ -160,7 +163,7 @@ export function NuevaOrdenClient({
                 type="button"
                 variant="outline"
                 onClick={() => o.setStep(o.step - 1)}
-                className="text-xs font-bold h-9 gap-1.5 cursor-pointer"
+                className="text-xs sm:text-sm font-bold h-10 px-3.5 sm:px-4 rounded-xl gap-1.5 cursor-pointer text-foreground hover:bg-muted/80 hover:text-foreground border-border shadow-2xs"
               >
                 <ArrowLeft className="size-4" />
                 Atrás
@@ -168,7 +171,10 @@ export function NuevaOrdenClient({
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-block text-xs text-muted-foreground font-semibold">
+              Paso {o.step} de 3
+            </span>
             {o.step < 3 ? (
               <Button
                 type="button"
@@ -189,7 +195,7 @@ export function NuevaOrdenClient({
                 }}
                 disabled={!cajaAbierta}
                 variant="secondary"
-                className="text-white font-bold text-xs h-9 rounded-lg gap-1.5 cursor-pointer px-5"
+                className="font-black text-xs sm:text-sm h-10 sm:h-11 rounded-xl gap-2 cursor-pointer px-6 shadow-sm shadow-secondary/15 active:scale-95 transition-transform"
               >
                 Siguiente
                 <ArrowRight className="size-4" />
@@ -200,7 +206,7 @@ export function NuevaOrdenClient({
                 onClick={o.handleSubmit}
                 disabled={o.isPending || !cajaAbierta}
                 variant="secondary"
-                className="font-bold text-xs h-9 rounded-lg gap-2 cursor-pointer px-6"
+                className="font-black text-xs sm:text-sm h-10 sm:h-11 rounded-xl gap-2 cursor-pointer px-7 shadow-md shadow-secondary/20 active:scale-95 transition-transform"
               >
                 {o.isPending ? "Registrando..." : "Registrar Orden"}
               </Button>

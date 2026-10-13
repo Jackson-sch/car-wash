@@ -147,165 +147,189 @@ function ServicioFormContent({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-200 p-4">
-      <div className="bg-card border border-border w-full max-w-lg rounded-xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-200 p-3 sm:p-4 md:p-6">
+      <div className="bg-card border border-border w-full max-w-3xl rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] text-foreground">
         {/* Header */}
-        <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/30 shrink-0">
           <div>
-            <h3 className="text-base font-bold text-zinc-900">
+            <h3 className="text-base font-bold text-foreground">
               {servicio ? "Editar Servicio" : "Agregar Nuevo Servicio"}
             </h3>
-            <p className="text-xs text-zinc-500 mt-1">
-              Completa los detalles del servicio a ofrecer.
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Configura los detalles del servicio y los tipos de vehículos admitidos.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 flex items-center justify-center transition-colors"
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nombre" className="text-xs font-bold text-zinc-650">
-              Nombre del Servicio *
-            </Label>
-            <Input
-              id="nombre"
-              placeholder="Ej. Lavado Premium, Detallado de Motor..."
-              value={nombre}
-              onChange={(e) => sf("nombre", e.target.value)}
-              required
-              className="bg-card border-zinc-300 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="precio" className="text-xs font-bold text-zinc-650">
-                Precio (S/) *
-              </Label>
-              <Input
-                id="precio"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                value={precio}
-                onChange={(e) => sf("precio", e.target.value)}
-                required
-                className="bg-card border-zinc-300 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="duracion" className="text-xs font-bold text-zinc-650">
-                Duración (minutos)
-              </Label>
-              <Input
-                id="duracion"
-                type="number"
-                placeholder="30"
-                value={duracionMin}
-                onChange={(e) => sf("duracionMin", e.target.value)}
-                className="bg-card border-zinc-300 focus:border-secondary text-xs h-9 rounded-lg text-zinc-900"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="categoria" className="text-xs font-bold text-zinc-650">
-                Categoría
-              </Label>
-              <button
-                type="button"
-                onClick={onOpenNewCategoria}
-                className="text-[10px] text-secondary hover:text-[#004c6e] font-bold flex items-center gap-1 cursor-pointer"
-              >
-                <Plus className="h-3 w-3" />
-                Nueva Categoría
-              </button>
-            </div>
-            <Select
-              value={categoriaId || "unassigned"}
-              onValueChange={(val: string | null) => sf("categoriaId", !val || val === "unassigned" ? "" : val)}
-            >
-              <SelectTrigger id="categoria" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-9 px-3">
-                <SelectValue placeholder="Selecciona una categoría">
-                  {(val) => {
-                    if (!val || val === "unassigned") return "Selecciona una categoría";
-                    const cat = categorias.find((c) => c.id === val);
-                    return cat ? cat.nombre : val;
-                  }}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="w-full bg-card text-card-foreground border border-border">
-                <SelectItem value="unassigned">Selecciona una categoría</SelectItem>
-                {categorias.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="descripcion" className="text-xs font-bold text-zinc-650">
-              Descripción / Detalles
-            </Label>
-            <textarea
-              id="descripcion"
-              placeholder="Describe las tareas incluidas en el servicio..."
-              value={descripcion}
-              onChange={(e) => sf("descripcion", e.target.value)}
-              rows={3}
-              className="w-full bg-card border border-zinc-300 focus:border-secondary rounded-lg text-xs p-3 text-zinc-800 outline-none resize-none"
-            />
-          </div>
-
-          {/* Compatible Vehicles Checklist */}
-          <div className="space-y-2">
-            <Label className="text-xs font-bold text-zinc-650">
-              Tipos de Vehículos Compatibles
-            </Label>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 bg-zinc-50 p-3 rounded-lg border border-zinc-200">
-              {VEHICULO_OPCIONES.map((v) => (
-                <label
-                  key={v.id}
-                  className="flex items-center gap-2 text-[10px] text-zinc-700 cursor-pointer select-none"
-                >
-                  <input
-                    type="checkbox"
-                    checked={aplicaA.includes(v.id)}
-                    onChange={() => handleVehiculoToggle(v.id)}
-                    className="rounded border-zinc-300 text-secondary focus:ring-0 h-3.5 w-3.5 bg-card"
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div className="overflow-y-auto p-5 sm:p-6 flex-1 space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+              {/* Columna 1: Información básica del servicio */}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="nombre" className="text-xs font-bold text-muted-foreground">
+                    Nombre del Servicio *
+                  </Label>
+                  <Input
+                    id="nombre"
+                    placeholder="Ej. Lavado Premium, Detallado de Motor..."
+                    value={nombre}
+                    onChange={(e) => sf("nombre", e.target.value)}
+                    required
+                    className="bg-background border-border focus:border-secondary text-xs h-9.5 rounded-lg text-foreground"
                   />
-                  <span>{v.label}</span>
-                </label>
-              ))}
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="categoria" className="text-xs font-bold text-muted-foreground">
+                      Categoría
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={onOpenNewCategoria}
+                      className="text-[11px] text-secondary hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Nueva Categoría
+                    </button>
+                  </div>
+                  <Select
+                    value={categoriaId || "unassigned"}
+                    onValueChange={(val: string | null) => sf("categoriaId", !val || val === "unassigned" ? "" : val)}
+                  >
+                    <SelectTrigger id="categoria" className="w-full bg-background border-border text-foreground rounded-lg text-xs h-9.5 px-3">
+                      <SelectValue placeholder="Selecciona una categoría">
+                        {(val) => {
+                          if (!val || val === "unassigned") return "Selecciona una categoría";
+                          const cat = categorias.find((c) => c.id === val);
+                          return cat ? cat.nombre : val;
+                        }}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="w-full bg-card text-card-foreground border border-border">
+                      <SelectItem value="unassigned">Selecciona una categoría</SelectItem>
+                      {categorias.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="precio" className="text-xs font-bold text-muted-foreground">
+                      Precio (S/) *
+                    </Label>
+                    <Input
+                      id="precio"
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={precio}
+                      onChange={(e) => sf("precio", e.target.value)}
+                      required
+                      className="bg-background border-border focus:border-secondary text-xs h-9.5 rounded-lg text-foreground font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="duracion" className="text-xs font-bold text-muted-foreground">
+                      Duración (min)
+                    </Label>
+                    <Input
+                      id="duracion"
+                      type="number"
+                      placeholder="30"
+                      value={duracionMin}
+                      onChange={(e) => sf("duracionMin", e.target.value)}
+                      className="bg-background border-border focus:border-secondary text-xs h-9.5 rounded-lg text-foreground font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="descripcion" className="text-xs font-bold text-muted-foreground">
+                    Descripción / Detalles
+                  </Label>
+                  <textarea
+                    id="descripcion"
+                    placeholder="Describe las tareas incluidas en el servicio..."
+                    value={descripcion}
+                    onChange={(e) => sf("descripcion", e.target.value)}
+                    rows={3}
+                    className="w-full bg-background border border-border focus:border-secondary rounded-lg text-xs p-3 text-foreground outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Columna 2: Vehículos Compatibles */}
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold text-muted-foreground">
+                    Tipos de Vehículos Compatibles
+                  </Label>
+                  <span className="text-[11px] font-semibold text-secondary">
+                    {aplicaA.length} seleccionado{aplicaA.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground">
+                  Indica qué tipos de carrocería pueden recibir este servicio en el punto de venta.
+                </p>
+
+                <div className="grid grid-cols-2 gap-2.5 bg-muted/20 p-3.5 rounded-xl border border-border flex-1 content-start">
+                  {VEHICULO_OPCIONES.map((v) => {
+                    const isSelected = aplicaA.includes(v.id);
+                    return (
+                      <label
+                        key={v.id}
+                        className={`flex items-center gap-2.5 p-2 rounded-lg border text-xs font-medium cursor-pointer select-none transition-colors ${
+                          isSelected
+                            ? "bg-secondary/10 border-secondary/40 text-foreground font-semibold"
+                            : "bg-background border-border/70 text-muted-foreground hover:border-border hover:text-foreground"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleVehiculoToggle(v.id)}
+                          className="rounded border-border text-secondary focus:ring-0 h-4 w-4 bg-background cursor-pointer"
+                        />
+                        <span>{v.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 border-t border-zinc-200 pt-4 mt-6">
+          {/* Sticky Actions Footer */}
+          <div className="p-4 sm:px-6 border-t border-border bg-muted/30 flex items-center justify-end gap-3 shrink-0">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="text-xs font-bold text-zinc-550 hover:text-zinc-800"
+              className="text-xs font-bold text-muted-foreground hover:text-foreground"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="font-bold text-xs h-9 rounded-lg px-5 shadow-sm cursor-pointer"
+              className="font-bold text-xs h-9 rounded-lg px-6 shadow-sm cursor-pointer"
             >
               {isPending ? "Guardando..." : "Guardar Servicio"}
             </Button>

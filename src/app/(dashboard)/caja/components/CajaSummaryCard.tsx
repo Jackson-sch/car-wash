@@ -142,7 +142,7 @@ export function CajaSummaryCard({ turno }: CajaSummaryCardProps) {
           type="button"
           onClick={() => setShowEgresoModal(true)}
           variant="outline"
-          className="w-full font-bold text-xs h-9 gap-1.5 cursor-pointer border-red-500/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+          className="w-full font-bold text-xs h-9 gap-1.5 cursor-pointer border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/10 hover:text-red-700 dark:hover:text-red-300"
         >
           <PlusCircle className="size-4 text-red-500" />
           Registrar Egreso (Salida de Dinero)
