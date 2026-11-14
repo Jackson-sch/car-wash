@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { es } from "date-fns/locale";
 import { Clock } from "lucide-react";
@@ -9,13 +9,18 @@ interface TimeElapsedProps {
   createdAt: Date | null;
 }
 
+const emptySubscribe = () => () => {};
+
 export function TimeElapsed({ createdAt }: TimeElapsedProps) {
-  const [mounted, setMounted] = useState(false);
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [elapsed, setElapsed] = useState("");
   const [minutes, setMinutes] = useState(0);
 
   useEffect(() => {
-    setMounted(true);
     if (!createdAt) return;
     
     const updateTime = () => {
@@ -29,9 +34,9 @@ export function TimeElapsed({ createdAt }: TimeElapsedProps) {
     return () => clearInterval(interval);
   }, [createdAt]);
 
-  if (!mounted || !createdAt) {
+  if (!isClient || !createdAt) {
     return (
-      <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border border-border/40 bg-muted/20 text-muted-foreground/50 shrink-0">
+      <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2 py-0.5 rounded-full border border-border bg-muted/60 text-muted-foreground shrink-0">
         <Clock className="size-3" />
         <span>--</span>
       </div>

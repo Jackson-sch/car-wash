@@ -241,7 +241,7 @@ export async function GET(
 <body>
   ${renderSlip(copias === 2 ? "COPIA CLIENTE" : "")}
   ${copias === 2 ? `
-    <div class="cut-guide">✂ - - - CORTE DE PAPEL / GUILLOTINA - - - ✂</div>
+    <div class="cut-guide">- - - - - CORTE DE PAPEL / GUILLOTINA - - - - -</div>
     ${renderSlip(copiaLavador ? "COPIA LAVADOR / PARABRISAS" : "COPIA ARCHIVO INTERNO", copiaLavador)}
   ` : ""}
 

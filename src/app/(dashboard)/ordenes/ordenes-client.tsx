@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { useQueryState, parseAsInteger, parseAsString } from "nuqs";
 import { updateOrdenEstado, asignarLavadorAOrden } from "@/lib/actions/ordenes";
 import { cobrarOrden } from "@/lib/actions/caja";
 import { useOrdenesRealtime, broadcastOrdenEvent } from "./hooks/useOrdenesRealtime";
+import { useBandejaShortcuts } from "./hooks/useBandejaShortcuts";
 import { toast } from "sonner";
 import { OrdenesToolbar } from "./components/OrdenesToolbar";
+import { BandejaShortcutsDock } from "./components/BandejaShortcutsDock";
 import { OrdenesKpiCards } from "./components/OrdenesKpiCards";
 import { StaffAvailabilityCard } from "./components/StaffAvailabilityCard";
 import dynamic from "next/dynamic";
@@ -22,7 +24,7 @@ import { OrdenesTable } from "./components/OrdenesTable";
 import { OrdenesBoard } from "./components/OrdenesBoard";
 import type { PaymentMethod } from "./components/CobrarModal";
 import { CobrarModal } from "./components/CobrarModal";
-import { getWhatsAppTicketUrl } from "@/lib/whatsapp";
+import { CobroExitosoDialog, type CobroExitosoData } from "./components/CobroExitosoDialog";
 
 interface SucursalInfo {
   id: string;
@@ -67,9 +69,47 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta, sucursal
 
   const [isPending, startTransition] = useTransition();
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Estados para cobro de orden
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [payingOrden, setPayingOrden] = useState<Orden | null>(null);
+  const [cobroExitosoData, setCobroExitosoData] = useState<CobroExitosoData | null>(null);
+  const [isCobroExitosoOpen, setIsCobroExitosoOpen] = useState(false);
+
+  // Status counts memorizados para los tabs interactivos del toolbar
+  const counts = useMemo(
+    () => ({
+      todos: ordenes.length,
+      pendiente: ordenes.filter((o) => o.estado === "pendiente").length,
+      en_proceso: ordenes.filter((o) => o.estado === "en_proceso").length,
+      completado: ordenes.filter((o) => o.estado === "completado").length,
+      cobrado: ordenes.filter((o) => o.estado === "cobrado").length,
+    }),
+    [ordenes]
+  );
+
+  // Atajos de teclado para la bandeja de órdenes
+  useBandejaShortcuts({
+    onFocusSearch: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.select();
+      }
+    },
+    onClearSearch: () => {
+      setSearchQuery("");
+    },
+    onSwitchView: (mode) => {
+      setViewMode(mode);
+      setPage(null);
+    },
+    onRefresh: () => {
+      router.refresh();
+      toast.info("Bandeja de órdenes actualizada");
+    },
+    enabled: !isPayModalOpen && !isCobroExitosoOpen,
+  });
 
   // Cambiar estado de orden
   const handleStatusChange = async (id: string, nuevoEstado: Orden["estado"]) => {
@@ -201,35 +241,35 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta, sucursal
       });
 
       if (res.success) {
-        toast.success("Pago registrado correctamente en caja", {
-          action: payingOrden.clienteTelefono
-            ? {
-                label: "Enviar WhatsApp",
-                onClick: () => {
-                  const url = getWhatsAppTicketUrl({
-                    clienteNombre: payingOrden.clienteNombre || "Cliente",
-                    clienteTelefono: payingOrden.clienteTelefono,
-                    placa: payingOrden.placa,
-                    total: monto || payingOrden.total,
-                    nroTicket: payingOrden.nroTicket,
-                    ordenId: payingOrden.id,
-                    sucursalNombre: sucursal?.nombre,
-                  });
-                  if (url) window.open(url, "_blank");
-                },
-              }
-            : undefined,
-        });
+        toast.success("Pago registrado correctamente en caja");
+        const totalNeto = monto || payingOrden.total || "0";
+        const totalNum = parseFloat(totalNeto);
+        const refNum = parseFloat(referencia) || totalNum;
+        const vueltoCalc = metodo === "efectivo" ? Math.max(0, refNum - totalNum) : 0;
+
         setOrdenes((prev) =>
           prev.map((o) =>
-            o.id === payingOrden.id ? { ...o, estado: "cobrado" } : o
+            o.id === payingOrden.id ? { ...o, estado: "cobrado", total: totalNeto } : o
           )
         );
         setIsPayModalOpen(false);
-        // Dispatch event to trigger navbar status refetch
+
+        // Notificar cambio de estado en la caja
         window.dispatchEvent(new Event("caja-status-changed"));
-        // Redirigir directamente al ticket con el hash #print para abrir el diálogo de impresión
-        router.push(`/ordenes/${payingOrden.id}/ticket#print`);
+
+        // Preparar y desplegar modal de éxito con acciones rápidas
+        setCobroExitosoData({
+          orderId: payingOrden.id,
+          nroTicket: payingOrden.nroTicket,
+          placa: payingOrden.placa,
+          clienteNombre: payingOrden.clienteNombre || "Cliente General",
+          clienteTelefono: payingOrden.clienteTelefono,
+          montoCobrado: totalNeto,
+          metodo,
+          vuelto: vueltoCalc > 0 ? vueltoCalc : undefined,
+          sucursalNombre: sucursal?.nombre,
+        });
+        setIsCobroExitosoOpen(true);
       } else {
         toast.error(res.error || "Ocurrió un error al procesar el pago");
       }
@@ -270,6 +310,8 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta, sucursal
         viewMode={viewMode || "patio"}
         onViewModeChange={(mode) => setViewMode(mode)}
         onPageReset={() => setPage(null)}
+        counts={counts}
+        searchInputRef={searchInputRef}
       />
 
       {/* KPI Stats Bento Grid (Stitch design) */}
@@ -321,6 +363,25 @@ export function OrdenesClient({ initialOrdenes, lavadores, cajaAbierta, sucursal
           sucursal={sucursal}
         />
       )}
+
+      {/* Diálogo de Cobro Exitoso en el Tablero (Sin salir de /ordenes) */}
+      <CobroExitosoDialog
+        open={isCobroExitosoOpen}
+        onOpenChange={setIsCobroExitosoOpen}
+        data={cobroExitosoData}
+        onPrintTicket={(orderId) => {
+          const w = window.open(
+            `/api/pdf/ticket/${orderId}`,
+            "_blank",
+            "width=420,height=650,menubar=no,toolbar=no,location=no,status=no"
+          );
+          if (w) w.focus();
+        }}
+        onNewOrder={() => router.push("/ordenes/nueva")}
+      />
+
+      {/* Floating Shortcuts Dock */}
+      <BandejaShortcutsDock />
     </div>
   );
 }

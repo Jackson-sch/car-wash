@@ -1,9 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Users, Search, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useTransition, useMemo } from "react";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { createCliente, getClienteHistorial, ajustarPuntosCliente } from "@/lib/actions/clientes";
 import { toast } from "sonner";
@@ -11,6 +8,8 @@ import { toast } from "sonner";
 import type { Cliente } from "./components/ClientesTable";
 import { ClientesTable } from "./components/ClientesTable";
 import { ClientesKpiCards } from "./components/ClientesKpiCards";
+import { ClientesHeader } from "./components/ClientesHeader";
+import { ClientesToolbar, type ClienteTierFilter } from "./components/ClientesToolbar";
 import type { Vehiculo, PuntosLog, OrdenVisita } from "./components/ClienteDrawer";
 import { ClienteDrawer } from "./components/ClienteDrawer";
 import { AjustarPuntosModal } from "./components/AjustarPuntosModal";
@@ -31,6 +30,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
     "page",
     parseAsInteger.withDefault(1).withOptions({ shallow: true })
   );
+  const [tierFilter, setTierFilter] = useState<ClienteTierFilter>("todos");
   const [isPending, startTransition] = useTransition();
 
   // Estados del modal de agregar cliente
@@ -47,6 +47,62 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
 
   // Estados del modal de Ajustar Puntos
   const [isAjusteOpen, setIsAjusteOpen] = useState(false);
+
+  // Conteos por Tier de Lealtad
+  const counts = useMemo(() => {
+    let vip = 0;
+    let silver = 0;
+    let conAutos = 0;
+    let sinPuntos = 0;
+
+    clientesList.forEach((c) => {
+      const pts = c.totalPuntos || 0;
+      if (pts >= 100) vip++;
+      else if (pts >= 50) silver++;
+      else if (pts === 0) sinPuntos++;
+
+      if (c.totalVehiculos > 0) conAutos++;
+    });
+
+    return {
+      total: clientesList.length,
+      vip,
+      silver,
+      conAutos,
+      sinPuntos,
+    };
+  }, [clientesList]);
+
+  // Filtrado compuesto (buscador + tier)
+  const filteredClientes = useMemo(() => {
+    return clientesList.filter((c) => {
+      // 1. Buscador
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        const matchName = c.nombre.toLowerCase().includes(query);
+        const matchLast = (c.apellido || "").toLowerCase().includes(query);
+        const matchPhone = (c.telefono || "").includes(query);
+        const matchDoc = (c.nroDoc || "").includes(query);
+        if (!matchName && !matchLast && !matchPhone && !matchDoc) return false;
+      }
+
+      // 2. Filtro por Tier
+      const pts = c.totalPuntos || 0;
+      if (tierFilter === "vip") return pts >= 100;
+      if (tierFilter === "silver") return pts >= 50 && pts < 100;
+      if (tierFilter === "con_autos") return c.totalVehiculos > 0;
+      if (tierFilter === "sin_puntos") return pts === 0;
+
+      return true;
+    });
+  }, [clientesList, searchQuery, tierFilter]);
+
+  const hasActiveFilters = Boolean(searchQuery.trim()) || tierFilter !== "todos";
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setTierFilter("todos");
+  };
 
   // Guardar nuevo cliente manual
   const handleSaveCliente = async (data: {
@@ -76,7 +132,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
           totalVehiculos: 0,
           totalPuntos: 0,
         } as Cliente;
-        setClientesList((prev) => [...prev, newCli]);
+        setClientesList((prev) => [newCli, ...prev]);
         setIsCreateOpen(false);
       } else {
         toast.error(res.error || "Error al crear cliente");
@@ -140,17 +196,6 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
     });
   };
 
-  // Filtrado
-  const filteredClientes = clientesList.filter((c) => {
-    const query = (searchQuery || "").toLowerCase();
-    return (
-      c.nombre.toLowerCase().includes(query) ||
-      (c.apellido && c.apellido.toLowerCase().includes(query)) ||
-      (c.telefono && c.telefono.includes(query)) ||
-      (c.nroDoc && c.nroDoc.includes(query))
-    );
-  });
-
   // Paginación
   const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredClientes.length / itemsPerPage);
@@ -161,51 +206,34 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
   );
 
   return (
-    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-            <Users className="h-7 w-7 text-secondary" />
-            Directorio de Clientes
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Gestión de clientes de autolavado, historial de visitas y programa de fidelidad de puntos.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={() => setIsCreateOpen(true)}
-            className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
-          >
-            <UserPlus className="size-4.5" />
-            Registrar Cliente
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6 sm:space-y-8 text-foreground pb-12">
+      {/* 1. Header con Exportación a Excel y Registrar Cliente */}
+      <ClientesHeader
+        onOpenCreate={() => setIsCreateOpen(true)}
+        totalClientes={clientesList.length}
+      />
 
-      {/* Stats Cards */}
+      {/* 2. Stats Cards de Clientes y Fidelización */}
       <ClientesKpiCards clientesList={clientesList} />
 
-      {/* Search and Filters */}
-      <div className="flex gap-4 items-center">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nombre, DNI o teléfono..."
-            value={searchQuery || ""}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(null);
-            }}
-            className="pl-9 bg-card border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 focus:border-secondary text-xs h-9 rounded-lg text-foreground shadow-xs"
-          />
+      {/* 3. Toolbar con Píldoras de Fidelización y Buscador Universal */}
+      <ClientesToolbar
+        searchQuery={searchQuery || ""}
+        onSearchChange={(val) => {
+          setSearchQuery(val);
+          setPage(null);
+        }}
+        tierFilter={tierFilter}
+        onTierFilterChange={(tier) => {
+          setTierFilter(tier);
+          setPage(null);
+        }}
+        counts={counts}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
 
-        </div>
-      </div>
-
-
-      {/* Clientes Table Extracted Component */}
+      {/* 4. Tabla de Clientes con WhatsApp a 1 clic, avatares y niveles */}
       <ClientesTable
         clientes={paginatedClientes}
         onViewDetails={handleOpenFicha}
@@ -217,8 +245,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
         itemsPerPage={itemsPerPage}
       />
 
-
-      {/* Drawer Ficha Extracted Component */}
+      {/* 5. Drawer de Ficha de Cliente */}
       <ClienteDrawer
         isOpen={isFichaOpen}
         onClose={() => setIsFichaOpen(false)}
@@ -226,7 +253,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
         fichaData={fichaData}
       />
 
-      {/* Ajuste Puntos Extracted Component */}
+      {/* 6. Modal de Ajuste de Puntos */}
       {selectedCliente && (
         <AjustarPuntosModal
           isOpen={isAjusteOpen}
@@ -237,7 +264,7 @@ export function ClientesClient({ initialClientes }: ClientesClientProps) {
         />
       )}
 
-      {/* Crear Cliente Extracted Component */}
+      {/* 7. Modal de Registrar Cliente */}
       <CrearClienteModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}

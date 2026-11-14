@@ -51,20 +51,24 @@ interface KioscoClientProps {
 
 export function KioscoClient({ initialOrdenes }: KioscoClientProps) {
   const [ordenesList, setOrdenesList] = useState<OrdenItem[]>(initialOrdenes);
-  const [now, setNow] = useState<number>(Date.now());
+  const [now, setNow] = useState<number>(0);
   const [timeStr, setTimeStr] = useState<string>("");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Actualizar el reloj cada 10 segundos
   useEffect(() => {
-    setTimeStr(new Date().toLocaleTimeString("es-PE"));
-    const timer = setInterval(() => {
+    const tick = () => {
       const current = Date.now();
       setNow(current);
       setTimeStr(new Date(current).toLocaleTimeString("es-PE"));
-    }, 10000);
-    return () => clearInterval(timer);
+    };
+    const initTimer = setTimeout(tick, 0);
+    const timer = setInterval(tick, 10000);
+    return () => {
+      clearTimeout(initTimer);
+      clearInterval(timer);
+    };
   }, []);
 
   // Sincronización en tiempo real (Auto-polling cada 3 segundos)

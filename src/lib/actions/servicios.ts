@@ -87,6 +87,7 @@ export async function getServicios() {
         categoriaId: servicios.categoriaId,
         categoriaNombre: categoriasServicio.nombre,
         totalInsumosReceta: sql<number>`coalesce((select count(*) from servicio_recetas where servicio_recetas.servicio_id = ${servicios.id}), 0)::int`,
+        costoReceta: sql<number>`coalesce((select sum(sr.cantidad_consumo::numeric * coalesce(inv.precio_compra::numeric, 0)) from servicio_recetas sr join inventario inv on inv.id = sr.item_id where sr.servicio_id = ${servicios.id}), 0)::float`,
       })
       .from(servicios)
       .leftJoin(categoriasServicio, eq(servicios.categoriaId, categoriasServicio.id))
@@ -216,6 +217,57 @@ export async function createCategoriaServicio(nombre: string, orden: number = 0)
   }
 }
 
+// Actualizar categoría de servicio
+export async function updateCategoriaServicio(id: string, nombre: string) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "servicios", accion: "gestionar" });
+    const sucursalId = session.user.sucursalId!;
+
+    if (!nombre.trim()) {
+      return { success: false, error: "El nombre de la categoría es obligatorio." };
+    }
+
+    const [updated] = await db
+      .update(categoriasServicio)
+      .set({ nombre: nombre.trim() })
+      .where(and(eq(categoriasServicio.id, id), eq(categoriasServicio.sucursalId, sucursalId)))
+      .returning();
+
+    revalidateTag("servicios", { expire: 3600 });
+    revalidatePath("/servicios");
+    return { success: true, data: updated };
+  } catch (error: unknown) {
+    console.error("Error al actualizar categoría:", error);
+    return { success: false, error: getErrorMessage(error, "Error al actualizar la categoría") };
+  }
+}
+
+// Eliminar categoría de servicio (desvinculando servicios previos)
+export async function deleteCategoriaServicio(id: string) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "servicios", accion: "gestionar" });
+    const sucursalId = session.user.sucursalId!;
+
+    await db.transaction(async (tx) => {
+      await tx
+        .update(servicios)
+        .set({ categoriaId: null })
+        .where(and(eq(servicios.categoriaId, id), eq(servicios.sucursalId, sucursalId)));
+
+      await tx
+        .delete(categoriasServicio)
+        .where(and(eq(categoriasServicio.id, id), eq(categoriasServicio.sucursalId, sucursalId)));
+    });
+
+    revalidateTag("servicios", { expire: 3600 });
+    revalidatePath("/servicios");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error al eliminar categoría:", error);
+    return { success: false, error: getErrorMessage(error, "Error al eliminar la categoría") };
+  }
+}
+
 // Pre-cargar datos demo de servicios
 export async function preCargarServiciosDemo() {
   try {
@@ -340,6 +392,7 @@ export async function getRecetaServicio(servicioId: string) {
         itemId: servicioRecetas.itemId,
         itemNombre: inventario.nombre,
         unidad: inventario.unidad,
+        precioCompra: inventario.precioCompra,
         cantidadConsumo: servicioRecetas.cantidadConsumo,
       })
       .from(servicioRecetas)

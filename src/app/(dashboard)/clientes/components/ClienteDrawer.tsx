@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Car, History, Gift, Phone, Mail, FileText, CreditCard, Clock } from "lucide-react";
+import { X, Car, History, Gift, Phone, Mail, FileText, CreditCard, Clock, MessageCircle } from "lucide-react";
 import type { Cliente } from "./ClientesTable";
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 
@@ -86,14 +86,29 @@ export function ClienteDrawer({
                   </DrawerTitle>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Cerrar"
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                {cliente.telefono && (
+                  <a
+                    href={`https://wa.me/51${cliente.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(
+                      `Hola ${cliente.nombre}, te saludamos de Car Wash Pro Perú.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="h-8 px-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 border border-emerald-500/20 cursor-pointer transition-colors"
+                  >
+                    <MessageCircle className="size-3.5 fill-current" />
+                    <span className="hidden sm:inline">WhatsApp</span>
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Cerrar"
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Ficha Body */}
@@ -110,7 +125,7 @@ export function ClienteDrawer({
                       <div className="p-3 rounded-xl bg-muted/50 border border-border flex items-center gap-2.5">
                         <Phone className="h-4 w-4 text-secondary shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Teléfono</p>
+                          <p className="text-[10px] uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Teléfono</p>
                           <p className="text-xs font-bold text-foreground truncate">{cliente.telefono}</p>
                         </div>
                       </div>
@@ -119,7 +134,7 @@ export function ClienteDrawer({
                       <div className="p-3 rounded-xl bg-muted/50 border border-border flex items-center gap-2.5">
                         <Mail className="h-4 w-4 text-blue-500 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Email</p>
+                          <p className="text-[10px] uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Email</p>
                           <p className="text-xs font-bold text-foreground truncate">{cliente.email}</p>
                         </div>
                       </div>
@@ -128,7 +143,7 @@ export function ClienteDrawer({
                       <div className="p-3 rounded-xl bg-muted/50 border border-border flex items-center gap-2.5">
                         <CreditCard className="h-4 w-4 text-amber-500 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">{cliente.tipoDoc || "Doc"}</p>
+                          <p className="text-[10px] uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">{cliente.tipoDoc || "Doc"}</p>
                           <p className="text-xs font-bold text-foreground truncate">{cliente.nroDoc}</p>
                         </div>
                       </div>
@@ -137,7 +152,7 @@ export function ClienteDrawer({
                       <div className="p-3 rounded-xl bg-muted/50 border border-border flex items-center gap-2.5">
                         <FileText className="h-4 w-4 text-zinc-400 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Notas</p>
+                          <p className="text-[10px] uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Notas</p>
                           <p className="text-xs font-bold text-foreground truncate">{cliente.notas}</p>
                         </div>
                       </div>
@@ -161,9 +176,12 @@ export function ClienteDrawer({
                             className="p-4 rounded-xl bg-muted/30 border border-border hover:border-secondary/30 transition-colors"
                           >
                             <div className="flex items-center justify-between mb-2">
-                              <span className="px-2.5 py-0.5 bg-card text-foreground font-mono font-bold text-xs rounded-md border border-border tracking-wider shadow-sm">
-                                {v.placa}
-                              </span>
+                              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950 dark:bg-zinc-900 border border-zinc-700/80 shadow-xs">
+                                <span className="text-[7px] font-black tracking-widest text-red-500 font-sans">PERÚ</span>
+                                <span className="font-mono font-extrabold text-[11px] text-white tracking-widest">
+                                  {v.placa}
+                                </span>
+                              </div>
                               <span className="text-[10px] uppercase font-bold text-muted-foreground">
                                 {tipoVehiculoIcon[v.tipo || ""] || v.tipo || "Auto"}
                               </span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Layers, Sparkles } from "lucide-react";
+import { User, Layers, Sparkles, Check } from "lucide-react";
 
 interface StepperHeaderProps {
   step: number;
@@ -35,7 +35,7 @@ export function StepperHeader({ step }: StepperHeaderProps) {
                   }`}
                 >
                   {isDone ? (
-                    <span className="text-sm font-black">✓</span>
+                    <Check className="size-4.5 stroke-[3]" />
                   ) : (
                     <Icon className="size-4.5" />
                   )}

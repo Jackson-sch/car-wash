@@ -286,7 +286,7 @@ export function PasoVehiculoCliente({
           >
             <ShieldAlert className={`h-4 w-4 ${inspeccionNotas ? "text-emerald-400" : "text-amber-400"}`} />
             <span>
-              {inspeccionNotas ? "✓ Inspección de Daños Registrada" : "Registrar Inspección de Daños (Rayones / Abolladuras)"}
+              {inspeccionNotas ? "Inspección de Daños Registrada" : "Registrar Inspección de Daños (Rayones / Abolladuras)"}
             </span>
           </Button>
         </div>

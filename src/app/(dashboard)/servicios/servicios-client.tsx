@@ -11,8 +11,8 @@ import {
   deleteServicio,
   preCargarServiciosDemo,
   createCategoriaServicio,
-  getRecetaServicio,
-  asignarRecetaServicio,
+  updateCategoriaServicio,
+  deleteCategoriaServicio,
 } from "@/lib/actions/servicios";
 import { toast } from "sonner";
 
@@ -22,13 +22,7 @@ import { ServiciosGrid } from "./components/ServiciosGrid";
 import { ServiciosKpiCards } from "./components/ServiciosKpiCards";
 import { ServicioModal } from "./components/ServicioModal";
 import { CategoriaModal } from "./components/CategoriaModal";
-import { RecetaModal } from "./components/RecetaModal";
-
-interface InsumoDisponible {
-  id: string;
-  nombre: string;
-  unidad: string | null;
-}
+import { RecetaModal, type InsumoDisponible } from "./components/RecetaModal";
 
 interface ServiciosClientProps {
   initialServicios: Servicio[];
@@ -55,6 +49,7 @@ export function ServiciosClient({
     shallow: true,
     history: "replace",
   });
+  const [recetaFilter, setRecetaFilter] = useState<"todos" | "con_receta" | "sin_receta">("todos");
   const [isPending, startTransition] = useTransition();
 
   // Estados del modal de servicio
@@ -85,6 +80,16 @@ export function ServiciosClient({
     setIsModalOpen(true);
   };
 
+  // Duplicar servicio (prefill con id vacío para crear uno nuevo)
+  const handleDuplicate = (serv: Servicio) => {
+    setEditingServicio({
+      ...serv,
+      id: "",
+      nombre: `${serv.nombre} (Copia)`,
+    });
+    setIsModalOpen(true);
+  };
+
   // Guardar servicio (Crear o Editar)
   const handleSaveServicio = async (data: {
     nombre: string;
@@ -95,7 +100,7 @@ export function ServiciosClient({
     aplicaA: string[];
   }) => {
     startTransition(async () => {
-      if (editingServicio) {
+      if (editingServicio && editingServicio.id) {
         // Actualizar
         const res = await updateServicio(editingServicio.id, {
           nombre: data.nombre,
@@ -188,9 +193,45 @@ export function ServiciosClient({
       if (res.success && res.data) {
         toast.success("Categoría creada con éxito");
         setCategorias((prev) => [...prev, res.data as Categoria]);
-        setIsCatModalOpen(false);
       } else {
         toast.error(res.error || "Error al crear categoría");
+      }
+    });
+  };
+
+  // Renombrar categoría
+  const handleUpdateCategory = async (id: string, nombre: string) => {
+    startTransition(async () => {
+      const res = await updateCategoriaServicio(id, nombre);
+      if (res.success && res.data) {
+        toast.success("Categoría actualizada");
+        setCategorias((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, nombre } : c))
+        );
+        setServicios((prev) =>
+          prev.map((s) => (s.categoriaId === id ? { ...s, categoriaNombre: nombre } : s))
+        );
+      } else {
+        toast.error(res.error || "Error al actualizar categoría");
+      }
+    });
+  };
+
+  // Eliminar categoría
+  const handleDeleteCategory = async (id: string) => {
+    startTransition(async () => {
+      const res = await deleteCategoriaServicio(id);
+      if (res.success) {
+        toast.success("Categoría eliminada");
+        setCategorias((prev) => prev.filter((c) => c.id !== id));
+        setServicios((prev) =>
+          prev.map((s) =>
+            s.categoriaId === id ? { ...s, categoriaId: null, categoriaNombre: null } : s
+          )
+        );
+        if (activeTab === id) setActiveTab("todos");
+      } else {
+        toast.error(res.error || "Error al eliminar categoría");
       }
     });
   };
@@ -215,7 +256,7 @@ export function ServiciosClient({
             className="font-bold gap-2 cursor-pointer h-10 rounded-xl border-border hover:bg-muted/80 text-foreground hover:text-foreground text-xs shadow-2xs"
           >
             <Plus className="h-4 w-4" />
-            Nueva Categoría
+            Categorías
           </Button>
           <Button
             onClick={handleOpenCreate}
@@ -231,20 +272,47 @@ export function ServiciosClient({
       <ServiciosKpiCards servicios={servicios} />
 
       {/* Filters & Tabs */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-        <ServiciosCategoryTabs
-          categorias={categorias}
-          activeTab={activeTab || "todos"}
-          onTabChange={setActiveTab}
-        />
-
-        <div className="w-full md:w-72">
-          <Input
-            placeholder="Buscar por nombre o descripción..."
-            value={searchQuery || ""}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-card border-border hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-xl text-foreground"
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+          <ServiciosCategoryTabs
+            categorias={categorias}
+            activeTab={activeTab || "todos"}
+            onTabChange={setActiveTab}
           />
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-1 bg-card border border-border rounded-xl p-1 shrink-0">
+              {(
+                [
+                  { key: "todos", label: "Todos" },
+                  { key: "con_receta", label: "Con Receta" },
+                  { key: "sin_receta", label: "Sin Receta" },
+                ] as const
+              ).map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setRecetaFilter(f.key)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                    recetaFilter === f.key
+                      ? "bg-secondary text-secondary-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex-1 md:w-64">
+              <Input
+                placeholder="Buscar por nombre o descripción..."
+                value={searchQuery || ""}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-card border-border hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-xl text-foreground"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -254,8 +322,10 @@ export function ServiciosClient({
         categorias={categorias}
         searchQuery={searchQuery || ""}
         activeTab={activeTab || "todos"}
+        recetaFilter={recetaFilter}
         isPending={isPending}
         onEdit={handleOpenEdit}
+        onDuplicate={handleDuplicate}
         onReceta={handleOpenReceta}
         onDelete={handleDelete}
         onLoadDemo={handleLoadDemo}
@@ -279,7 +349,10 @@ export function ServiciosClient({
         isOpen={isCatModalOpen}
         onClose={() => setIsCatModalOpen(false)}
         isPending={isPending}
+        categorias={categorias}
         onSave={handleCreateCategory}
+        onUpdate={handleUpdateCategory}
+        onDelete={handleDeleteCategory}
       />
 
       {/* Receta Modal Component */}
@@ -289,12 +362,13 @@ export function ServiciosClient({
           onOpenChange={setIsRecetaOpen}
           servicioId={recetaServicio.id}
           servicioNombre={recetaServicio.nombre}
+          servicioPrecio={recetaServicio.precio}
           insumosDisponibles={insumosDisponibles}
-          onSuccess={(totalItems) => {
+          onSuccess={(totalItems, costoTotal) => {
             setServicios((prev) =>
               prev.map((s) =>
                 s.id === recetaServicio.id
-                  ? { ...s, totalInsumosReceta: totalItems }
+                  ? { ...s, totalInsumosReceta: totalItems, costoReceta: costoTotal }
                   : s
               )
             );

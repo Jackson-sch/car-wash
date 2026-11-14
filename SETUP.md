@@ -107,7 +107,7 @@ pnpm db:seed
 ```
 
 The seed creates:
-- **Admin user**: `admin@washmaster.com` / `WashMaster2026!`
+- **Admin user**: `admin@carwashpro.com` / `CarWash2026!` (o alias `admin@washmaster.com`)
 - **Sucursal Principal**: default branch
 - **Sample services**: 6 demo services across 4 categories
 

@@ -153,7 +153,7 @@ function ServicioFormContent({
         <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/30 shrink-0">
           <div>
             <h3 className="text-base font-bold text-foreground">
-              {servicio ? "Editar Servicio" : "Agregar Nuevo Servicio"}
+              {servicio?.id ? "Editar Servicio" : "Agregar Nuevo Servicio"}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               Configura los detalles del servicio y los tipos de vehículos admitidos.

@@ -351,6 +351,59 @@ export const inventarioMovimientos = pgTable('inventario_movimientos', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
+export const proveedores = pgTable('proveedores', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sucursalId: uuid('sucursal_id').notNull().references(() => sucursales.id),
+  ruc: text('ruc'),
+  razonSocial: text('razon_social').notNull(),
+  nombreComercial: text('nombre_comercial'),
+  direccion: text('direccion'),
+  telefono: text('telefono'),
+  email: text('email'),
+  contactoNombre: text('contacto_nombre'),
+  banco: text('banco'),
+  cuentaBancaria: text('cuenta_bancaria'),
+  cci: text('cci'),
+  notas: text('notas'),
+  activo: boolean('activo').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (t) => ({
+  idxProveedoresRuc: index('idx_proveedores_ruc').on(t.ruc),
+  uqProveedoresSucursalRuc: unique('uq_proveedores_sucursal_ruc').on(t.sucursalId, t.ruc),
+}));
+
+export const compras = pgTable('compras', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  sucursalId: uuid('sucursal_id').notNull().references(() => sucursales.id),
+  usuarioId: text('usuario_id').references(() => usuarios.id),
+  proveedorId: uuid('proveedor_id').references(() => proveedores.id),
+  proveedorNombre: text('proveedor_nombre').notNull(),
+  proveedorRuc: text('proveedor_ruc'),
+  tipoComprobante: text('tipo_comprobante').default('factura').notNull(), // 'factura', 'boleta', 'guia', 'nota'
+  numeroComprobante: text('numero_comprobante').notNull(),
+  fechaEmision: timestamp('fecha_emision', { withTimezone: true }).defaultNow().notNull(),
+  metodoPago: text('metodo_pago').default('transferencia').notNull(), // 'efectivo', 'transferencia', 'tarjeta', 'credito'
+  estado: text('estado').default('completada').notNull(), // 'completada', 'anulada'
+  subtotal: numeric('subtotal', { precision: 10, scale: 2 }).default('0'),
+  igv: numeric('igv', { precision: 10, scale: 2 }).default('0'),
+  total: numeric('total', { precision: 10, scale: 2 }).notNull(),
+  observaciones: text('observaciones'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const comprasDetalles = pgTable('compras_detalles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  compraId: uuid('compra_id').notNull().references(() => compras.id, { onDelete: 'cascade' }),
+  insumoId: uuid('insumo_id').notNull().references(() => inventario.id),
+  descripcion: text('descripcion').notNull(),
+  cantidad: numeric('cantidad', { precision: 10, scale: 3 }).notNull(),
+  costoUnitario: numeric('costo_unitario', { precision: 10, scale: 2 }).notNull(),
+  subtotal: numeric('subtotal', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
 export const notificaciones = pgTable('notificaciones', {
   id: uuid('id').primaryKey().defaultRandom(),
   usuarioId: text('usuario_id').notNull().references(() => usuarios.id),
@@ -479,6 +532,12 @@ export const serviciosRelations = relations(servicios, ({ one, many }) => ({
   paquetes: many(paqueteServicios),
   ordenes: many(ordenServicios),
   cupones: many(cuponServicios),
+  recetas: many(servicioRecetas),
+}));
+
+export const servicioRecetasRelations = relations(servicioRecetas, ({ one }) => ({
+  servicio: one(servicios, { fields: [servicioRecetas.servicioId], references: [servicios.id] }),
+  insumo: one(inventario, { fields: [servicioRecetas.itemId], references: [inventario.id] }),
 }));
 
 export const paquetesRelations = relations(paquetes, ({ one, many }) => ({
@@ -529,6 +588,8 @@ export const puntosFidelidadRelations = relations(puntosFidelidad, ({ one }) => 
 export const inventarioRelations = relations(inventario, ({ one, many }) => ({
   sucursal: one(sucursales, { fields: [inventario.sucursalId], references: [sucursales.id] }),
   movimientos: many(inventarioMovimientos),
+  recetas: many(servicioRecetas),
+  comprasDetalles: many(comprasDetalles),
 }));
 
 export const inventarioMovimientosRelations = relations(inventarioMovimientos, ({ one }) => ({
@@ -555,4 +616,21 @@ export const cuponesUsosRelations = relations(cuponesUsos, ({ one }) => ({
   cupon: one(cupones, { fields: [cuponesUsos.cuponId], references: [cupones.id] }),
   cliente: one(clientes, { fields: [cuponesUsos.clienteId], references: [clientes.id] }),
   orden: one(ordenes, { fields: [cuponesUsos.ordenId], references: [ordenes.id] }),
+}));
+
+export const proveedoresRelations = relations(proveedores, ({ one, many }) => ({
+  sucursal: one(sucursales, { fields: [proveedores.sucursalId], references: [sucursales.id] }),
+  compras: many(compras),
+}));
+
+export const comprasRelations = relations(compras, ({ one, many }) => ({
+  sucursal: one(sucursales, { fields: [compras.sucursalId], references: [sucursales.id] }),
+  usuario: one(usuarios, { fields: [compras.usuarioId], references: [usuarios.id] }),
+  proveedor: one(proveedores, { fields: [compras.proveedorId], references: [proveedores.id] }),
+  detalles: many(comprasDetalles),
+}));
+
+export const comprasDetallesRelations = relations(comprasDetalles, ({ one }) => ({
+  compra: one(compras, { fields: [comprasDetalles.compraId], references: [compras.id] }),
+  insumo: one(inventario, { fields: [comprasDetalles.insumoId], references: [inventario.id] }),
 }));

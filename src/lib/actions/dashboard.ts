@@ -23,11 +23,26 @@ export interface DashboardKpis {
   ordenesEnEspera: number;
   ticketPromedio: number;
   insumosBajoStock: number;
+  ordenesCompletadasHoy?: number;
+  efectivoHoy?: number;
+  digitalHoy?: number;
 }
 
 export interface SalesTrendPoint {
   day: string;
   ventas: number;
+}
+
+export interface TopServiceItem {
+  nombre: string;
+  cantidad: number;
+  total: number;
+}
+
+export interface PaymentBreakdownItem {
+  metodo: string;
+  total: number;
+  porcentaje: number;
 }
 
 export interface OrdenEnCola {
@@ -71,6 +86,8 @@ export interface DashboardData {
   sucursalesResumen?: SucursalResumen[];
   sucursales?: SucursalInfo[];
   currentBranch?: SucursalInfo | null;
+  topServicios?: TopServiceItem[];
+  pagosBreakdown?: PaymentBreakdownItem[];
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────

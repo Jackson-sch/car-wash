@@ -9,6 +9,24 @@ import { validarCuponPrevio } from "@/lib/actions/cupones";
 
 export type VehiculoTipo = "sedan" | "suv" | "pickup" | "moto" | "camion" | "furgon" | "otro";
 
+export interface VehiculoTipoOption {
+  id: VehiculoTipo;
+  label: string;
+  defaultMultiplier: number;
+  shortcut: string;
+  shortcutNum: number;
+}
+
+export const VEHICULO_TIPOS_CONFIG: VehiculoTipoOption[] = [
+  { id: "sedan", label: "Sedán", defaultMultiplier: 1.0, shortcut: "Alt+1", shortcutNum: 1 },
+  { id: "suv", label: "SUV", defaultMultiplier: 1.2, shortcut: "Alt+2", shortcutNum: 2 },
+  { id: "pickup", label: "Pick-up / Camioneta", defaultMultiplier: 1.4, shortcut: "Alt+3", shortcutNum: 3 },
+  { id: "moto", label: "Moto", defaultMultiplier: 0.8, shortcut: "Alt+4", shortcutNum: 4 },
+  { id: "camion", label: "Camión", defaultMultiplier: 2.0, shortcut: "Alt+5", shortcutNum: 5 },
+  { id: "furgon", label: "Furgón / Van", defaultMultiplier: 1.8, shortcut: "Alt+6", shortcutNum: 6 },
+  { id: "otro", label: "Otro", defaultMultiplier: 1.0, shortcut: "Alt+7", shortcutNum: 7 },
+];
+
 export interface Servicio {
   id: string;
   nombre: string;
@@ -71,39 +89,14 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
     descuentoMonto: number;
   } | null>(null);
 
-  const aplicarCupon = async (codigo: string) => {
-    if (!codigo.trim()) return;
-    const res = await validarCuponPrevio(codigo.trim(), subtotal);
-    if (res.success) {
-      let descMonto = 0;
-      if (res.tipoDescuento === "porcentaje") {
-        descMonto = (subtotal * res.valorDescuento) / 100;
-      } else {
-        descMonto = res.valorDescuento;
-      }
-      descMonto = Math.min(descMonto, subtotal);
-      setDescuento(descMonto.toFixed(2));
-      setCuponAplicado({
-        id: res.cuponId,
-        codigo: codigo.toUpperCase(),
-        descuentoMonto: descMonto,
-      });
-      toast.success(`¡Cupón ${codigo.toUpperCase()} aplicado con éxito!`);
-    } else {
-      toast.error(res.error || "Cupón no válido.");
-    }
-  };
-
-  const removerCupon = () => {
-    setCuponAplicado(null);
-    setCuponCodigo("");
-    setDescuento("0");
-  };
-
   // Form Step 3: Asignaciones & Notas
   const [empleadoId, setEmpleadoId] = useState("");
   const [notas, setNotas] = useState("");
   const [prioridad, setPrioridad] = useState(0);
+
+  // Inspección de daños (opcional)
+  const [inspeccionPuntos, setInspeccionPuntos] = useState<{ id: number; x: number; y: number; zona: string; tipo: string; nota: string }[]>([]);
+  const [inspeccionNotas, setInspeccionNotas] = useState("");
 
   const multiplier = useMemo(() => {
     const dbMultipliers = sucursalConfig.multipliers ?? {};
@@ -134,10 +127,56 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
     return Math.max(0, subtotal - desc);
   }, [subtotal, descuento]);
 
+  const totalDuracionMin = useMemo(() => {
+    let dur = 0;
+    serviciosSeleccionados.forEach((id) => {
+      const s = servicios.find((item) => item.id === id);
+      if (s?.duracionMin) dur += s.duracionMin;
+    });
+    return dur;
+  }, [serviciosSeleccionados, servicios]);
+
+  const aplicarCupon = useCallback(async (codigo: string) => {
+    if (!codigo.trim()) return;
+    const res = await validarCuponPrevio(codigo.trim(), subtotal);
+    if (res.success) {
+      let descMonto = 0;
+      if (res.tipoDescuento === "porcentaje") {
+        descMonto = (subtotal * res.valorDescuento) / 100;
+      } else {
+        descMonto = res.valorDescuento;
+      }
+      descMonto = Math.min(descMonto, subtotal);
+      setDescuento(descMonto.toFixed(2));
+      setCuponAplicado({
+        id: res.cuponId,
+        codigo: codigo.toUpperCase(),
+        descuentoMonto: descMonto,
+      });
+      toast.success(`¡Cupón ${codigo.toUpperCase()} aplicado con éxito!`);
+    } else {
+      toast.error(res.error || "Cupón no válido.");
+    }
+  }, [subtotal]);
+
+  const removerCupon = useCallback(() => {
+    setCuponAplicado(null);
+    setCuponCodigo("");
+    setDescuento("0");
+  }, []);
+
   const handleServiceToggle = (id: string) => {
     setServiciosSeleccionados((prev) =>
       prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
     );
+  };
+
+  const removeService = (id: string) => {
+    setServiciosSeleccionados((prev) => prev.filter((sId) => sId !== id));
+  };
+
+  const addService = (id: string) => {
+    setServiciosSeleccionados((prev) => (prev.includes(id) ? prev : [...prev, id]));
   };
 
   const handleSubmit = async () => {
@@ -145,8 +184,16 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
       toast.error("No es posible registrar la orden: la caja se encuentra cerrada.");
       return;
     }
-    if (!placa.trim() || !clienteNombre.trim() || serviciosSeleccionados.length === 0) {
-      toast.error("Por favor completa los datos obligatorios y selecciona al menos un servicio");
+    if (!placa.trim()) {
+      toast.error("Por favor ingresa la placa del vehículo.");
+      return;
+    }
+    if (!clienteNombre.trim()) {
+      toast.error("Por favor completa el nombre del cliente.");
+      return;
+    }
+    if (serviciosSeleccionados.length === 0) {
+      toast.error("Por favor selecciona al menos un servicio para la orden.");
       return;
     }
 
@@ -159,26 +206,32 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
       };
     });
 
+    let notasFinales = notas.trim();
+    if (inspeccionPuntos.length > 0 || inspeccionNotas.trim()) {
+      const inspTxt = `[INSPECCIÓN: ${inspeccionPuntos.length} hallazgo(s)${inspeccionNotas ? ` - ${inspeccionNotas.trim()}` : ""}]`;
+      notasFinales = notasFinales ? `${notasFinales} | ${inspTxt}` : inspTxt;
+    }
+
     startTransition(async () => {
       const res = await createOrden({
-        placa: placa.toUpperCase(),
+        placa: placa.toUpperCase().trim(),
         vehiculoTipo,
-        vehiculoMarca,
-        vehiculoModelo,
-        vehiculoColor,
-        clienteNombre,
-        clienteApellido,
-        clienteTelefono,
-        clienteEmail,
+        vehiculoMarca: vehiculoMarca.trim() || undefined,
+        vehiculoModelo: vehiculoModelo.trim() || undefined,
+        vehiculoColor: vehiculoColor.trim() || undefined,
+        clienteNombre: clienteNombre.trim(),
+        clienteApellido: clienteApellido.trim() || undefined,
+        clienteTelefono: clienteTelefono.trim() || undefined,
+        clienteEmail: clienteEmail.trim() || undefined,
         serviciosSeleccionados: mappedServs,
         empleadoId: empleadoId || null,
-        notas,
+        notas: notasFinales || undefined,
         prioridad,
         descuento,
       });
 
       if (res.success && res.data) {
-        toast.success("Orden de servicio registrada exitosamente");
+        toast.success("¡Orden de servicio registrada exitosamente!");
         setCreatedOrderId(res.data.id);
         setShowSuccessDialog(true);
         router.refresh();
@@ -200,9 +253,13 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
     setClienteEmail("");
     setServiciosSeleccionados([]);
     setDescuento("0");
+    setCuponCodigo("");
+    setCuponAplicado(null);
     setEmpleadoId("");
     setNotas("");
     setPrioridad(0);
+    setInspeccionPuntos([]);
+    setInspeccionNotas("");
     setStep(1);
     setShowSuccessDialog(false);
     setCreatedOrderId(null);
@@ -247,9 +304,18 @@ export function useNuevaOrden({ servicios, sucursalConfig = {}, cajaAbierta }: U
     setNotas,
     prioridad,
     setPrioridad,
+    inspeccionPuntos,
+    setInspeccionPuntos,
+    inspeccionNotas,
+    setInspeccionNotas,
     subtotal,
     total,
+    totalDuracionMin,
+    multiplier,
+    calculateServicePrice,
     handleServiceToggle,
+    removeService,
+    addService,
     handleSubmit,
     handleNewOrder,
   };

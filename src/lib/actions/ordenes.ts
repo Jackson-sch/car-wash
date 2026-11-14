@@ -51,6 +51,14 @@ export async function getOrdenes() {
         comprobanteTipo: ordenes.comprobanteTipo,
         comprobanteSerie: ordenes.comprobanteSerie,
         comprobanteNumero: ordenes.comprobanteNumero,
+        serviciosNombres: sql<string[]>`coalesce(
+          (
+            select array_agg(${ordenServicios.nombreServicio})
+            from ${ordenServicios}
+            where ${ordenServicios.ordenId} = ${ordenes.id}
+          ),
+          array[]::text[]
+        )`,
       })
       .from(ordenes)
       .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))

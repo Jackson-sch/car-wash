@@ -1,5 +1,7 @@
 "use client";
 
+import { CommandMenu } from "@/components/shared/CommandMenu";
+
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "@/lib/auth-client";
@@ -48,6 +50,7 @@ export function Header() {
   } | null>(null);
 
   const [turnoActivo, setTurnoActivo] = useState<TurnoActivo>(null);
+  const [isCajaOverdue, setIsCajaOverdue] = useState(false);
   const [loadingCaja, setLoadingCaja] = useState(true);
 
   const userId = session?.user?.id;
@@ -60,8 +63,15 @@ export function Header() {
       try {
         const turno = await getTurnoActivoHeader(currentBranchId);
         setTurnoActivo(turno);
+        if (turno?.apertura) {
+          const diffHours = (Date.now() - new Date(turno.apertura).getTime()) / (1000 * 60 * 60);
+          setIsCajaOverdue(diffHours >= 12);
+        } else {
+          setIsCajaOverdue(false);
+        }
       } catch {
         setTurnoActivo(null);
+        setIsCajaOverdue(false);
       } finally {
         setLoadingCaja(false);
       }
@@ -90,7 +100,7 @@ export function Header() {
         fetchCajaStatus();
       });
     }
-  }, [userId, currentBranchId, userRol, pathname, fetchCajaStatus]);
+  }, [userId, currentBranchId, userRol, fetchCajaStatus]);
 
   useEffect(() => {
     const handleCajaChange = () => {
@@ -131,8 +141,14 @@ export function Header() {
   const pathSegments = pathname.split("/").filter(Boolean);
   const breadcrumbs = pathSegments.map((segment, index) => {
     const href = "/" + pathSegments.slice(0, index + 1).join("/");
-    const label = segment.charAt(0).toUpperCase() + segment.slice(1);
-    return { label: label.replace(/-/g, " "), href };
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment);
+    let label = segment.charAt(0).toUpperCase() + segment.slice(1);
+    if (isUUID) {
+      label = `#${segment.slice(0, 8).toUpperCase()}`;
+    } else {
+      label = label.replace(/-/g, " ");
+    }
+    return { label, href };
   });
 
   const handleSignOut = async () => {
@@ -190,10 +206,12 @@ export function Header() {
       </div>
 
       {/* Quick Action Controls */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Global Search / Command Menu */}
+        <CommandMenu />
         {/* Super Admin indicator */}
         {session?.user?.rol === "superadmin" && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-extrabold rounded-xl uppercase tracking-wider">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-xs font-bold rounded-xl uppercase tracking-wider">
             Super Admin
           </div>
         )}
@@ -257,15 +275,34 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/15 text-xs font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer shadow-xs transition-colors duration-300"
-                title="Caja Abierta - Gestionar o Cerrar Turno"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer shadow-xs transition-colors duration-300 ${
+                  isCajaOverdue
+                    ? "bg-rose-500/15 border-rose-500/35 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400"
+                    : "bg-emerald-500/10 border-emerald-500/25 hover:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                }`}
+                title={
+                  isCajaOverdue
+                    ? "Turno extendido (>12h) - Se sugiere realizar corte de caja"
+                    : "Caja Abierta - Gestionar o Cerrar Turno"
+                }
               >
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="whitespace-nowrap">Caja: S/ {(() => {
-                  const efectivoPago = turnoActivo.pagos?.find((p) => p.metodo === "efectivo")?.total || 0;
-                  const egresos = turnoActivo.totalEgresos || 0;
-                  return Math.max(0, parseFloat(turnoActivo.montoInicial || "0") + efectivoPago - egresos).toFixed(2);
-                })()}</span>
+                <div
+                  className={`h-2.5 w-2.5 rounded-full animate-pulse shrink-0 ${
+                    isCajaOverdue ? "bg-rose-500" : "bg-emerald-500"
+                  }`}
+                />
+                <span className="whitespace-nowrap">
+                  Caja: S/{" "}
+                  {(() => {
+                    const efectivoPago =
+                      turnoActivo.pagos?.find((p) => p.metodo === "efectivo")?.total || 0;
+                    const egresos = turnoActivo.totalEgresos || 0;
+                    return Math.max(
+                      0,
+                      parseFloat(turnoActivo.montoInicial || "0") + efectivoPago - egresos
+                    ).toFixed(2);
+                  })()}
+                </span>
               </Button>
             </Link>
           ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Layers, Sparkles, Car, Edit3, Trash2, FlaskConical } from "lucide-react";
+import { Clock, Layers, Sparkles, Car, Edit3, Trash2, FlaskConical, Copy, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formats";
@@ -23,6 +23,7 @@ export interface Servicio {
   categoriaId: string | null;
   categoriaNombre: string | null;
   totalInsumosReceta?: number;
+  costoReceta?: number;
 }
 
 const VEHICULO_OPCIONES = [
@@ -40,8 +41,10 @@ interface ServiciosGridProps {
   categorias: Categoria[];
   searchQuery: string;
   activeTab: string;
+  recetaFilter?: "todos" | "con_receta" | "sin_receta";
   isPending: boolean;
   onEdit: (servicio: Servicio) => void;
+  onDuplicate: (servicio: Servicio) => void;
   onReceta: (servicio: Servicio) => void;
   onDelete: (id: string) => void;
   onLoadDemo: () => void;
@@ -53,8 +56,10 @@ export function ServiciosGrid({
   categorias: _categorias,
   searchQuery,
   activeTab,
+  recetaFilter = "todos",
   isPending,
   onEdit,
+  onDuplicate,
   onReceta,
   onDelete,
   onLoadDemo,
@@ -66,8 +71,14 @@ export function ServiciosGrid({
       serv.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (serv.descripcion && serv.descripcion.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    if (activeTab === "todos") return matchesSearch;
-    return matchesSearch && serv.categoriaId === activeTab;
+    const matchesCategory = activeTab === "todos" || serv.categoriaId === activeTab;
+    const hasReceta = (serv.totalInsumosReceta ?? 0) > 0;
+    const matchesReceta =
+      recetaFilter === "todos" ||
+      (recetaFilter === "con_receta" && hasReceta) ||
+      (recetaFilter === "sin_receta" && !hasReceta);
+
+    return matchesSearch && matchesCategory && matchesReceta;
   });
 
   if (filteredServicios.length === 0) {
@@ -163,6 +174,32 @@ export function ServiciosGrid({
                 })}
               </div>
             )}
+
+            {/* Rentabilidad / Costo de Receta (si está configurada) */}
+            {(serv.totalInsumosReceta ?? 0) > 0 && (
+              <div className="pt-1">
+                {(() => {
+                  const precioNum = parseFloat(serv.precio || "0");
+                  const costoNum = serv.costoReceta ?? 0;
+                  const margenPct =
+                    precioNum > 0 ? Math.round(((precioNum - costoNum) / precioNum) * 100) : 0;
+                  return (
+                    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-emerald-500/8 border border-emerald-500/20 text-[11px]">
+                      <span className="text-muted-foreground font-medium">
+                        Costo insumos:{" "}
+                        <strong className="font-mono text-foreground">
+                          {formatCurrency(costoNum)}
+                        </strong>
+                      </span>
+                      <span className="inline-flex items-center gap-1 font-mono font-black text-emerald-500">
+                        <TrendingUp className="size-3" />
+                        {margenPct}% margen
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
 
           {/* Actions Footer */}
@@ -181,11 +218,21 @@ export function ServiciosGrid({
             >
               <FlaskConical className="h-3.5 w-3.5" />
               {(serv.totalInsumosReceta ?? 0) > 0
-                ? `Receta (${serv.totalInsumosReceta} insumo${serv.totalInsumosReceta === 1 ? "" : "s"})`
+                ? `Receta (${serv.totalInsumosReceta})`
                 : "Configurar Receta"}
             </Button>
 
             <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => onDuplicate(serv)}
+                className="h-8 w-8 text-muted-foreground hover:text-secondary hover:bg-secondary/10 rounded-lg cursor-pointer"
+                title="Duplicar servicio"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </Button>
               <Button
                 type="button"
                 variant="ghost"

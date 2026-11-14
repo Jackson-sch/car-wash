@@ -16,6 +16,7 @@ import {
   Sparkles,
   Boxes,
   CalendarDays,
+  ReceiptText,
 } from "lucide-react";
 import { canDo } from "@/lib/auth/permissions";
 
@@ -144,6 +145,12 @@ export function getAdminNavItems(rol: string): NavItem[] {
       href: "/inventario",
       icon: Boxes,
       show: canDo(rol, "configuracion", "ver") || rol === "supervisor",
+    },
+    {
+      label: "Compras",
+      href: "/compras",
+      icon: ReceiptText,
+      show: canDo(rol, "compras", "ver"),
     },
     {
       label: "Configuración",

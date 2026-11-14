@@ -18,6 +18,8 @@ import type {
   TurnoActivoData,
   SucursalInfo,
   SucursalResumen,
+  TopServiceItem,
+  PaymentBreakdownItem,
 } from "@/lib/actions/dashboard";
 import {
   pagos,
@@ -163,6 +165,9 @@ async function _getCachedDashboardData(
     trendResult,
     colaResult,
     [activeShift],
+    [completedTodayResult],
+    metodosPagoResult,
+    topServiciosResult,
   ] = await Promise.all([
     db
       .select({ total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)` })
@@ -261,6 +266,44 @@ async function _getCachedDashboardData(
       .innerJoin(usuarios, eq(turnosCaja.empleadoId, usuarios.id))
       .where(and(shiftFilter, sql`${turnosCaja.cierre} IS NULL`))
       .limit(1),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(ordenes)
+      .where(
+        and(
+          sucursalFilter,
+          or(eq(ordenes.estado, "cobrado"), eq(ordenes.estado, "completado")),
+          gte(ordenes.createdAt, todayStart),
+          lte(ordenes.createdAt, todayEnd)
+        )
+      ),
+    db
+      .select({
+        metodo: pagos.metodo,
+        total: sql<number>`COALESCE(SUM(${pagos.monto}), 0)`,
+      })
+      .from(pagos)
+      .innerJoin(ordenes, eq(pagos.ordenId, ordenes.id))
+      .where(
+        and(
+          sucursalFilter,
+          gte(pagos.createdAt, todayStart),
+          lte(pagos.createdAt, todayEnd)
+        )
+      )
+      .groupBy(pagos.metodo),
+    db
+      .select({
+        nombreServicio: ordenServicios.nombreServicio,
+        cantidad: sql<number>`count(*)`,
+        total: sql<number>`COALESCE(SUM(${ordenServicios.subtotal}), 0)`,
+      })
+      .from(ordenServicios)
+      .innerJoin(ordenes, eq(ordenServicios.ordenId, ordenes.id))
+      .where(and(sucursalFilter, gte(ordenes.createdAt, sevenDaysAgo)))
+      .groupBy(ordenServicios.nombreServicio)
+      .orderBy(desc(sql`count(*)`))
+      .limit(5),
   ]);
 
   const ventasHoy = Number(pagosResult?.total || 0);
@@ -269,6 +312,32 @@ async function _getCachedDashboardData(
   const ordenesEnEspera = Number(activeResult?.pendiente || 0);
   const ticketPromedio = Number(avgResult?.avg || 0);
   const insumosBajoStock = Number(stockResult?.count || 0);
+  const ordenesCompletadasHoy = Number(completedTodayResult?.count || 0);
+
+  const efectivoHoy = Number(
+    metodosPagoResult.find((m) => m.metodo === "efectivo")?.total || 0
+  );
+  const digitalHoy = Number(
+    metodosPagoResult
+      .filter((m) => m.metodo !== "efectivo")
+      .reduce((acc, m) => acc + Number(m.total || 0), 0)
+  );
+
+  const totalMetodos = metodosPagoResult.reduce((sum, m) => sum + Number(m.total || 0), 0);
+  const pagosBreakdown: PaymentBreakdownItem[] = metodosPagoResult.map((m) => {
+    const val = Number(m.total || 0);
+    return {
+      metodo: m.metodo,
+      total: val,
+      porcentaje: totalMetodos > 0 ? Math.round((val / totalMetodos) * 100) : 0,
+    };
+  });
+
+  const topServicios: TopServiceItem[] = topServiciosResult.map((s) => ({
+    nombre: s.nombreServicio,
+    cantidad: Number(s.cantidad || 0),
+    total: Number(s.total || 0),
+  }));
 
   // Formatear tendencia semanal
   const salesTrendData: SalesTrendPoint[] = trendResult.map((r) => {
@@ -389,13 +458,25 @@ async function _getCachedDashboardData(
   }
 
   return {
-    kpis: { ventasHoy, ordenesActivas, ordenesEnProceso, ordenesEnEspera, ticketPromedio, insumosBajoStock },
+    kpis: {
+      ventasHoy,
+      ordenesActivas,
+      ordenesEnProceso,
+      ordenesEnEspera,
+      ticketPromedio,
+      insumosBajoStock,
+      ordenesCompletadasHoy,
+      efectivoHoy,
+      digitalHoy,
+    },
     salesTrendData: finalTrendData,
     ordenesEnCola,
     turnoActivo,
     sucursalesResumen,
     sucursales: vista === "todas" ? sucursalesInfo : undefined,
     currentBranch: vista === "sucursal" ? currentBranch : undefined,
+    topServicios,
+    pagosBreakdown,
   };
 }
 
@@ -421,6 +502,7 @@ async function _getCachedServicios(sucursalId: string) {
       categoriaId: servicios.categoriaId,
       categoriaNombre: categoriasServicio.nombre,
       totalInsumosReceta: sql<number>`coalesce((select count(*) from servicio_recetas where servicio_recetas.servicio_id = ${servicios.id}), 0)::int`,
+      costoReceta: sql<number>`coalesce((select sum(sr.cantidad_consumo::numeric * coalesce(inv.precio_compra::numeric, 0)) from servicio_recetas sr join inventario inv on inv.id = sr.item_id where sr.servicio_id = ${servicios.id}), 0)::float`,
     })
     .from(servicios)
     .leftJoin(categoriasServicio, eq(servicios.categoriaId, categoriasServicio.id))
@@ -455,8 +537,42 @@ export interface CachedReportesVentas {
   horasPico: { hora: string; cantidad: number; prediccion: number }[];
 }
 
-async function _getCachedReportesVentas(sucursalId: string): Promise<CachedReportesVentas> {
+async function _getCachedReportesVentas(sucursalId: string, rango: string = "7d"): Promise<CachedReportesVentas> {
   cacheTag("reportes");
+
+  const getDateFilter = () => {
+    switch (rango) {
+      case "hoy":
+        return sql`${ordenes.createdAt} >= date_trunc('day', now())`;
+      case "30d":
+        return sql`${ordenes.createdAt} >= now() - interval '30 days'`;
+      case "mes":
+        return sql`${ordenes.createdAt} >= date_trunc('month', now())`;
+      case "todo":
+        return sql`1 = 1`;
+      case "7d":
+      default:
+        return sql`${ordenes.createdAt} >= now() - interval '7 days'`;
+    }
+  };
+
+  const getPagosDateFilter = () => {
+    switch (rango) {
+      case "hoy":
+        return sql`${pagos.createdAt} >= date_trunc('day', now())`;
+      case "30d":
+        return sql`${pagos.createdAt} >= now() - interval '30 days'`;
+      case "mes":
+        return sql`${pagos.createdAt} >= date_trunc('month', now())`;
+      case "todo":
+        return sql`1 = 1`;
+      case "7d":
+      default:
+        return sql`${pagos.createdAt} >= now() - interval '7 days'`;
+    }
+  };
+
+  const isToday = rango === "hoy";
 
   const [kpisRows, ventasDiarias, pagosMetodo, serviciosTop, horasPico] = await Promise.all([
     db
@@ -469,24 +585,28 @@ async function _getCachedReportesVentas(sucursalId: string): Promise<CachedRepor
       .where(
         and(
           eq(ordenes.sucursalId, sucursalId),
-          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`,
+          getDateFilter()
         )
       ),
     db
       .select({
-        fecha: sql<string>`to_char(${ordenes.createdAt}, 'DD/MM')`,
+        fecha: isToday 
+          ? sql<string>`to_char(${ordenes.createdAt}, 'HH24:00')`
+          : sql<string>`to_char(${ordenes.createdAt}, 'DD/MM')`,
         total: sql<string>`sum(${ordenes.total})`,
+        ordenSort: sql`min(${ordenes.createdAt})`,
       })
       .from(ordenes)
       .where(
         and(
           eq(ordenes.sucursalId, sucursalId),
           sql`${ordenes.estado} IN ('completado', 'cobrado')`,
-          sql`${ordenes.createdAt} >= now() - interval '7 days'`
+          getDateFilter()
         )
       )
-      .groupBy(sql`to_char(${ordenes.createdAt}, 'DD/MM')`)
-      .orderBy(sql`to_char(${ordenes.createdAt}, 'DD/MM')`),
+      .groupBy(isToday ? sql`to_char(${ordenes.createdAt}, 'HH24:00')` : sql`to_char(${ordenes.createdAt}, 'DD/MM')`)
+      .orderBy(sql`min(${ordenes.createdAt}) asc`),
     db
       .select({
         name: pagos.metodo,
@@ -494,7 +614,12 @@ async function _getCachedReportesVentas(sucursalId: string): Promise<CachedRepor
       })
       .from(pagos)
       .innerJoin(turnosCaja, eq(pagos.turnoId, turnosCaja.id))
-      .where(eq(turnosCaja.sucursalId, sucursalId))
+      .where(
+        and(
+          eq(turnosCaja.sucursalId, sucursalId),
+          getPagosDateFilter()
+        )
+      )
       .groupBy(pagos.metodo),
     db
       .select({
@@ -507,7 +632,8 @@ async function _getCachedReportesVentas(sucursalId: string): Promise<CachedRepor
       .where(
         and(
           eq(ordenes.sucursalId, sucursalId),
-          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`,
+          getDateFilter()
         )
       )
       .groupBy(ordenServicios.nombreServicio)
@@ -522,7 +648,8 @@ async function _getCachedReportesVentas(sucursalId: string): Promise<CachedRepor
       .where(
         and(
           eq(ordenes.sucursalId, sucursalId),
-          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`,
+          getDateFilter()
         )
       )
       .groupBy(sql`to_char(${ordenes.createdAt}, 'HH24')`)
@@ -725,6 +852,8 @@ export interface EmpleadoCached {
   totalLavados: number;
   montoLavado: number;
   comisionAcumulada: number;
+  comisionHistorica?: number;
+  ordenesPendientesLiquidar?: number;
   tiempoPromedioMin?: number;
 }
 
@@ -753,6 +882,8 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
         empleadoId: ordenes.empleadoId,
         totalLavados: count(ordenes.id),
         montoTotal: sql<string>`coalesce(sum(${ordenes.total}), 0)`,
+        montoPendiente: sql<string>`coalesce(sum(case when ${ordenes.liquidacionId} is null then ${ordenes.total} else 0 end), 0)`,
+        ordenesPendientesCount: sql<number>`count(case when ${ordenes.liquidacionId} is null then 1 end)::int`,
         tiempoPromedioMin: sql<number>`coalesce(avg(extract(epoch from (${ordenes.updatedAt} - ${ordenes.createdAt})) / 60), 25)::int`,
       })
       .from(ordenes)
@@ -765,12 +896,23 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
       .groupBy(ordenes.empleadoId),
   ]);
 
-  const statsMap = new Map<string, { totalLavados: number; montoTotal: number; tiempoPromedioMin: number }>();
+  const statsMap = new Map<
+    string,
+    {
+      totalLavados: number;
+      montoTotal: number;
+      montoPendiente: number;
+      ordenesPendientesCount: number;
+      tiempoPromedioMin: number;
+    }
+  >();
   for (const row of lavadorStats) {
     if (row.empleadoId) {
       statsMap.set(row.empleadoId, {
         totalLavados: row.totalLavados,
         montoTotal: parseFloat(row.montoTotal || "0"),
+        montoPendiente: parseFloat(row.montoPendiente || "0"),
+        ordenesPendientesCount: Number(row.ordenesPendientesCount || 0),
         tiempoPromedioMin: row.tiempoPromedioMin || 25,
       });
     }
@@ -778,12 +920,20 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
 
   return empleadosList.map((emp) => {
     if (emp.rol === "lavador") {
-      const s = statsMap.get(emp.id) || { totalLavados: 0, montoTotal: 0, tiempoPromedioMin: 25 };
+      const s = statsMap.get(emp.id) || {
+        totalLavados: 0,
+        montoTotal: 0,
+        montoPendiente: 0,
+        ordenesPendientesCount: 0,
+        tiempoPromedioMin: 25,
+      };
       return {
         ...emp,
         totalLavados: s.totalLavados,
         montoLavado: s.montoTotal,
-        comisionAcumulada: s.montoTotal * 0.30,
+        comisionAcumulada: s.montoPendiente * 0.30,
+        comisionHistorica: s.montoTotal * 0.30,
+        ordenesPendientesLiquidar: s.ordenesPendientesCount,
         tiempoPromedioMin: s.tiempoPromedioMin,
       };
     }
@@ -792,6 +942,8 @@ async function _getCachedEmpleados(sucursalId: string): Promise<EmpleadoCached[]
       totalLavados: 0,
       montoLavado: 0,
       comisionAcumulada: 0,
+      comisionHistorica: 0,
+      ordenesPendientesLiquidar: 0,
       tiempoPromedioMin: 0,
     };
   });

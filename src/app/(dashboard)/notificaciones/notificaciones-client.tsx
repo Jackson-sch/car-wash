@@ -159,7 +159,7 @@ export function NotificacionesClient({ initialNotificaciones }: NotificacionesCl
                           {n.titulo}
                         </h4>
                         {n.mensaje && (
-                          <p className={`text-xs mt-1 ${n.leida ? "text-muted-foreground/60" : "text-muted-foreground"}`}>
+                          <p className={`text-xs mt-1 ${n.leida ? "text-slate-500 dark:text-slate-400" : "text-slate-700 dark:text-slate-300 font-medium"}`}>
                             {n.mensaje}
                           </p>
                         )}
@@ -176,7 +176,7 @@ export function NotificacionesClient({ initialNotificaciones }: NotificacionesCl
                         </Button>
                       )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground/50 mt-2" suppressHydrationWarning>
+                    <p className="text-xs text-muted-foreground mt-2" suppressHydrationWarning>
                       {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
                     </p>
                   </div>

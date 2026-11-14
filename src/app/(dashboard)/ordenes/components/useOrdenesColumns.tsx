@@ -1,3 +1,4 @@
+import { VehiclePlate } from "@/components/shared/VehiclePlate";
 import { useMemo } from "react";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -115,21 +116,12 @@ export function useOrdenesColumns({
     },
     {
       accessorKey: "placa",
-      header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Placa</span>,
-      cell: ({ row }) => (
-        <div className="inline-flex flex-col items-center justify-center bg-zinc-900 border border-zinc-700/80 rounded px-2 py-0.5 shadow-2xs select-all font-mono min-w-[70px]">
-          <span className="text-[6px] uppercase font-bold text-zinc-400 tracking-widest leading-none">
-            PERÚ
-          </span>
-          <span className="text-[11px] font-black text-zinc-100 tracking-wider leading-none mt-0.5 uppercase">
-            {String(row.getValue("placa") || "")}
-          </span>
-        </div>
-      ),
+      header: () => <span className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Placa</span>,
+      cell: ({ row }) => <VehiclePlate plate={String(row.getValue("placa") || "")} size="sm" />,
     },
     {
       id: "cliente_vehiculo",
-      header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Cliente / Vehículo</span>,
+      header: () => <span className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Cliente / Vehículo</span>,
       cell: ({ row }) => {
         const ord = row.original;
         const clienteNombreCompleto = `${ord.clienteNombre} ${ord.clienteApellido || ""}`.trim();
@@ -174,16 +166,16 @@ export function useOrdenesColumns({
     },
     {
       id: "servicios",
-      header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Servicios</span>,
+      header: () => <span className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Servicios</span>,
       cell: ({ row }) => {
         const ord = row.original;
         return (
           <div className="flex flex-col items-start gap-0.5">
-            <span className="font-semibold text-[9px] bg-muted/65 text-muted-foreground px-1.5 py-0.2 rounded border border-border/80 shadow-3xs">
+            <span className="font-bold text-[10px] bg-muted text-foreground/90 px-2 py-0.5 rounded border border-border shadow-xs">
               Detalle en ticket
             </span>
             {ord.notas && (
-              <span className="text-[8.5px] text-muted-foreground italic truncate max-w-32.5" title={ord.notas}>
+              <span className="text-[10px] text-muted-foreground italic truncate max-w-36" title={ord.notas}>
                 Nota: {ord.notas}
               </span>
             )}
@@ -193,7 +185,7 @@ export function useOrdenesColumns({
     },
     {
       accessorKey: "lavadorNombre",
-      header: () => <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Lavador Asignado</span>,
+      header: () => <span className="text-xs uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Lavador Asignado</span>,
       cell: ({ row }) => {
         const ord = row.original;
         const isUnassigned = !ord.lavadorNombre;
@@ -257,7 +249,7 @@ export function useOrdenesColumns({
     },
     {
       accessorKey: "estado",
-      header: () => <div className="text-center text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Estado</div>,
+      header: () => <div className="text-center text-xs uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Estado</div>,
       cell: ({ row }) => {
         const ord = row.original;
         
@@ -399,7 +391,7 @@ export function useOrdenesColumns({
     },
     {
       id: "acciones",
-      header: () => <div className="text-right text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Acciones</div>,
+      header: () => <div className="text-right text-xs uppercase font-extrabold text-slate-700 dark:text-slate-300 tracking-wider">Acciones</div>,
       cell: ({ row }) => {
         const ord = row.original;
         return (

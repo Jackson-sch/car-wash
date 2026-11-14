@@ -33,7 +33,7 @@ export function ClienteCard({ vehiculo }: ClienteCardProps) {
         <div className="space-y-3 w-full min-w-0">
           <div>
             <Link
-              href={`/clientes?search=${encodeURIComponent(vehiculo.clienteNombre)}`}
+              href={`/clientes/${vehiculo.clienteId}`}
               className="text-base font-extrabold text-foreground hover:text-secondary transition-colors inline-block"
             >
               {vehiculo.clienteNombre} {vehiculo.clienteApellido || ""}

@@ -1,25 +1,22 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Package, Plus, AlertTriangle, TrendingDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { registrarItemInventario, registrarMovimientoStock } from "@/lib/actions/inventario";
+import { useState, useTransition, useMemo } from "react";
+import {
+  registrarItemInventario,
+  registrarMovimientoStock,
+  actualizarItemInventarioAction,
+  cambiarEstadoInsumoAction,
+} from "@/lib/actions/inventario";
 import { toast } from "sonner";
-import { InventarioTable } from "./components/InventarioTable";
+import { InventarioHeader } from "./components/InventarioHeader";
+import { InventarioKpis } from "./components/InventarioKpis";
+import { InventarioToolbar, type StatusFilter } from "./components/InventarioToolbar";
+import { InventarioTable, type Insumo } from "./components/InventarioTable";
 import { CrearInsumoModal } from "./components/CrearInsumoModal";
 import { AjustarStockModal } from "./components/AjustarStockModal";
-
-interface Insumo {
-  id: string;
-  nombre: string;
-  descripcion: string | null;
-  unidad: string | null;
-  stock: string | null;
-  stockMinimo: string | null;
-  precioCompra: string | null;
-  proveedor: string | null;
-  activo: boolean | null;
-}
+import { KardexMovimientosModal } from "./components/KardexMovimientosModal";
+import { EditarInsumoModal } from "./components/EditarInsumoModal";
+import { RecetasServiciosModal } from "./components/RecetasServiciosModal";
 
 interface InventarioClientProps {
   initialInventario: Insumo[];
@@ -29,9 +26,91 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
   const [inventarioList, setInventarioList] = useState<Insumo[]>(initialInventario);
   const [isPending, startTransition] = useTransition();
 
+  // Estados de filtros y búsqueda
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [unitFilter, setUnitFilter] = useState<string>("todas");
+
+  // Estados de modales
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isAjusteOpen, setIsAjusteOpen] = useState(false);
+  const [isKardexOpen, setIsKardexOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isRecetasOpen, setIsRecetasOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Insumo | null>(null);
+
+  // Unidades disponibles únicas para el filtro
+  const availableUnits = useMemo(() => {
+    const set = new Set<string>();
+    inventarioList.forEach((i) => {
+      if (i.unidad) set.add(i.unidad);
+    });
+    return Array.from(set).sort();
+  }, [inventarioList]);
+
+  // Conteos para las píldoras de estado
+  const counts = useMemo(() => {
+    let suficiente = 0;
+    let bajo = 0;
+    let agotado = 0;
+
+    inventarioList.forEach((item) => {
+      const st = parseFloat(item.stock || "0");
+      const min = parseFloat(item.stockMinimo || "0");
+      if (st === 0) {
+        agotado++;
+      } else if (st <= min) {
+        bajo++;
+      } else {
+        suficiente++;
+      }
+    });
+
+    return {
+      total: inventarioList.length,
+      suficiente,
+      bajo,
+      agotado,
+    };
+  }, [inventarioList]);
+
+  // Filtrado compuesto
+  const filteredInsumos = useMemo(() => {
+    return inventarioList.filter((item) => {
+      // 1. Filtro de búsqueda
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchName = item.nombre.toLowerCase().includes(q);
+        const matchDesc = (item.descripcion || "").toLowerCase().includes(q);
+        const matchProv = (item.proveedor || "").toLowerCase().includes(q);
+        if (!matchName && !matchDesc && !matchProv) return false;
+      }
+
+      // 2. Filtro por Unidad
+      if (unitFilter !== "todas" && item.unidad !== unitFilter) {
+        return false;
+      }
+
+      // 3. Filtro por Estado
+      const st = parseFloat(item.stock || "0");
+      const min = parseFloat(item.stockMinimo || "0");
+
+      if (statusFilter === "suficiente") return st > min;
+      if (statusFilter === "bajo") return st <= min && st > 0;
+      if (statusFilter === "agotado") return st === 0;
+
+      return true;
+    });
+  }, [inventarioList, searchQuery, unitFilter, statusFilter]);
+
+  const hasActiveFilters =
+    Boolean(searchQuery.trim()) || statusFilter !== "todos" || unitFilter !== "todas";
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("todos");
+    setUnitFilter("todas");
+  };
 
   const handleSaveItem = async (data: {
     nombre: string;
@@ -67,6 +146,67 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
   const handleOpenAjuste = (item: Insumo) => {
     setSelectedItem(item);
     setIsAjusteOpen(true);
+  };
+
+  const handleOpenKardex = (item: Insumo) => {
+    setSelectedItem(item);
+    setIsKardexOpen(true);
+  };
+
+  const handleOpenEdit = (item: Insumo) => {
+    setSelectedItem(item);
+    setIsEditOpen(true);
+  };
+
+  const handleSaveEdit = async (data: {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    unidad: string;
+    stockMinimo: string;
+    precioCompra: string;
+    proveedor: string;
+  }): Promise<boolean> => {
+    return new Promise<boolean>((resolve) => {
+      startTransition(async () => {
+        const res = await actualizarItemInventarioAction({
+          id: data.id,
+          nombre: data.nombre,
+          descripcion: data.descripcion,
+          unidad: data.unidad,
+          stockMinimo: data.stockMinimo,
+          precioCompra: data.precioCompra || undefined,
+          proveedor: data.proveedor,
+        });
+
+        if (res.success && res.data) {
+          toast.success("Insumo actualizado exitosamente");
+          setInventarioList((prev) =>
+            prev.map((i) => (i.id === data.id ? (res.data as Insumo) : i))
+          );
+          resolve(true);
+        } else {
+          toast.error(res.error || "No se pudo actualizar el insumo");
+          resolve(false);
+        }
+      });
+    });
+  };
+
+  const handleToggleActivo = async (id: string, activo: boolean): Promise<boolean> => {
+    return new Promise<boolean>((resolve) => {
+      startTransition(async () => {
+        const res = await cambiarEstadoInsumoAction(id, activo);
+        if (res.success) {
+          toast.success("Insumo dado de baja del catálogo");
+          setInventarioList((prev) => prev.filter((i) => i.id !== id));
+          resolve(true);
+        } else {
+          toast.error(res.error || "No se pudo desactivar el insumo");
+          resolve(false);
+        }
+      });
+    });
   };
 
   const handleSaveAjuste = async (
@@ -123,160 +263,44 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
     });
   };
 
-  const totalItems = inventarioList.length;
-
-  const lowStockItems = inventarioList.filter((item) => {
-    const st = parseFloat(item.stock || "0");
-    const min = parseFloat(item.stockMinimo || "0");
-    return st <= min && st > 0;
-  }).length;
-
-  const outOfStockItems = inventarioList.filter((item) => {
-    const st = parseFloat(item.stock || "0");
-    return st === 0;
-  }).length;
-
   return (
-    <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-            <Package className="h-7 w-7 text-secondary" />
-            Control de Inventario
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Supervisa stock mínimo de químicos, ceras y siliconas, y registra reposiciones de materiales.
-          </p>
-        </div>
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
-        >
-          <Plus className="h-4.5 w-4.5" />
-          Agregar Insumo
-        </Button>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card 1: Total Productos */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Total de Productos
-              </span>
-              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-                {totalItems} <span className="text-sm font-medium text-muted-foreground">ítems</span>
-              </h3>
-            </div>
-            <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
-              <Package className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Monitoreando catálogo de materiales</span>
-          </div>
-          {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </div>
-
-        {/* Card 2: Bajo Stock */}
-        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md ${
-          lowStockItems > 0 
-            ? "border-amber-500/30 hover:border-amber-500/60" 
-            : "border-border hover:border-zinc-350"
-        }`}>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Bajo Stock Mínimo
-              </span>
-              <h3 className={`text-3xl font-extrabold tracking-tight ${
-                lowStockItems > 0 ? "text-amber-500" : "text-foreground"
-              }`}>
-                {lowStockItems} <span className="text-sm font-medium text-muted-foreground">alertas</span>
-              </h3>
-            </div>
-            <div className={`p-3.5 rounded-xl transition-transform group-hover:scale-110 duration-300 ${
-              lowStockItems > 0 ? "bg-amber-500/10 text-amber-500" : "bg-zinc-500/10 text-zinc-500"
-            }`}>
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            {totalItems > 0 ? (
-              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-colors duration-500 ${
-                    lowStockItems > 0 ? "bg-amber-500" : "bg-emerald-500"
-                  }`}
-                  style={{ width: `${(lowStockItems / totalItems) * 100}%` }}
-                />
-              </div>
-            ) : (
-              <div className="h-1.5" />
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              {lowStockItems > 0 
-                ? "Requiere reabastecimiento pronto" 
-                : "Niveles de stock estables"}
-            </p>
-          </div>
-          {lowStockItems > 0 && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent" />
-          )}
-        </div>
-
-        {/* Card 3: Agotados */}
-        <div className={`relative group overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md ${
-          outOfStockItems > 0 
-            ? "border-rose-500/30 hover:border-rose-500/60" 
-            : "border-border hover:border-zinc-350"
-        }`}>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Insumos Agotados
-              </span>
-              <h3 className={`text-3xl font-extrabold tracking-tight ${
-                outOfStockItems > 0 ? "text-rose-500" : "text-foreground"
-              }`}>
-                {outOfStockItems} <span className="text-sm font-medium text-muted-foreground">ítems</span>
-              </h3>
-            </div>
-            <div className={`p-3.5 rounded-xl transition-transform group-hover:scale-110 duration-300 ${
-              outOfStockItems > 0 ? "bg-rose-500/10 text-rose-500 animate-pulse" : "bg-zinc-500/10 text-zinc-500"
-            }`}>
-              <TrendingDown className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className={`h-1.5 w-1.5 rounded-full ${
-              outOfStockItems > 0 ? "bg-rose-500 animate-ping" : "bg-emerald-500"
-            }`} />
-            <span>
-              {outOfStockItems > 0 
-                ? "¡Crítico! Reponer stock inmediatamente" 
-                : "Sin rupturas de stock"}
-            </span>
-          </div>
-          {outOfStockItems > 0 && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-rose-500/50 to-transparent" />
-          )}
-        </div>
-      </div>
-
-      {/* Inventory Table */}
-      <InventarioTable
-        insumos={inventarioList}
-        onAdjustStock={handleOpenAjuste}
-        onQuickAdjust={handleQuickAdjust}
+    <div className="space-y-6 sm:space-y-8 text-foreground pb-12">
+      {/* 1. Header con Exportación a Excel, Recetas y Crear Insumo */}
+      <InventarioHeader
+        onOpenCreate={() => setIsCreateOpen(true)}
+        onOpenRecetas={() => setIsRecetasOpen(true)}
+        totalItems={inventarioList.length}
       />
 
-      {/* Modals */}
+      {/* 2. Bento KPI Grid (Total, Capital Valorizado en S/, Bajo Mínimo, Agotados) */}
+      <InventarioKpis insumos={inventarioList} />
+
+      {/* 3. Toolbar con Píldoras de Estado y Buscador */}
+      <InventarioToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        unitFilter={unitFilter}
+        onUnitFilterChange={setUnitFilter}
+        availableUnits={availableUnits}
+        counts={counts}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
+
+      {/* 4. Tabla de Inventario con Kardex, Ajuste, Edición y Micro-ajustes */}
+      <InventarioTable
+        insumos={filteredInsumos}
+        onAdjustStock={handleOpenAjuste}
+        onViewKardex={handleOpenKardex}
+        onEditInsumo={handleOpenEdit}
+        onQuickAdjust={handleQuickAdjust}
+        onClearFilters={handleClearFilters}
+        hasActiveFilters={hasActiveFilters}
+      />
+
+      {/* 5. Modales */}
       <CrearInsumoModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -290,6 +314,27 @@ export function InventarioClient({ initialInventario }: InventarioClientProps) {
         selectedItem={selectedItem}
         isPending={isPending}
         onSave={handleSaveAjuste}
+      />
+
+      <KardexMovimientosModal
+        isOpen={isKardexOpen}
+        onClose={() => setIsKardexOpen(false)}
+        insumo={selectedItem}
+      />
+
+      <EditarInsumoModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        insumo={selectedItem}
+        isPending={isPending}
+        onSave={handleSaveEdit}
+        onToggleActivo={handleToggleActivo}
+      />
+
+      <RecetasServiciosModal
+        isOpen={isRecetasOpen}
+        onClose={() => setIsRecetasOpen(false)}
+        insumos={inventarioList}
       />
     </div>
   );

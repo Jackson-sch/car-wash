@@ -14,10 +14,16 @@ import {
 } from "@/components/ui/select";
 import type { Cliente } from "./ClientesTable";
 
+interface ClientePuntosTarget {
+  id: string;
+  nombre: string;
+  apellido: string | null;
+}
+
 interface AjustarPuntosModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cliente: Cliente;
+  cliente: ClientePuntosTarget;
   isPending: boolean;
   onSave: (tipo: "ganado" | "canjeado" | "ajuste", puntos: number, descripcion: string) => Promise<void>;
 }
@@ -43,54 +49,47 @@ export function AjustarPuntosModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-card border border-border w-full max-w-sm rounded-xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
-        <div className="p-5 border-b border-zinc-200 flex items-center justify-between">
-          <h4 className="text-sm font-bold text-zinc-900">Ajustar Puntos Lealtad</h4>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-200">
+      <div className="bg-card border border-border w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl transition-transform duration-200 text-foreground">
+        <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/30">
+          <h4 className="text-sm font-extrabold text-foreground">Ajustar Puntos de Lealtad</h4>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
-            className="h-6 w-6 text-zinc-500 hover:text-zinc-900 flex items-center justify-center"
+            aria-label="Cerrar modal"
+            className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="size-4" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <div className="text-xs font-bold text-zinc-650">
-            Cliente: <span className="text-zinc-900">{cliente.nombre} {cliente.apellido || ""}</span>
+          <div className="text-xs font-bold text-muted-foreground">
+            Cliente: <span className="text-foreground font-extrabold">{cliente.nombre} {cliente.apellido || ""}</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="ajTipo" className="text-[10px] font-bold text-zinc-650">
+            <div className="space-y-1.5">
+              <Label htmlFor="ajTipo" className="text-[11px] font-bold text-muted-foreground">
                 Tipo de Operación
               </Label>
               <Select
                 value={ajusteTipo}
                 onValueChange={(val: string | null) => val && setAjusteTipo(val as "ganado" | "canjeado" | "ajuste")}
               >
-                <SelectTrigger id="ajTipo" className="w-full bg-card border-border text-foreground rounded-lg text-xs h-8 px-2">
-                  <SelectValue>
-                    {(val) => {
-                      const map: Record<string, string> = {
-                        ganado: "Sumar (+)",
-                        canjeado: "Restar / Canje (-)",
-                        ajuste: "Ajuste de Auditoría",
-                      };
-                      return map[val] || val;
-                    }}
+                <SelectTrigger id="ajTipo" className="w-full bg-background border-border text-foreground rounded-xl text-xs h-9 px-3">
+                  <SelectValue placeholder="Tipo">
+                    {ajusteTipo === "ganado" ? "Sumar (+)" : ajusteTipo === "canjeado" ? "Restar (-)" : "Ajuste"}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="w-full bg-card text-card-foreground border border-border">
+                <SelectContent className="w-full bg-popover text-popover-foreground border border-border">
                   <SelectItem value="ganado">Sumar (+)</SelectItem>
                   <SelectItem value="canjeado">Restar / Canje (-)</SelectItem>
                   <SelectItem value="ajuste">Ajuste de Auditoría</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="ajPts" className="text-[10px] font-bold text-zinc-650">
-                Cantidad de Puntos
+            <div className="space-y-1.5">
+              <Label htmlFor="ajPts" className="text-[11px] font-bold text-muted-foreground">
+                Cantidad Puntos
               </Label>
               <Input
                 id="ajPts"
@@ -100,40 +99,40 @@ export function AjustarPuntosModal({
                 value={ajustePuntos}
                 onChange={(e) => setAjustePuntos(e.target.value)}
                 required
-                className="bg-card border-zinc-300 focus:border-secondary text-xs h-8 rounded-lg text-zinc-900"
+                className="bg-background border-border hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-xl text-foreground font-mono font-bold"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="ajDesc" className="text-[10px] font-bold text-zinc-650">
-              Motivo o Detalle de Ajuste
+          <div className="space-y-1.5">
+            <Label htmlFor="ajDesc" className="text-[11px] font-bold text-muted-foreground">
+              Motivo o Detalle del Ajuste
             </Label>
             <Input
               id="ajDesc"
-              placeholder="Ej. Campaña especial, corrección..."
+              placeholder="Ej. Campaña especial, fidelización..."
               value={ajusteDesc}
               onChange={(e) => setAjusteDesc(e.target.value)}
-              className="bg-card border-zinc-300 focus:border-secondary text-xs h-8 rounded-lg text-zinc-900"
+              className="bg-background border-border hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-xl text-foreground"
             />
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-zinc-200 pt-3 mt-4">
+          <div className="flex justify-end gap-2.5 border-t border-border pt-4 mt-4">
             <Button
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="text-[10px] font-bold text-zinc-500 hover:text-zinc-800"
+              className="text-xs font-bold text-muted-foreground hover:text-foreground h-9 px-3 rounded-xl cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending || !ajustePuntos}
-              className="font-bold text-[10px] h-8 rounded-lg px-4 shadow-sm flex items-center gap-1 cursor-pointer"
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold text-xs h-9 rounded-xl px-4 shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
-              <Save className="h-3 w-3" />
-              {isPending ? "Guardando..." : "Guardar"}
+              <Save className="size-3.5" />
+              <span>{isPending ? "Guardando..." : "Guardar Puntos"}</span>
             </Button>
           </div>
         </form>

@@ -7,8 +7,12 @@ const SalesTrendChartInner = dynamic(
   { ssr: false }
 );
 
+import type { TopServiceItem, PaymentBreakdownItem } from "@/lib/actions/dashboard";
+
 interface SalesTrendChartProps {
   data: { day: string; ventas: number }[];
+  topServicios?: TopServiceItem[];
+  pagosBreakdown?: PaymentBreakdownItem[];
 }
 
 export function SalesTrendChart(props: SalesTrendChartProps) {

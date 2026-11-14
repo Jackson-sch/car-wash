@@ -1,81 +1,116 @@
-import { Coins, TrendingUp, ClipboardCheck } from "lucide-react";
-import type { KPIStats } from "./types";
+import { Coins, TrendingUp, ClipboardCheck, Sparkles } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/formats";
+import type { KPIStats, ServicioTop } from "./types";
 
 interface ReportesSummaryCardsProps {
   kpis: KPIStats;
+  currentRango?: string;
+  serviciosTop?: ServicioTop[];
 }
 
-export function ReportesSummaryCards({ kpis }: ReportesSummaryCardsProps) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Card 1: Facturación */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Facturación Acumulada
-            </span>
-            <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-              S/ {kpis.totalVentas.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-            </h3>
-          </div>
-          <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
-            <Coins className="h-5 w-5" />
-          </div>
-        </div>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
-          <span>Ingresos brutos registrados</span>
-        </div>
-        {/* Subtle gradient glow */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
+const RANGO_LABELS: Record<string, string> = {
+  hoy: "Hoy",
+  "7d": "Últimos 7 días",
+  "30d": "Últimos 30 días",
+  mes: "Este mes",
+  todo: "Histórico",
+};
 
-      {/* Card 2: Ticket Promedio */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-emerald-500/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+export function ReportesSummaryCards({
+  kpis,
+  currentRango = "7d",
+  serviciosTop = [],
+}: ReportesSummaryCardsProps) {
+  // eslint-disable-next-line security/detect-object-injection
+  const rangoLabel = RANGO_LABELS[currentRango] || "Período actual";
+  const topServicio = serviciosTop[0];
+
+  return (
+    <Card className="border border-border bg-card/60 backdrop-blur-md rounded-2xl p-0 overflow-hidden shadow-xs w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border/50">
+        {/* 1. Facturación Acumulada */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+            <Coins className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block truncate">
+              Facturación ({rangoLabel})
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-foreground leading-none">
+                {formatCurrency(kpis.totalVentas)}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                bruto
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Ticket Promedio */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors border-l border-border/50 lg:border-l-0">
+          <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+            <TrendingUp className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block truncate">
               Ticket Promedio
             </span>
-            <h3 className="text-3xl font-extrabold text-emerald-500 tracking-tight">
-              S/ {kpis.ticketPromedio.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-            </h3>
-          </div>
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110 duration-300">
-            <TrendingUp className="h-5 w-5" />
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                {formatCurrency(kpis.ticketPromedio)}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                por vehículo
+              </span>
+            </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Valor promedio de ticket de venta</span>
-        </div>
-        {/* Subtle gradient glow */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
 
-      {/* Card 3: Servicios Atendidos */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Servicios Atendidos
+        {/* 3. Servicios Atendidos */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+            <ClipboardCheck className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block truncate">
+              Órdenes Finalizadas
             </span>
-            <h3 className="text-3xl font-extrabold text-blue-500 tracking-tight">
-              {kpis.ordenesCompletadas} <span className="text-sm font-medium text-muted-foreground">órdenes</span>
-            </h3>
-          </div>
-          <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
-            <ClipboardCheck className="h-5 w-5" />
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-blue-400 leading-none">
+                {kpis.ordenesCompletadas}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                100% cobradas
+              </span>
+            </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-          <span>Servicios finalizados con éxito</span>
+
+        {/* 4. Servicio Estrella */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors border-l border-border/50 lg:border-l-0">
+          <div className="size-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+            <Sparkles className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block truncate">
+              Servicio Estrella
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-sm sm:text-base font-black text-foreground leading-none truncate max-w-[140px]">
+                {topServicio ? topServicio.name : "Sin datos"}
+              </span>
+              {topServicio && (
+                <span className="text-[10px] text-muted-foreground font-mono font-bold shrink-0">
+                  ({topServicio.cantidad})
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        {/* Subtle gradient glow */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-    </div>
+    </Card>
   );
 }

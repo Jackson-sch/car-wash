@@ -12,6 +12,9 @@ export interface ServicioOption {
   id: string;
   nombre: string;
   precio: string;
+  duracionMin?: number | null;
+  categoriaNombre?: string | null;
+  costoReceta?: number;
 }
 
 export interface PaqueteFormData {

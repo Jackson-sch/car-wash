@@ -261,7 +261,7 @@ export async function cambiarEstadoReservaAction(
   nuevoEstado: "pendiente" | "en_proceso" | "completado" | "cobrado" | "cancelado"
 ) {
   try {
-    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "editar" });
+    const session = await getSessionOrThrow({ modulo: "ordenes", accion: "cambiarEstado" });
     const sucursalId = session.user.sucursalId!;
 
     await db

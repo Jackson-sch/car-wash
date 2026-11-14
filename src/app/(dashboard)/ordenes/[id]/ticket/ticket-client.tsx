@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useCallback } from "react";
 import {
   Printer,
   ArrowLeft,
@@ -150,9 +150,26 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
     });
   };
 
-  const handlePrint = () => {
+  const handleWhatsApp = useCallback(() => {
+    if (!orden.clienteTelefono) {
+      toast.error("El cliente no tiene teléfono celular registrado");
+      return;
+    }
+    const url = getWhatsAppTicketUrl({
+      clienteNombre: orden.clienteNombre,
+      clienteTelefono: orden.clienteTelefono,
+      placa: orden.placa,
+      nroTicket: orden.nroTicket,
+      total: orden.total,
+      ordenId: orden.id,
+      sucursalNombre: sucursal?.nombre,
+    });
+    if (url) window.open(url, "_blank");
+  }, [orden, sucursal]);
+
+  const handlePrint = useCallback(() => {
     window.print();
-  };
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#print") {
@@ -164,6 +181,34 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
     }
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      const isInput =
+        activeEl instanceof HTMLInputElement ||
+        activeEl instanceof HTMLTextAreaElement;
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        router.push("/ordenes");
+        return;
+      }
+
+      if (!isInput) {
+        if (e.key.toLowerCase() === "p") {
+          e.preventDefault();
+          handlePrint();
+        } else if (e.key.toLowerCase() === "w") {
+          e.preventDefault();
+          handleWhatsApp();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router, handlePrint, handleWhatsApp]);
+
   return (
     <div className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground">
 
@@ -173,9 +218,14 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
           <Link href="/ordenes" passHref>
             <Button
               variant="outline"
-              className="border-border hover:bg-muted text-foreground h-9 px-3 rounded-lg cursor-pointer"
+              className="border-border hover:bg-muted text-foreground h-10 px-3.5 rounded-xl cursor-pointer gap-2 font-bold"
+              title="Volver a la Bandeja de Órdenes (Tecla: Esc)"
             >
               <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Volver a Órdenes</span>
+              <kbd className="hidden md:inline px-1.5 py-0.2 rounded bg-muted text-[10px] font-mono font-bold text-muted-foreground border border-border">
+                Esc
+              </kbd>
             </Button>
           </Link>
           <div>
@@ -200,28 +250,16 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
             </Label>
           </div>
           <Button
-            onClick={() => {
-              if (!orden.clienteTelefono) {
-                toast.error("El cliente no tiene teléfono celular registrado");
-                return;
-              }
-              const url = getWhatsAppTicketUrl({
-                clienteNombre: orden.clienteNombre,
-                clienteTelefono: orden.clienteTelefono,
-                placa: orden.placa,
-                nroTicket: orden.nroTicket,
-                total: orden.total,
-                ordenId: orden.id,
-                sucursalNombre: sucursal?.nombre,
-              });
-              if (url) window.open(url, "_blank");
-            }}
+            onClick={handleWhatsApp}
             variant="outline"
-            className="border-emerald-600/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 h-10 rounded-lg gap-2 cursor-pointer px-3.5 font-bold"
-            title="Enviar comprobante por WhatsApp"
+            className="border-emerald-600/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 h-10 rounded-xl gap-2 cursor-pointer px-3.5 font-bold"
+            title="Enviar comprobante por WhatsApp (Tecla: W)"
           >
             <MessageCircle className="h-4 w-4" />
-            WhatsApp
+            <span>WhatsApp</span>
+            <kbd className="hidden sm:inline px-1.5 py-0.2 rounded bg-emerald-500/10 text-[9px] font-mono font-bold">
+              W
+            </kbd>
           </Button>
           <Button
             onClick={() => window.open(`/api/pdf/ticket/${orden.id}${hidePrices ? "?mode=work" : ""}`, "_blank")}
@@ -233,10 +271,14 @@ export function TicketClient({ orden, sucursal }: TicketClientProps) {
           </Button>
           <Button
             onClick={handlePrint}
-            className="font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm px-5"
+            className="bg-secondary hover:bg-sky-400 text-slate-950 font-black gap-2 cursor-pointer h-10 rounded-xl shadow-md shadow-secondary/20 px-5"
+            title="Imprimir ticket térmico (Tecla: P)"
           >
-            <Printer className="h-4 w-4" />
-            {hidePrices ? "Imprimir Trabajo" : "Imprimir Ticket"}
+            <Printer className="size-4 text-slate-950" />
+            <span>{hidePrices ? "Imprimir Trabajo" : "Imprimir Ticket"}</span>
+            <kbd className="hidden sm:inline px-1.5 py-0.2 rounded bg-slate-950/20 text-slate-950 text-[10px] font-mono font-black">
+              P
+            </kbd>
           </Button>
         </div>
       </div>

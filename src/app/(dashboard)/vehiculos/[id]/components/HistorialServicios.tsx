@@ -118,14 +118,14 @@ export function HistorialServicios({ vehiculoId, ordenes }: HistorialServiciosPr
                         </span>
                         <Badge
                           variant="outline"
-                          className={`text-[9px] font-extrabold uppercase tracking-wider ${stateBadgeStyle}`}
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 ${stateBadgeStyle}`}
                         >
                           {config.label}
                         </Badge>
                         {o.prioridad != null && o.prioridad >= 1 && (
                           <Badge
                             variant="outline"
-                            className="text-[9px] font-extrabold text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 bg-amber-500/5 dark:bg-amber-950/20 gap-0.5"
+                            className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 border-amber-500/30 bg-amber-500/10 dark:bg-amber-950/20 gap-1 px-2 py-0.5"
                           >
                             <Zap className="h-2.5 w-2.5 fill-amber-500" />
                             Express

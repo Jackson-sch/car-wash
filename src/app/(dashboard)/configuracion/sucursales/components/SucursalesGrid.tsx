@@ -47,7 +47,7 @@ export function SucursalesGrid({
   if (data.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-20 bg-card border border-border rounded-2xl p-8 shadow-sm">
-        <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground/35 animate-pulse transition-opacity duration-1000" />
+        <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60 animate-pulse transition-opacity duration-1000" />
         <p className="font-bold text-lg text-foreground">
           {searchQuery ? "Sin resultados para tu búsqueda" : "No hay sucursales registradas"}
         </p>
@@ -96,7 +96,7 @@ export function SucursalesGrid({
                   {esPrincipal && (
                     <Badge
                       variant="default"
-                      className="text-[9px] font-extrabold tracking-wider uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-xs"
+                      className="text-[10px] font-extrabold tracking-wider uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-xs"
                     >
                       <span className="flex items-center gap-1">
                         <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
@@ -107,7 +107,7 @@ export function SucursalesGrid({
                   {isCurrent && (
                     <Badge
                       variant="default"
-                      className="text-[9px] font-extrabold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/25 shadow-xs"
+                      className="text-[10px] font-extrabold tracking-wider uppercase bg-secondary/15 text-secondary border border-secondary/30 shadow-xs"
                     >
                       <span className="flex items-center gap-1">
                         <ShieldCheck className="h-3 w-3" />
@@ -117,7 +117,7 @@ export function SucursalesGrid({
                   )}
                   <Badge
                     variant={s.activa ? "default" : "secondary"}
-                    className={`text-[9px] font-extrabold tracking-wider uppercase ${
+                    className={`text-[10px] font-extrabold tracking-wider uppercase ${
                       s.activa
                         ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                         : "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"

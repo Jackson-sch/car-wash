@@ -214,7 +214,13 @@ export function AjustarStockModal({
             >
               {isPending
                 ? "Procesando..."
-                : `Registrar ${MOV_CONFIG[movTipo].label}`}
+                : `Registrar ${
+                    movTipo === "entrada"
+                      ? "Entrada"
+                      : movTipo === "salida"
+                      ? "Salida"
+                      : "Ajuste"
+                  }`}
             </Button>
           </div>
         </form>

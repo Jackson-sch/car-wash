@@ -80,6 +80,8 @@ export default async function DashboardPage({
       sucursales={data.sucursales}
       currentBranch={data.currentBranch}
       userRol={session.user?.rol}
+      topServicios={data.topServicios}
+      pagosBreakdown={data.pagosBreakdown}
     />
   );
 }

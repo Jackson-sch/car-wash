@@ -48,7 +48,7 @@ export function SidebarUserFooter() {
           </div>
           <div className="min-w-0 flex-1 text-left group-data-[collapsible=icon]:hidden">
             <p className="text-xs font-bold text-white/90 truncate">{session?.user?.name || "Usuario"}</p>
-            <span className="inline-block text-[8px] text-white/70 font-extrabold uppercase tracking-widest mt-0.5 bg-white/10 px-1.5 py-0.5 rounded">
+            <span className="inline-block text-[10px] text-white/90 font-bold uppercase tracking-wider mt-0.5 bg-white/15 px-2 py-0.5 rounded-md">
               {rol}
             </span>
           </div>

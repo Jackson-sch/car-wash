@@ -1,26 +1,41 @@
 "use client";
 
-import { useState, useMemo, useTransition, useCallback } from "react";
+import { useState, useMemo, useTransition, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { cerrarTurnoCaja, verificarAutorizacionSupervisor } from "@/lib/actions/caja";
+import {
+  cerrarTurnoCaja,
+  verificarAutorizacionSupervisor,
+  registrarIntentoArqueoCaja,
+} from "@/lib/actions/caja";
 import { notifyCajaStatusChanged } from "@/lib/events/caja-events";
 import type { TurnoActivo } from "../types";
 import { DENOMINACIONES } from "../types";
 
+const STORAGE_KEY_PREFIX = "washmaster_arqueo_audit_";
+
 export function useCierreCaja(turno: TurnoActivo) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
+  const [isClosing, setIsClosing] = useState(false);
 
-  // Estado de conciliación ciega
+  // Estado de conciliación (inicia en false para consistencia estricta SSR)
   const [reconciliado, setReconciliado] = useState(false);
   const [isReconciling, setIsReconciling] = useState(false);
+
+  // Bloqueo persistente por discrepancia antifraude
+  const [bloqueadoPorDiscrepancia, setBloqueadoPorDiscrepancia] = useState(false);
 
   // Confirmación final antes del cierre
   const [showConfirmClose, setShowConfirmClose] = useState(false);
 
   // Aprobación de supervisor
-  const [supervisorAprobado, setSupervisorAprobado] = useState<{ nombre: string; email: string } | null>(null);
+  const [supervisorAprobado, setSupervisorAprobado] = useState<{
+    id: string;
+    nombre: string;
+    email: string;
+    rol: string;
+  } | null>(null);
   const [showSupervisorModal, setShowSupervisorModal] = useState(false);
 
   // Credenciales de supervisor para el modal
@@ -31,8 +46,36 @@ export function useCierreCaja(turno: TurnoActivo) {
   // Estado del arqueo de denominaciones
   const [cantidades, setCantidades] = useState<Record<string, string>>({});
 
+  // Contadores reales ingresados por el cajero
+  const [actualCount, setActualCount] = useState<Record<string, string>>({
+    tarjeta: "",
+    yapePlin: "",
+    transferencia: "",
+  });
+
   // Estado para observaciones / justificación
   const [obsCierre, setObsCierre] = useState("");
+
+  // Sincronizar intento de auditoría previo en cliente de forma diferida (evita mismatch en SSR)
+  useEffect(() => {
+    try {
+      const storageKey = `${STORAGE_KEY_PREFIX}${turno.id}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.hasDiscrepancy) {
+          startTransition(() => {
+            setCantidades(parsed.cantidades || {});
+            setActualCount(parsed.actualCount || { tarjeta: "", yapePlin: "", transferencia: "" });
+            setReconciliado(true);
+            setBloqueadoPorDiscrepancia(true);
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Error restaurando auditoría:", e);
+    }
+  }, [turno.id]);
 
   // Estadísticas esperadas por sistema
   const systemStats = useMemo(() => {
@@ -61,28 +104,36 @@ export function useCierreCaja(turno: TurnoActivo) {
     };
   }, [turno]);
 
-  // Contadores reales ingresados por el cajero (inicializados en vacío para el arqueo a ciegas)
-  const [actualCount, setActualCount] = useState<Record<string, string>>({
-    tarjeta: "",
-    yapePlin: "",
-    transferencia: "",
-  });
+  // Si está bloqueado por discrepancia, no se permite editar campos sin supervisor
+  const handleActualCountChange = useCallback(
+    (id: string, value: string) => {
+      if (bloqueadoPorDiscrepancia && !supervisorAprobado) {
+        toast.error("El arqueo está bloqueado por discrepancia. Solicite autorización a un supervisor.");
+        return;
+      }
+      if (reconciliado && !bloqueadoPorDiscrepancia) {
+        setReconciliado(false);
+        setSupervisorAprobado(null);
+      }
+      setActualCount((prev) => ({ ...prev, [id]: value }));
+    },
+    [bloqueadoPorDiscrepancia, supervisorAprobado, reconciliado]
+  );
 
-  const handleActualCountChange = useCallback((id: string, value: string) => {
-    if (reconciliado) {
-      setReconciliado(false);
-      setSupervisorAprobado(null);
-    }
-    setActualCount((prev) => ({ ...prev, [id]: value }));
-  }, [reconciliado]);
-
-  const handleCantidadesChange = useCallback((id: string, value: string) => {
-    if (reconciliado) {
-      setReconciliado(false);
-      setSupervisorAprobado(null);
-    }
-    setCantidades((prev) => ({ ...prev, [id]: value }));
-  }, [reconciliado]);
+  const handleCantidadesChange = useCallback(
+    (id: string, value: string) => {
+      if (bloqueadoPorDiscrepancia && !supervisorAprobado) {
+        toast.error("El arqueo está bloqueado por discrepancia. Solicite autorización a un supervisor.");
+        return;
+      }
+      if (reconciliado && !bloqueadoPorDiscrepancia) {
+        setReconciliado(false);
+        setSupervisorAprobado(null);
+      }
+      setCantidades((prev) => ({ ...prev, [id]: value }));
+    },
+    [bloqueadoPorDiscrepancia, supervisorAprobado, reconciliado]
+  );
 
   // Calcular el total de efectivo contado físicamente
   const totalEfectivoContado = useMemo(() => {
@@ -118,41 +169,100 @@ export function useCierreCaja(turno: TurnoActivo) {
 
   const tieneDescuadre = Math.abs(totalDiferencia) > 0.01;
 
-  const handleReconciliar = () => {
-    if (!actualCount.tarjeta.trim() || !actualCount.yapePlin.trim() || !actualCount.transferencia.trim()) {
-      toast.error("Por favor complete los montos contados de Tarjeta, Yape/Plin y Transferencia (coloque 0 si no hubo movimientos).");
+  // Acción principal: Verificar conteo
+  const handleReconciliar = async () => {
+    if (
+      !actualCount.tarjeta.trim() ||
+      !actualCount.yapePlin.trim() ||
+      !actualCount.transferencia.trim()
+    ) {
+      toast.error(
+        "Por favor complete los montos contados de Tarjeta, Yape/Plin y Transferencia (coloque 0 si no hubo movimientos)."
+      );
       return;
     }
+
     setIsReconciling(true);
-    setTimeout(() => {
+
+    // Si hay descuadre: ANTIFRAUDE ACTIVO
+    if (tieneDescuadre) {
+      // 1. Guardar en Base de Datos de manera inmutable
+      const detallesAudit = `Gaveta: S/ ${totalEfectivoContado.toFixed(2)} | POS: S/ ${parseFloat(actualCount.tarjeta || "0").toFixed(2)} | Yape/Plin: S/ ${parseFloat(actualCount.yapePlin || "0").toFixed(2)} | Transf: S/ ${parseFloat(actualCount.transferencia || "0").toFixed(2)}`;
+
+      await registrarIntentoArqueoCaja({
+        turnoId: turno.id,
+        totalDeclarado: actualTotals,
+        diferencia: totalDiferencia,
+        detalles: detallesAudit,
+      });
+
+      // 2. Guardar en storage local para que una recarga de página no borre el intento
+      try {
+        localStorage.setItem(
+          `${STORAGE_KEY_PREFIX}${turno.id}`,
+          JSON.stringify({
+            cantidades,
+            actualCount,
+            totalEfectivoContado,
+            actualTotals,
+            hasDiscrepancy: true,
+            timestamp: new Date().toISOString(),
+          })
+        );
+      } catch (e) {
+        console.error("Error guardando snapshot local:", e);
+      }
+
       setReconciliado(true);
+      setBloqueadoPorDiscrepancia(true);
       setIsReconciling(false);
-      toast.success("Saldos calculados y conciliados contra el sistema.");
-    }, 400);
+
+      // Aviso sin revelar montos exactos ni si es sobrante o faltante al cajero
+      toast.error(
+        "Discrepancia detectada en el arqueo. Por seguridad, el cierre requiere validación de un Supervisor.",
+        { duration: 5000 }
+      );
+      setShowSupervisorModal(true);
+    } else {
+      // Caja Cuadrada
+      // Limpiar cualquier flag anterior
+      try {
+        localStorage.removeItem(`${STORAGE_KEY_PREFIX}${turno.id}`);
+      } catch {}
+      setReconciliado(true);
+      setBloqueadoPorDiscrepancia(false);
+      setIsReconciling(false);
+      toast.success("Caja Cuadrada al 100%. Los montos físicos coinciden exactamente con el sistema.");
+    }
   };
 
   const handleSolicitarAprobacion = useCallback(() => {
     setShowSupervisorModal(true);
   }, []);
 
-  const handleVerifySupervisor = async (e: React.FormEvent) => {
+  // Validación de credenciales de supervisor
+  const handleVerifySupervisor = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!supEmail.trim() || !supPassword.trim()) {
+    const formData = new FormData(e.currentTarget);
+    const email = ((formData.get("email") as string) || supEmail).trim();
+    const password = ((formData.get("password") as string) || supPassword).trim();
+
+    if (!email || !password) {
       toast.error("Por favor complete los campos de email y contraseña.");
       return;
     }
 
     setVerifyingSup(true);
     try {
-      const res = await verificarAutorizacionSupervisor(supEmail, supPassword);
+      const res = await verificarAutorizacionSupervisor(email, password);
       if (res.success && res.supervisor) {
         setSupervisorAprobado(res.supervisor);
         setShowSupervisorModal(false);
-        toast.success(`Cierre descuadrado autorizado por: ${res.supervisor.nombre}`);
+        toast.success(`Auditoría desbloqueada por supervisor: ${res.supervisor.nombre}`);
         setSupEmail("");
         setSupPassword("");
       } else {
-        toast.error(res.error || "No se pudo verificar la autorización.");
+        toast.error(res.error || "No se pudo verificar la autorización del supervisor.");
       }
     } catch (err) {
       console.error(err);
@@ -162,14 +272,32 @@ export function useCierreCaja(turno: TurnoActivo) {
     }
   };
 
+  // Reconteo presencial autorizado por supervisor
+  const handleHabilitarReconteo = useCallback(() => {
+    if (!supervisorAprobado) {
+      toast.error("Se requiere la autorización de un supervisor para reiniciar el conteo.");
+      return;
+    }
+
+    try {
+      localStorage.removeItem(`${STORAGE_KEY_PREFIX}${turno.id}`);
+    } catch {}
+
+    setBloqueadoPorDiscrepancia(false);
+    setReconciliado(false);
+    setSupervisorAprobado(null);
+    toast.info("Reconteo presencial habilitado. Realice el recuento junto al supervisor.");
+  }, [supervisorAprobado, turno.id]);
+
   const handleShowConfirmClose = () => {
     if (!reconciliado) {
-      toast.error("Por favor verifique y concilie los saldos primero.");
+      toast.error("Por favor verifique los saldos primero.");
       return;
     }
 
     if (tieneDescuadre && !supervisorAprobado) {
-      toast.error("Cierre bloqueado por descuadre. Requiere autorización de un Supervisor.");
+      toast.error("Cierre bloqueado por discrepancia. Requiere autorización de un Supervisor.");
+      setShowSupervisorModal(true);
       return;
     }
 
@@ -181,12 +309,13 @@ export function useCierreCaja(turno: TurnoActivo) {
     setShowConfirmClose(true);
   };
 
-  const handleConfirmClose = () => {
+  const handleConfirmClose = async () => {
     setShowConfirmClose(false);
+    setIsClosing(true);
 
-    startTransition(async () => {
+    try {
       const supervisorInfoStr = supervisorAprobado
-        ? `\n\n[AUTORIZADO POR SUPERVISOR: ${supervisorAprobado.nombre} (${supervisorAprobado.email})]`
+        ? `\n\n[AUTORIZADO POR SUPERVISOR: ${supervisorAprobado.nombre} (${supervisorAprobado.email}) - ROL: ${supervisorAprobado.rol}]`
         : "";
 
       const efectivoDetalle = DENOMINACIONES
@@ -200,15 +329,15 @@ export function useCierreCaja(turno: TurnoActivo) {
         .join("\n");
 
       const finalObservaciones = `
-[CORTE DE CAJA DETALLADO - ARQUEO A CIEGAS]
+[CORTE DE CAJA DETALLADO - ARQUEO A CIEGAS AUDITADO]
 - Fondo Inicial: S/ ${systemStats.openingCash.toFixed(2)}
 - Efectivo Esperado: S/ ${systemStats.expectedEfectivo.toFixed(2)} | Contado: S/ ${totalEfectivoContado.toFixed(2)} (Dif: S/ ${cashDiferencia.toFixed(2)})
 - Tarjeta Esperado: S/ ${systemStats.tarjetaVentas.toFixed(2)} | Contado: S/ ${(parseFloat(actualCount.tarjeta) || 0).toFixed(2)} (Dif: S/ ${tarjetaDiferencia.toFixed(2)})
 - Yape/Plin Esperado: S/ ${systemStats.yapePlinVentas.toFixed(2)} | Contado: S/ ${(parseFloat(actualCount.yapePlin) || 0).toFixed(2)} (Dif: S/ ${yapePlinDiferencia.toFixed(2)})
 - Transferencias Esperado: S/ ${systemStats.transferenciasVentas.toFixed(2)} | Contado: S/ ${(parseFloat(actualCount.transferencia) || 0).toFixed(2)} (Dif: S/ ${transferDiferencia.toFixed(2)})
 
-[DESGLOSE DE EFECTIVO]
-${efectivoDetalle}
+[DESGLOSE DE EFECTIVO GAVETA]
+${efectivoDetalle || "  (Sin desglose especificado)"}
 
 [OBSERVACIONES GENERALES]
 ${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
@@ -220,14 +349,25 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
       });
 
       if (res.success) {
-        toast.success("Turno de caja cerrado correctamente");
+        try {
+          localStorage.removeItem(`${STORAGE_KEY_PREFIX}${turno.id}`);
+        } catch {}
+        toast.success("Turno de caja cerrado correctamente. Redirigiendo...");
         notifyCajaStatusChanged();
-        router.push("/caja");
+        router.replace("/caja");
         router.refresh();
+        setTimeout(() => {
+          window.location.href = "/caja";
+        }, 1500);
       } else {
+        setIsClosing(false);
         toast.error(res.error || "Ocurrió un error al cerrar la caja");
       }
-    });
+    } catch (err) {
+      console.error("Error al procesar el cierre de caja:", err);
+      setIsClosing(false);
+      toast.error("Ocurrió un error inesperado al procesar el cierre");
+    }
   };
 
   const handlePrint = useCallback(() => {
@@ -235,9 +375,10 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
   }, []);
 
   return {
-    isPending,
+    isPending: isClosing,
     reconciliado,
     isReconciling,
+    bloqueadoPorDiscrepancia,
     showConfirmClose,
     setShowConfirmClose,
     supervisorAprobado,
@@ -267,6 +408,7 @@ ${obsCierre.trim() || "Sin observaciones adicionales."}${supervisorInfoStr}
     handleReconciliar,
     handleSolicitarAprobacion,
     handleVerifySupervisor,
+    handleHabilitarReconteo,
     handleShowConfirmClose,
     handleConfirmClose,
     handlePrint,

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { turnosCaja, pagos, usuarios, ordenes, vehiculos, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad, egresosCaja, servicioRecetas, inventario, inventarioMovimientos } from "@/lib/db/schema";
+import { turnosCaja, pagos, usuarios, ordenes, vehiculos, clientes, categoriasServicio, servicios, ordenServicios, cuponesUsos, cuentas, puntosFidelidad, egresosCaja, servicioRecetas, inventario, inventarioMovimientos } from "@/lib/db/schema";
 import { eq, and, desc, sql, or, inArray } from "drizzle-orm";
 import { getSessionOrThrow } from "./servicios";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -36,6 +36,7 @@ export async function getTurnoActivoHeader(sucursalIdParam?: string | null) {
       .select({
         id: turnosCaja.id,
         montoInicial: turnosCaja.montoInicial,
+        apertura: turnosCaja.apertura,
       })
       .from(turnosCaja)
       .where(and(eq(turnosCaja.sucursalId, sucursalId), sql`${turnosCaja.cierre} IS NULL`))
@@ -60,6 +61,7 @@ export async function getTurnoActivoHeader(sucursalIdParam?: string | null) {
     return {
       id: activeTurno.id,
       montoInicial: activeTurno.montoInicial,
+      apertura: activeTurno.apertura,
       pagos: [{ metodo: "efectivo", total: parseFloat(efectivo?.total || "0") }],
       totalEgresos: parseFloat(egresos?.total || "0"),
     };
@@ -147,13 +149,29 @@ export async function getTurnoActivo() {
         metodo: pagos.metodo,
         createdAt: pagos.createdAt,
         nroTicket: ordenes.nroTicket,
+        ordenId: ordenes.id,
+        placa: vehiculos.placa,
+        clienteNombre: clientes.nombre,
+        clienteApellido: clientes.apellido,
         serviciosConcat: sql<string>`string_agg(${ordenServicios.nombreServicio}, ', ')`,
       })
       .from(pagos)
       .innerJoin(ordenes, eq(pagos.ordenId, ordenes.id))
+      .leftJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
+      .leftJoin(clientes, eq(vehiculos.clienteId, clientes.id))
       .leftJoin(ordenServicios, eq(ordenes.id, ordenServicios.ordenId))
       .where(eq(pagos.turnoId, activeTurno.id))
-      .groupBy(pagos.id, pagos.monto, pagos.metodo, pagos.createdAt, ordenes.nroTicket)
+      .groupBy(
+        pagos.id,
+        pagos.monto,
+        pagos.metodo,
+        pagos.createdAt,
+        ordenes.nroTicket,
+        ordenes.id,
+        vehiculos.placa,
+        clientes.nombre,
+        clientes.apellido
+      )
       .orderBy(desc(pagos.createdAt));
 
     const transaccionesDetalladas = txns.map((t) => ({
@@ -162,6 +180,11 @@ export async function getTurnoActivo() {
       metodo: t.metodo as "efectivo" | "tarjeta" | "yape" | "plin" | "transferencia" | "otro",
       createdAt: t.createdAt || new Date(),
       nroTicket: t.nroTicket,
+      ordenId: t.ordenId,
+      placa: t.placa || null,
+      clienteNombre: t.clienteNombre
+        ? `${t.clienteNombre} ${t.clienteApellido || ""}`.trim()
+        : "Cliente General",
       servicios: t.serviciosConcat || "Servicio General",
     }));
 
@@ -247,9 +270,13 @@ export async function getDetalleCierreCaja() {
         metodo: pagos.metodo,
         createdAt: pagos.createdAt,
         nroTicket: ordenes.nroTicket,
+        placa: vehiculos.placa,
+        clienteNombre: clientes.nombre,
       })
       .from(pagos)
       .innerJoin(ordenes, eq(pagos.ordenId, ordenes.id))
+      .leftJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
+      .leftJoin(clientes, eq(vehiculos.clienteId, clientes.id))
       .where(eq(pagos.turnoId, turno.id))
       .orderBy(desc(pagos.createdAt))
       .limit(10);
@@ -260,6 +287,8 @@ export async function getDetalleCierreCaja() {
       metodo: p.metodo as "efectivo" | "tarjeta" | "yape" | "plin" | "transferencia" | "otro",
       createdAt: p.createdAt || new Date(),
       nroTicket: p.nroTicket,
+      placa: p.placa || null,
+      clienteNombre: p.clienteNombre || null,
     }));
 
     return {
@@ -576,6 +605,42 @@ export async function cerrarTurnoCaja(data: {
   } catch (error: unknown) {
     console.error("Error al cerrar caja:", error);
     return { success: false, error: getErrorMessage(error, "Error al cerrar la caja") };
+  }
+}
+
+// Registrar intento de arqueo con descuadre en auditoría permanente (antifraude)
+export async function registrarIntentoArqueoCaja(data: {
+  turnoId: string;
+  totalDeclarado: number;
+  diferencia: number;
+  detalles: string;
+}) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "caja", accion: "cerrar" });
+    const sucursalId = session.user.sucursalId!;
+
+    const [activeTurno] = await db
+      .select({ id: turnosCaja.id, observaciones: turnosCaja.observaciones })
+      .from(turnosCaja)
+      .where(and(eq(turnosCaja.id, data.turnoId), eq(turnosCaja.sucursalId, sucursalId), sql`${turnosCaja.cierre} IS NULL`));
+
+    if (!activeTurno) return { success: false, error: "Turno no encontrado o ya cerrado" };
+
+    const timestamp = new Date().toISOString();
+    const intentoLog = `[AUDITORIA_ARQUEO: ${timestamp} | Declarado: S/ ${data.totalDeclarado.toFixed(2)} | Dif: S/ ${data.diferencia.toFixed(2)} | Usuario: ${session.user.name || session.user.email}]\n${data.detalles}`;
+
+    const prevObs = activeTurno.observaciones ? activeTurno.observaciones + "\n\n" : "";
+    await db
+      .update(turnosCaja)
+      .set({
+        observaciones: (prevObs + intentoLog).slice(0, 4000), // límite seguro de caracteres
+      })
+      .where(eq(turnosCaja.id, activeTurno.id));
+
+    return { success: true };
+  } catch (err) {
+    console.error("Error registrando intento arqueo:", err);
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 

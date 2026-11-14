@@ -13,20 +13,20 @@ import postgres from 'postgres';
 async function runMigrations() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
-    console.error("❌ DATABASE_URL no está definido.");
+    console.error("[ERROR] DATABASE_URL no está definido.");
     process.exit(1);
   }
 
-  console.log("⏳ Conectando a la base de datos...");
+  console.log("[INFO] Conectando a la base de datos...");
   const client = postgres(connectionString, { max: 1 });
   const db = drizzle(client);
 
   try {
-    console.log("🚀 Aplicando migraciones...");
+    console.log("[INFO] Aplicando migraciones...");
     await migrate(db, { migrationsFolder: './src/lib/db/migrations' });
-    console.log("✅ ¡Migraciones aplicadas con éxito en la base de datos local!");
+    console.log("[SUCCESS] ¡Migraciones aplicadas con éxito en la base de datos local!");
   } catch (error) {
-    console.error("❌ Error al aplicar migraciones:", error);
+    console.error("[ERROR] Error al aplicar migraciones:", error);
     process.exit(1);
   } finally {
     await client.end();

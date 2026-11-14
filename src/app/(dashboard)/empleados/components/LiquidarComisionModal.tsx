@@ -9,6 +9,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +23,7 @@ import { toast } from "sonner";
 import { formatCurrency, formatDate } from "@/lib/formats";
 import { liquidarComisionesEmpleado } from "@/lib/actions/empleados";
 
-interface OrdenPendiente {
+export interface OrdenPendiente {
   id: string;
   nroTicket: string | null;
   total: string | null;
@@ -30,10 +37,26 @@ interface LiquidarComisionModalProps {
   empleadoId: string;
   empleadoNombre: string;
   ordenesPendientes: OrdenPendiente[];
-  onSuccess?: () => void;
+  onSuccess?: (montoLiquidado: number, ordenesLiquidadas: number) => void;
 }
 
-export function LiquidarComisionModal({
+const METODOS_PAGO = [
+  { value: "efectivo", label: "Efectivo en Mano" },
+  { value: "yape", label: "Yape / Plin" },
+  { value: "transferencia", label: "Transferencia Bancaria" },
+];
+
+export function LiquidarComisionModal(props: LiquidarComisionModalProps) {
+  if (!props.open) return null;
+  return (
+    <LiquidarComisionContent
+      key={`${props.empleadoId}-${props.ordenesPendientes.length}`}
+      {...props}
+    />
+  );
+}
+
+function LiquidarComisionContent({
   open,
   onOpenChange,
   empleadoId,
@@ -69,7 +92,10 @@ export function LiquidarComisionModal({
     () => ordenesPendientes.filter((o) => selectedSet.has(o.id)),
     [ordenesPendientes, selectedSet]
   );
-  const totalVentas = selectedOrders.reduce((sum, o) => sum + (parseFloat(o.total || "0") || 0), 0);
+  const totalVentas = selectedOrders.reduce(
+    (sum, o) => sum + (parseFloat(o.total || "0") || 0),
+    0
+  );
   const totalComision = totalVentas * 0.30;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,9 +116,9 @@ export function LiquidarComisionModal({
       });
 
       if (res.success) {
-        toast.success(`Liquidación registrada con éxito (S/ ${totalComision.toFixed(2)})`);
+        toast.success(`Liquidación registrada con éxito (${formatCurrency(totalComision)})`);
         onOpenChange(false);
-        if (onSuccess) onSuccess();
+        onSuccess?.(totalComision, selectedIds.length);
       } else {
         toast.error(res.error || "Ocurrió un error al liquidar comisiones.");
       }
@@ -112,7 +138,7 @@ export function LiquidarComisionModal({
             Liquidar Comisiones — {empleadoNombre}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Selecciona las órdenes de servicio completadas para generar el pago de comisión correspondiente.
+            Selecciona las órdenes de servicio completadas para registrar el pago de comisión (30%).
           </DialogDescription>
         </DialogHeader>
 
@@ -120,20 +146,26 @@ export function LiquidarComisionModal({
           {/* Listado de Órdenes */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs font-bold text-muted-foreground">
-              <span>Órdenes Pendientes ({selectedIds.length} / {ordenesPendientes.length})</span>
-              <button
-                type="button"
-                onClick={toggleSelectAll}
-                className="text-secondary hover:underline cursor-pointer text-[11px]"
-              >
-                {selectedIds.length === ordenesPendientes.length ? "Desmarcar todas" : "Seleccionar todas"}
-              </button>
+              <span>
+                Órdenes Pendientes ({selectedIds.length} / {ordenesPendientes.length})
+              </span>
+              {ordenesPendientes.length > 0 && (
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="text-secondary hover:underline cursor-pointer text-[11px]"
+                >
+                  {selectedIds.length === ordenesPendientes.length
+                    ? "Desmarcar todas"
+                    : "Seleccionar todas"}
+                </button>
+              )}
             </div>
 
-            <div className="max-h-48 overflow-y-auto border border-border rounded-lg divide-y divide-border/60 bg-muted/20 p-1">
+            <div className="max-h-52 overflow-y-auto border border-border rounded-xl divide-y divide-border/60 bg-muted/20 p-1">
               {ordenesPendientes.length === 0 ? (
-                <div className="p-4 text-center text-xs text-muted-foreground">
-                  No hay órdenes pendientes por liquidar para este empleado.
+                <div className="p-6 text-center text-xs text-muted-foreground">
+                  No hay órdenes pendientes por liquidar para este colaborador.
                 </div>
               ) : (
                 ordenesPendientes.map((ord) => {
@@ -145,20 +177,20 @@ export function LiquidarComisionModal({
                       key={ord.id}
                       type="button"
                       onClick={() => toggleSelect(ord.id)}
-                      className="w-full text-left flex items-center justify-between p-2 hover:bg-muted/80 rounded-lg cursor-pointer text-xs transition-colors"
+                      className="w-full text-left flex items-center justify-between p-2.5 hover:bg-muted/80 rounded-lg cursor-pointer text-xs transition-colors"
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         {isChecked ? (
                           <CheckSquare className="h-4 w-4 text-secondary shrink-0" />
                         ) : (
                           <Square className="h-4 w-4 text-muted-foreground shrink-0" />
                         )}
                         <div>
-                          <span className="font-bold text-foreground">
-                            Ticket #{ord.nroTicket || "S/N"}
+                          <span className="font-bold text-foreground font-mono">
+                            #{ord.nroTicket || "S/N"}
                           </span>
                           {ord.placa && (
-                            <span className="ml-1.5 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-100 font-mono text-[10px] font-black uppercase">
+                            <span className="ml-2 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700/80 text-zinc-100 font-mono text-[10px] font-black uppercase">
                               {ord.placa}
                             </span>
                           )}
@@ -169,11 +201,11 @@ export function LiquidarComisionModal({
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold text-emerald-600 dark:text-emerald-400">
+                        <div className="font-bold font-mono text-emerald-600 dark:text-emerald-400">
                           + {formatCurrency(comisionNum)}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">
-                          Venta: {formatCurrency(subTotalNum)}
+                        <div className="text-[10px] font-mono text-muted-foreground">
+                          Ticket: {formatCurrency(subTotalNum)}
                         </div>
                       </div>
                     </button>
@@ -184,40 +216,54 @@ export function LiquidarComisionModal({
           </div>
 
           {/* Resumen Total */}
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center text-xs">
+          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center text-xs">
             <div>
-              <span className="font-bold text-emerald-800 dark:text-emerald-300 block">Total a Pagar en Comisión</span>
-              <span className="text-[11px] text-muted-foreground">30% sobre ventas acumuladas ({formatCurrency(totalVentas)})</span>
+              <span className="font-bold text-emerald-800 dark:text-emerald-300 block">
+                Total a Liquidar (30%)
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                Base facturada: {formatCurrency(totalVentas)} en {selectedIds.length} órdenes
+              </span>
             </div>
-            <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+            <span className="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400">
               {formatCurrency(totalComision)}
             </span>
           </div>
 
           {/* Método de Pago */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="metodo-pago-liq" className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-                <CreditCard className="h-3.5 w-3.5" /> Método de Pago
+              <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                <CreditCard className="h-3.5 w-3.5" /> Medio de Pago
               </Label>
-              <select
-                id="metodo-pago-liq"
+              <Select
                 value={metodoPago}
-                onChange={(e) => setMetodoPago(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg border border-border bg-card text-foreground text-xs font-semibold"
+                onValueChange={(val) => val && setMetodoPago(val)}
+                items={METODOS_PAGO}
               >
-                <option value="efectivo">Efectivo</option>
-                <option value="transferencia">Transferencia Bancaria</option>
-                <option value="yape">Yape / Plin</option>
-              </select>
+                <SelectTrigger className="w-full h-9 text-xs bg-card border-border">
+                  <SelectValue>
+                    {(val) =>
+                      METODOS_PAGO.find((m) => m.value === val)?.label || val
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {METODOS_PAGO.map((m) => (
+                    <SelectItem key={m.value} value={m.value} label={m.label}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-                <FileText className="h-3.5 w-3.5" /> Nº Operación / Ref.
+                <FileText className="h-3.5 w-3.5" /> Nº Operación / Nota
               </Label>
               <Input
-                placeholder="Ej. Operación 1234"
+                placeholder="Ej. Yape 998123 / Vale #04"
                 value={referencia}
                 onChange={(e) => setReferencia(e.target.value)}
                 className="h-9 text-xs"
@@ -225,12 +271,12 @@ export function LiquidarComisionModal({
             </div>
           </div>
 
-          <div className="pt-2 flex justify-end gap-2.5">
+          <div className="pt-2 flex justify-end gap-2.5 border-t border-border/60">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="text-xs font-bold h-9"
+              className="text-xs font-bold h-9 cursor-pointer"
             >
               Cancelar
             </Button>
@@ -240,7 +286,7 @@ export function LiquidarComisionModal({
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 gap-1.5 px-4 cursor-pointer"
             >
               <Send className="h-3.5 w-3.5" />
-              {isSubmitting ? "Procesando..." : "Confirmar Pago de Comisiones"}
+              {isSubmitting ? "Procesando..." : "Confirmar Liquidación"}
             </Button>
           </div>
         </form>

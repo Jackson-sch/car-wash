@@ -23,7 +23,12 @@ export default async function CuponesPage() {
     activo: c.activo === true,
     tipoDescuento: c.tipoDescuento,
     valorDescuento: typeof c.valorDescuento === "string" ? parseFloat(c.valorDescuento) : c.valorDescuento,
+    compraMinima: c.compraMinima ? parseFloat(c.compraMinima) : null,
+    limiteTotal: c.limiteTotal ?? null,
+    limitePorCliente: c.limitePorCliente ?? 1,
+    fechaInicio: c.fechaInicio ? new Date(c.fechaInicio) : null,
     fechaFin: c.fechaFin ? new Date(c.fechaFin) : null,
+    createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
     usos: c.usos,
     servicios: c.servicios,
   }));

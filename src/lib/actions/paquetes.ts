@@ -185,8 +185,7 @@ export async function deletePaquete(id: string) {
     const sucursalId = session.user.sucursalId!;
 
     await db
-      .update(paquetes)
-      .set({ activo: false })
+      .delete(paquetes)
       .where(and(eq(paquetes.id, id), eq(paquetes.sucursalId, sucursalId)));
 
     revalidateTag("paquetes", { expire: 3600 });

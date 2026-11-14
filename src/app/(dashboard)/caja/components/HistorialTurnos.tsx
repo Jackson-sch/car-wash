@@ -10,9 +10,13 @@ import { TurnoCierreDetailSheet } from "./TurnoCierreDetailSheet";
 
 interface HistorialTurnosProps {
   historial: TurnoHistorial[];
+  hideHeading?: boolean;
 }
 
-export function HistorialTurnos({ historial }: HistorialTurnosProps) {
+export function HistorialTurnos({
+  historial,
+  hideHeading = false,
+}: HistorialTurnosProps) {
   const [selectedTurno, setSelectedTurno] = useState<TurnoHistorial | null>(null);
 
   const [currentPage, setCurrentPage] = useQueryState(
@@ -31,10 +35,12 @@ export function HistorialTurnos({ historial }: HistorialTurnosProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
-        <History className="h-4.5 w-4.5 text-muted-foreground" />
-        Historial de Turnos de Caja
-      </h2>
+      {!hideHeading && (
+        <h2 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+          <History className="h-4.5 w-4.5 text-muted-foreground" />
+          Historial de Turnos de Caja
+        </h2>
+      )}
       
       {historial.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground border-border bg-card text-xs">

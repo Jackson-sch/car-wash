@@ -4,6 +4,9 @@ export interface TransaccionDetallada {
   metodo: "efectivo" | "tarjeta" | "yape" | "plin" | "transferencia" | "otro";
   createdAt: Date;
   nroTicket: string | null;
+  ordenId?: string;
+  placa?: string | null;
+  clienteNombre?: string | null;
   servicios: string;
 }
 

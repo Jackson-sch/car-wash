@@ -1,6 +1,6 @@
 "use client";
 
-import { Tag, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { Tag, AlertCircle, CheckCircle2, X, Sparkles, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -32,24 +32,44 @@ export function CouponSection({
   onValidate,
   validatingCoupon,
 }: CouponSectionProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (cuponCode.trim() && !validatingCoupon) {
+        onValidate();
+      }
+    }
+  };
+
   return (
-    <div className="space-y-2">
-      <span className="text-[10px] font-bold uppercase text-zinc-500 tracking-wider flex items-center gap-1.5">
-        <Tag className="h-3 w-3" />
-        Cupón de Descuento
-      </span>
+    <div className="space-y-2 p-3.5 bg-card border border-border/80 rounded-2xl">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-extrabold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+          <Tag className="size-3 text-secondary" />
+          Cupón de Descuento
+        </span>
+        {couponApplied && (
+          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <CheckCircle2 className="size-2.5" />
+            Activo
+          </span>
+        )}
+      </div>
+
       {couponApplied ? (
-        <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            <div>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                Cupón aplicado
+        <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="size-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Sparkles className="size-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-black text-foreground block truncate">
+                Cupón Aplicado con Éxito
               </span>
-              <span className="text-[10px] text-emerald-600/70 dark:text-emerald-500/70 block">
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">
                 {couponApplied.tipoDescuento === "porcentaje"
-                  ? `${couponApplied.valorDescuento}% de descuento`
-                  : `S/ ${couponApplied.valorDescuento.toFixed(2)} de descuento`}
+                  ? `${couponApplied.valorDescuento}% de descuento aplicado`
+                  : `S/ ${couponApplied.valorDescuento.toFixed(2)} de descuento directo`}
               </span>
             </div>
           </div>
@@ -60,39 +80,47 @@ export function CouponSection({
               setCuponCode("");
             }}
             aria-label="Quitar cupón"
-            className="text-xs text-zinc-400 hover:text-zinc-700 font-bold cursor-pointer"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+            title="Quitar cupón"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="size-4" />
           </button>
         </div>
       ) : (
         <div className="flex gap-2">
-          <Input
-            placeholder="Ingresa código"
-            value={cuponCode}
-            onChange={(e) => {
-              setCuponCode(e.target.value.toUpperCase());
-              setCuponError("");
-            }}
-            className="h-9 text-xs uppercase font-mono"
-          />
+          <div className="relative flex-1">
+            <Input
+              placeholder="Ej. VERANO2026"
+              value={cuponCode}
+              onChange={(e) => {
+                setCuponCode(e.target.value.toUpperCase());
+                setCuponError("");
+              }}
+              onKeyDown={handleKeyDown}
+              className="h-9.5 text-xs uppercase font-mono font-bold bg-muted/40 border-border rounded-xl placeholder:normal-case placeholder:font-sans"
+            />
+          </div>
           <Button
             type="button"
             variant="outline"
-            size="sm"
             onClick={onValidate}
             disabled={!cuponCode.trim() || validatingCoupon}
-            className="h-9 text-xs cursor-pointer"
+            className="h-9.5 text-xs font-bold px-4 rounded-xl cursor-pointer hover:bg-secondary/15 hover:border-secondary transition-colors"
           >
-            {validatingCoupon ? "..." : "Validar"}
+            {validatingCoupon ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              "Validar"
+            )}
           </Button>
         </div>
       )}
+
       {cuponError && (
-        <p className="text-[10px] text-red-500 font-medium flex items-center gap-1 mt-1">
-          <AlertCircle className="h-3 w-3" />
-          {cuponError}
-        </p>
+        <div className="flex items-center gap-1.5 text-[11px] text-rose-500 font-semibold mt-1">
+          <AlertCircle className="size-3.5 shrink-0" />
+          <span>{cuponError}</span>
+        </div>
       )}
     </div>
   );

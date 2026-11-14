@@ -192,7 +192,7 @@ export async function GET(request: NextRequest) {
 <body>
   ${renderSlip(copias === 2 ? "COPIA CLIENTE" : "")}
   ${copias === 2 ? `
-    <div class="cut-guide">✂ - - - CORTE DE PAPEL / GUILLOTINA - - - ✂</div>
+    <div class="cut-guide">- - - - - CORTE DE PAPEL / GUILLOTINA - - - - -</div>
     ${renderSlip("COPIA LAVADOR / PARABRISAS", true)}
   ` : ""}
 

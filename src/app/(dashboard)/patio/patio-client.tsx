@@ -8,11 +8,13 @@ import {
   Car,
   Sparkles,
   ArrowLeft,
-  RefreshCw,
   User,
   CheckCircle2,
-  AlertTriangle,
   Flame,
+  Volume2,
+  VolumeX,
+  BellRing,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { getOrdenes } from "@/lib/actions/ordenes";
 import type { Orden } from "@/app/(dashboard)/ordenes/components/OrdenesTable";
 import { useOrdenesRealtime } from "@/app/(dashboard)/ordenes/hooks/useOrdenesRealtime";
+import { VehiclePlate } from "@/components/shared/VehiclePlate";
 
 interface PatioClientProps {
   initialOrdenes: Orden[];
@@ -33,21 +36,48 @@ interface PatioClientProps {
 export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
   const [ordenes, setOrdenes] = useState<Orden[]>(initialOrdenes);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [nowTimestamp, setNowTimestamp] = useState(() => 0);
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [lastUpdated, setLastUpdated] = useState<Date>(() => new Date());
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "en_proceso" | "pendiente" | "completado">("todos");
 
-  // ── Suscripción en Tiempo Real (Supabase Realtime WebSockets + BroadcastChannel) ──
+  // Reproducir sonido sutil (Web Audio API synth) cuando cambia el estado
+  const playChime = () => {
+    if (!soundEnabled || typeof window === "undefined") return;
+    try {
+      const AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    } catch {
+      // Ignorar errores de audio context en navegadores bloqueados
+    }
+  };
+
+  // ── Suscripción en Tiempo Real ──
   useOrdenesRealtime(setOrdenes, () => {
     setLastUpdated(new Date());
+    playChime();
   });
 
   // Reloj digital en vivo
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
+      setNowTimestamp(now.getTime());
       setCurrentTime(
         now.toLocaleTimeString("es-PE", {
           hour: "2-digit",
@@ -122,24 +152,47 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
     return { enEspera, enLavado, listos, total: ordenesActivas.length };
   }, [ordenesActivas]);
 
-  // Cálculo de tiempo transcurrido y semáforo
-  const getTimeInfo = (createdAt: Date | null) => {
-    if (!createdAt) return { text: "—", mins: 0, status: "normal" as const };
-    const diffMs = Date.now() - new Date(createdAt).getTime();
-    const diffMins = Math.floor(diffMs / 60000);
+  // Cálculo de tiempo transcurrido, tiempo estimado y barra de progreso (función pura con timestamp)
+  const getTimeInfo = (createdAt: Date | null, vehiculoTipo: string | null | undefined, currentTimestamp: number) => {
+    if (!createdAt || currentTimestamp <= 0) {
+      return { 
+        text: "—", 
+        mins: 0, 
+        status: "normal" as const,
+        progress: 0, 
+        estimatedMins: 30,
+        subtext: "Tiempo pendiente"
+      };
+    }
+
+    const diffMs = currentTimestamp - new Date(createdAt).getTime();
+    const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+
+    // Estimar duración estándar por categoría de vehículo
+    const estimatedMins = vehiculoTipo === "moto" 
+      ? 20 
+      : vehiculoTipo === "pickup" || vehiculoTipo === "camion" 
+        ? 45 
+        : 30;
+
+    const progress = Math.min(100, Math.round((diffMins / estimatedMins) * 100));
 
     let status: "normal" | "warning" | "danger" = "normal";
-    if (diffMins > 45) {
+    let subtext = `${Math.max(0, estimatedMins - diffMins)}m restantes`;
+
+    if (diffMins > estimatedMins) {
       status = "danger";
-    } else if (diffMins > 25) {
+      subtext = `+${diffMins - estimatedMins}m retraso`;
+    } else if (diffMins >= estimatedMins * 0.75) {
       status = "warning";
+      subtext = "Por finalizar";
     }
 
     const hours = Math.floor(diffMins / 60);
     const mins = diffMins % 60;
     const text = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
 
-    return { text, mins: diffMins, status };
+    return { text, mins: diffMins, status, progress, estimatedMins, subtext };
   };
 
   return (
@@ -151,7 +204,7 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
       {/* ── Top Bar para Smart TV de Taller ────────────────────────────────────────── */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
         <div className="flex items-center gap-4">
-          <Link href="/ordenes" passHref>
+          <Link href="/ordenes">
             <Button
               variant="outline"
               size="sm"
@@ -182,10 +235,10 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
           </div>
         </div>
 
-        {/* Reloj Digital Gigante & Botón Fullscreen */}
-        <div className="flex items-center gap-4">
+        {/* Reloj Digital Gigante, Sonido & Botón Fullscreen */}
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="text-right">
-            <div className="text-3xl sm:text-4xl font-black font-mono tracking-widest text-emerald-400 drop-shadow-sm">
+            <div className="text-3xl sm:text-4xl font-black font-mono tracking-widest text-emerald-400 drop-shadow-sm tabular-nums">
               {currentTime || "--:--:--"}
             </div>
             <div className="text-xs text-zinc-400 capitalize font-bold tracking-wide mt-0.5">
@@ -193,6 +246,25 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
             </div>
           </div>
 
+          {/* Toggle Sonido Alerta */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setSoundEnabled(!soundEnabled);
+              if (!soundEnabled) playChime();
+            }}
+            className={`border-zinc-800 rounded-xl h-12 w-12 p-0 cursor-pointer shrink-0 shadow-md transition-all active:scale-95 ${
+              soundEnabled
+                ? "bg-secondary/20 border-secondary text-secondary"
+                : "bg-[#12141c] hover:bg-zinc-800 text-zinc-400"
+            }`}
+            title={soundEnabled ? "Alertas de audio activadas" : "Activar alertas de audio"}
+          >
+            {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          </Button>
+
+          {/* Fullscreen Toggle */}
           <Button
             type="button"
             variant="outline"
@@ -224,7 +296,7 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
           <div className="text-xs font-black text-zinc-400 uppercase tracking-widest">
             Total en Patio
           </div>
-          <div className="text-4xl sm:text-5xl font-black font-mono text-white mt-1.5 drop-shadow-md">
+          <div className="text-4xl sm:text-5xl font-black font-mono text-white mt-1.5 drop-shadow-md tabular-nums">
             {stats.total}
           </div>
         </button>
@@ -242,7 +314,7 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
           <div className="text-xs font-black text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" /> En Espera
           </div>
-          <div className="text-4xl sm:text-5xl font-black font-mono text-amber-400 mt-1.5 drop-shadow-md">
+          <div className="text-4xl sm:text-5xl font-black font-mono text-amber-400 mt-1.5 drop-shadow-md tabular-nums">
             {stats.enEspera}
           </div>
         </button>
@@ -260,7 +332,7 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
           <div className="text-xs font-black text-sky-400 uppercase tracking-widest flex items-center gap-1.5">
             <Car className="h-3.5 w-3.5" /> En Lavado
           </div>
-          <div className="text-4xl sm:text-5xl font-black font-mono text-sky-400 mt-1.5 drop-shadow-md">
+          <div className="text-4xl sm:text-5xl font-black font-mono text-sky-400 mt-1.5 drop-shadow-md tabular-nums">
             {stats.enLavado}
           </div>
         </button>
@@ -278,7 +350,7 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
           <div className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5" /> Listos para Retiro
           </div>
-          <div className="text-4xl sm:text-5xl font-black font-mono text-emerald-400 mt-1.5 drop-shadow-md">
+          <div className="text-4xl sm:text-5xl font-black font-mono text-emerald-400 mt-1.5 drop-shadow-md tabular-nums">
             {stats.listos}
           </div>
         </button>
@@ -300,22 +372,24 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 flex-1">
           {ordenesFiltradas.map((orden) => {
-            const time = getTimeInfo(orden.createdAt);
+            const time = getTimeInfo(orden.createdAt, orden.vehiculoTipo, nowTimestamp);
 
             return (
               <div
                 key={orden.id}
-                className={`p-5 sm:p-6 rounded-3xl border-2 flex flex-col justify-between transition-all duration-300 shadow-2xl bg-[#12141d] ${
+                className={`p-5 sm:p-6 rounded-3xl border-2 flex flex-col justify-between transition-all duration-300 shadow-2xl bg-[#12141d] relative overflow-hidden group ${
                   orden.estado === "completado"
                     ? "border-emerald-500/70 shadow-emerald-950/20"
                     : orden.estado === "en_proceso"
-                      ? "border-sky-500/70 shadow-sky-950/20"
+                      ? time.status === "danger"
+                        ? "border-rose-500/80 shadow-rose-950/30 ring-2 ring-rose-500/30"
+                        : "border-sky-500/70 shadow-sky-950/20"
                       : "border-amber-500/70 shadow-amber-950/20"
                 }`}
               >
                 <div>
                   {/* Badge de Estado y Semáforo de Tiempo */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center justify-between gap-2 mb-3">
                     <Badge
                       className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-lg ${
                         orden.estado === "completado"
@@ -344,22 +418,39 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
                     >
                       {time.status === "danger" && <Flame className="size-3.5 text-rose-400" />}
                       <Clock className="size-3.5" />
-                      <span>{time.text}</span>
+                      <span className="tabular-nums">{time.text}</span>
                     </div>
                   </div>
 
-                  {/* Placa Gigante en Geist Mono (Alto Contraste Smart TV) */}
-                  <div className="relative py-4 px-3 rounded-2xl bg-[#0b0c10] border-2 border-zinc-700/80 text-center my-3 shadow-inner select-all">
-                    <span className="text-[9px] font-black tracking-widest text-zinc-400 uppercase block mb-0.5">
-                      PERÚ
-                    </span>
-                    <span className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-widest text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]">
-                      {orden.placa}
-                    </span>
+                  {/* Barra de progreso de tiempo estimado */}
+                  {orden.estado === "en_proceso" && (
+                    <div className="mb-3 space-y-1">
+                      <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                        <span className="truncate">{time.subtext}</span>
+                        <span>{time.progress}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-zinc-800/80 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            time.status === "danger"
+                              ? "bg-rose-500 shadow-sm shadow-rose-500"
+                              : time.status === "warning"
+                                ? "bg-amber-400"
+                                : "bg-sky-400"
+                          }`}
+                          style={{ width: `${time.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Placa Vehicular */}
+                  <div className="flex justify-center my-3">
+                    <VehiclePlate plate={orden.placa} size="lg" className="w-full py-3" />
                   </div>
 
                   {/* Marca y Modelo del Vehículo */}
-                  <div className="mt-4">
+                  <div className="mt-3">
                     <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-tight truncate">
                       {[orden.vehiculoMarca, orden.vehiculoModelo].filter(Boolean).join(" ") || "Vehículo sin modelo"}
                     </h3>
@@ -370,7 +461,7 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
                 </div>
 
                 {/* Footer de Tarjeta: Lavador Asignado */}
-                <div className="mt-6 pt-3.5 border-t border-zinc-800 flex items-center justify-between">
+                <div className="mt-5 pt-3.5 border-t border-zinc-800 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <div className="size-8 rounded-xl bg-zinc-800/90 border border-zinc-700 flex items-center justify-center text-zinc-300">
                       <User className="size-4" />
@@ -383,14 +474,15 @@ export function PatioClient({ initialOrdenes, sucursal }: PatioClientProps) {
                         {orden.lavadorNombre ? (
                           `${orden.lavadorNombre} ${orden.lavadorApellido || ""}`
                         ) : (
-                          <span className="text-amber-400 font-bold">⚠️ SIN ASIGNAR</span>
+                          <span className="text-amber-400 font-bold inline-flex items-center gap-1"><AlertTriangle className="size-3" /> SIN ASIGNAR</span>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {orden.prioridad && orden.prioridad > 0 ? (
-                    <Badge variant="outline" className="border-rose-500 bg-rose-500/10 text-rose-400 text-[10px] font-black px-2 py-0.5">
+                    <Badge variant="outline" className="border-rose-500 bg-rose-500/10 text-rose-400 text-[10px] font-black px-2 py-0.5 flex items-center gap-1">
+                      <BellRing className="size-3" />
                       URGENTE
                     </Badge>
                   ) : null}

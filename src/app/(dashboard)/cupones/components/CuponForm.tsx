@@ -7,9 +7,7 @@ import {
   RefreshCw,
   Calendar as CalendarIcon,
   Save,
-  Scissors,
   CheckCircle2,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { CuponData } from "@/lib/actions/cupones";
@@ -18,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -35,6 +32,7 @@ interface CuponFormProps {
   servicios: ServicioType[];
   editingCupon?: EditingCupon | null;
   onCancelEdit?: () => void;
+  onSuccess?: () => void;
 }
 
 interface EditingCupon extends Omit<CuponData, "servicios"> {
@@ -107,18 +105,38 @@ function editingToState(cupon: EditingCupon): CuponFormState {
   };
 }
 
-export function CuponForm({ servicios, editingCupon, onCancelEdit }: CuponFormProps) {
-  // key={editingCupon?.id || 'nuevo'} fuerza remonte con estado fresco
-  return <CuponFormContent key={editingCupon?.id || "nuevo"} servicios={servicios} editingCupon={editingCupon} onCancelEdit={onCancelEdit} />;
+export function CuponForm({ servicios, editingCupon, onCancelEdit, onSuccess }: CuponFormProps) {
+  return (
+    <CuponFormContent
+      key={editingCupon?.id || "nuevo"}
+      servicios={servicios}
+      editingCupon={editingCupon}
+      onCancelEdit={onCancelEdit}
+      onSuccess={onSuccess}
+    />
+  );
 }
 
-function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormProps) {
+function CuponFormContent({ servicios, editingCupon, onCancelEdit, onSuccess }: CuponFormProps) {
   const [isPending, startTransition] = useTransition();
   const initialForm = editingCupon ? editingToState(editingCupon) : { ...INITIAL_FORM };
   const [form, dispatch] = useReducer(formReducer, initialForm);
 
-  const { codigo, tipoDescuento, valorDescuento, compraMinima, fechaInicio, fechaFin, limiteTotal, limitePorCliente, serviciosSeleccionados } = form;
-  const selectedServiciosSet = useMemo(() => new Set(serviciosSeleccionados), [serviciosSeleccionados]);
+  const {
+    codigo,
+    tipoDescuento,
+    valorDescuento,
+    compraMinima,
+    fechaInicio,
+    fechaFin,
+    limiteTotal,
+    limitePorCliente,
+    serviciosSeleccionados,
+  } = form;
+  const selectedServiciosSet = useMemo(
+    () => new Set(serviciosSeleccionados),
+    [serviciosSeleccionados]
+  );
 
   const sf = (field: keyof CuponFormState, value: unknown) =>
     dispatch({ type: "SET_FIELD", field, value });
@@ -141,13 +159,13 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
   };
 
   const handleSubmit = async () => {
-    if (!codigo || !valorDescuento) {
+    if (!codigo.trim() || !valorDescuento) {
       toast.error("El código y el valor de descuento son obligatorios.");
       return;
     }
 
     const data: CuponData = {
-      codigo,
+      codigo: codigo.trim(),
       tipoDescuento,
       valorDescuento: parseFloat(valorDescuento),
       compraMinima: compraMinima ? parseFloat(compraMinima) : null,
@@ -166,6 +184,7 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
       if (res.success) {
         toast.success(editingCupon ? "Cupón actualizado exitosamente" : "Cupón creado exitosamente");
         dispatch({ type: "RESET" });
+        onSuccess?.();
         onCancelEdit?.();
       } else {
         toast.error(res.error || "Error al guardar cupón");
@@ -174,116 +193,121 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
   };
 
   const resetForm = () => dispatch({ type: "RESET" });
-  const handleCancel = () => { resetForm(); onCancelEdit?.(); };
+  const handleCancel = () => {
+    resetForm();
+    onCancelEdit?.();
+  };
   const handleToggleServicio = (id: string) => dispatch({ type: "TOGGLE_SERVICIO", id });
   const isEditing = !!editingCupon;
 
   return (
-    <div className="space-y-6">
-      {isEditing && (
-        <div className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-lg px-4 py-3">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium text-foreground">Editando cupón:</span>
-            <Badge variant="outline" className="font-mono">{editingCupon.codigo}</Badge>
-          </div>
-          <Button variant="ghost" size="icon-sm" onClick={handleCancel}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
-      <Card className="shadow-sm">
-        <CardHeader className="border-b border-border/50 pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Scissors className="h-5 w-5 text-muted-foreground" />
-            Detalles del Cupón
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Código de Cupón</Label>
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Columna Izquierda: Datos y Restricciones */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Código Promocional *
+              </Label>
               <div className="flex gap-2">
                 <Input
-                  className="uppercase font-mono"
+                  className="uppercase font-mono font-bold tracking-wider"
                   placeholder="EJ: VERANO20"
                   value={codigo}
                   onChange={(e) => sf("codigo", e.target.value.toUpperCase())}
                 />
-                <Button variant="outline" onClick={generateRandomCode} title="Generar Aleatorio" className="px-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={generateRandomCode}
+                  title="Generar código aleatorio"
+                  className="px-3 shrink-0 cursor-pointer"
+                >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Compra Mínima ($)</Label>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Compra Mínima (S/)
+              </Label>
               <Input
                 type="number"
-                placeholder="Ej. 50"
+                step="0.01"
+                placeholder="Ej. 50.00 (opcional)"
                 value={compraMinima}
                 onChange={(e) => sf("compraMinima", e.target.value)}
+                className="font-mono"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Tipo de Descuento</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Tipo de Descuento
+              </Label>
               <div className="flex p-1 bg-muted/50 rounded-lg border border-border">
-                <button type="button" onClick={() => sf("tipoDescuento", "porcentaje")}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                <button
+                  type="button"
+                  onClick={() => sf("tipoDescuento", "porcentaje")}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors cursor-pointer ${
                     tipoDescuento === "porcentaje"
-                      ? "bg-background shadow-sm border border-border text-foreground"
+                      ? "bg-secondary text-white shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   Porcentaje (%)
                 </button>
-                <button type="button" onClick={() => sf("tipoDescuento", "fijo")}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                <button
+                  type="button"
+                  onClick={() => sf("tipoDescuento", "fijo")}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors cursor-pointer ${
                     tipoDescuento === "fijo"
-                      ? "bg-background shadow-sm border border-border text-foreground"
+                      ? "bg-secondary text-white shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Monto Fijo ($)
+                  Monto Fijo (S/)
                 </button>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Valor del Descuento</Label>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Valor del Descuento ({tipoDescuento === "porcentaje" ? "%" : "S/"}) *
+              </Label>
               <Input
                 type="number"
-                className="h-11!"
-                placeholder={tipoDescuento === "porcentaje" ? "15" : "10.00"}
+                step="0.01"
+                className="font-mono font-bold"
+                placeholder={tipoDescuento === "porcentaje" ? "15" : "20.00"}
                 value={valorDescuento}
                 onChange={(e) => sf("valorDescuento", e.target.value)}
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <Card className="shadow-sm">
-        <CardHeader className="border-b border-border/50 pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-            Restricciones de Uso
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Fecha de Inicio</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Vigente Desde
+              </Label>
               <Popover>
                 <PopoverTrigger
                   className={cn(
-                    "flex h-9 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm font-normal shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+                    "flex h-9 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-xs font-normal shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     !fechaInicio && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {fechaInicio ? format(fechaInicio, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {fechaInicio ? (
+                    format(fechaInicio, "PPP", { locale: es })
+                  ) : (
+                    <span>Inmediato (sin inicio)</span>
+                  )}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
@@ -295,17 +319,24 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Fecha de Fin</Label>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Fecha de Expiración
+              </Label>
               <Popover>
                 <PopoverTrigger
                   className={cn(
-                    "flex h-9 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm font-normal shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+                    "flex h-9 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-xs font-normal shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer",
                     !fechaFin && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {fechaFin ? format(fechaFin, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {fechaFin ? (
+                    format(fechaFin, "PPP", { locale: es })
+                  ) : (
+                    <span>Sin caducidad</span>
+                  )}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
@@ -318,76 +349,93 @@ function CuponFormContent({ servicios, editingCupon, onCancelEdit }: CuponFormPr
               </Popover>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Límite Total de Usos</Label>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Cupo Total de Canjes
+              </Label>
               <Input
                 type="number"
-                placeholder="Ilimitado si está en blanco"
+                placeholder="Ilimitado si se deja vacío"
                 value={limiteTotal}
                 onChange={(e) => sf("limiteTotal", e.target.value)}
+                className="font-mono"
               />
-              <p className="text-xs text-muted-foreground">Veces que puede ser usado globalmente.</p>
             </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase text-muted-foreground">Límite por Cliente</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">
+                Usos Máx. por Cliente
+              </Label>
               <Input
                 type="number"
                 value={limitePorCliente}
                 onChange={(e) => sf("limitePorCliente", e.target.value)}
+                className="font-mono"
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card className="shadow-sm">
-        <CardHeader className="border-b border-border/50 pb-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-            Aplicabilidad de Servicio
-          </CardTitle>
-          <CardDescription>
-            Selecciona a qué servicios aplica. Si no seleccionas ninguno, aplicará a todos.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-            {servicios.map((s) => (
-              <label
-                key={s.id}
-                className="flex items-center gap-3 p-3 rounded-lg border border-transparent hover:border-border hover:bg-muted/30 cursor-pointer transition-colors"
-              >
-                <Checkbox
-                  checked={selectedServiciosSet.has(s.id)}
-                  onCheckedChange={() => handleToggleServicio(s.id)}
-                />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{s.nombre}</p>
-                </div>
-                {s.categoriaNombre && (
-                  <Badge variant="secondary" className="text-xs font-normal">
-                    {s.categoriaNombre}
-                  </Badge>
-                )}
-              </label>
-            ))}
-            {servicios.length === 0 && (
-              <p className="text-sm text-muted-foreground p-4 text-center">No hay servicios registrados.</p>
-            )}
+        {/* Columna Derecha: Servicios Aplicables */}
+        <div className="lg:col-span-5 flex flex-col justify-between rounded-2xl border border-border/80 bg-muted/20 p-4">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                <CheckCircle2 className="size-3.5 text-secondary" />
+                Servicios Aplicables
+              </Label>
+              <Badge variant="outline" className="text-[10px] font-bold">
+                {serviciosSeleccionados.length === 0
+                  ? "Todos los servicios"
+                  : `${serviciosSeleccionados.length} seleccionados`}
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Si no marcas ninguno, el cupón será válido para cualquier servicio del catálogo.
+            </p>
+
+            <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1 pt-1">
+              {servicios.map((s) => (
+                <label
+                  key={s.id}
+                  className="flex items-center gap-2.5 p-2 rounded-lg border border-transparent hover:border-border hover:bg-card/60 cursor-pointer transition-colors"
+                >
+                  <Checkbox
+                    checked={selectedServiciosSet.has(s.id)}
+                    onCheckedChange={() => handleToggleServicio(s.id)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate">{s.nombre}</p>
+                  </div>
+                  {s.categoriaNombre && (
+                    <Badge variant="secondary" className="text-[10px] font-normal shrink-0">
+                      {s.categoriaNombre}
+                    </Badge>
+                  )}
+                </label>
+              ))}
+              {servicios.length === 0 && (
+                <p className="text-xs text-muted-foreground p-4 text-center">
+                  No hay servicios registrados.
+                </p>
+              )}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <div className="flex justify-end gap-3 pt-2">
-        {isEditing && (
-          <Button variant="outline" type="button" onClick={handleCancel}>
-            Cancelar
-          </Button>
-        )}
-        <Button onClick={handleSubmit} disabled={isPending} className="gap-2">
+      <div className="flex justify-end gap-2.5 pt-2 border-t border-border/60">
+        <Button variant="outline" type="button" onClick={handleCancel} className="cursor-pointer">
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={isPending}
+          className="gap-2 bg-secondary hover:bg-secondary/90 text-white font-bold cursor-pointer"
+        >
           <Save className="h-4 w-4" />
-          {isPending ? "Guardando..." : isEditing ? "Actualizar Cupón" : "Guardar y Activar"}
+          {isPending ? "Guardando..." : isEditing ? "Actualizar Cupón" : "Guardar y Activar Cupón"}
         </Button>
       </div>
     </div>

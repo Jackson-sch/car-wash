@@ -138,7 +138,7 @@ export function InspeccionVehiculoModal({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleImageClick(e as any);
+                    handleImageClick(e as unknown as React.MouseEvent<HTMLDivElement>);
                   }
                 }}
                 className="relative w-full h-[310px] sm:h-[330px] bg-slate-950 border-2 border-dashed border-sky-800/80 rounded-2xl flex items-center justify-center cursor-crosshair overflow-hidden group select-none shadow-xl"
@@ -236,7 +236,7 @@ export function InspeccionVehiculoModal({
 
               {/* Nota de garantía legal */}
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed font-medium">
-                🛡️ Esta inspección respalda la entrega del vehículo ante reclamos por daños preexistentes o pérdidas de objetos.
+                <span className="flex items-start gap-2"><ShieldAlert className="size-4 shrink-0 text-amber-500 mt-0.5" /><span>Esta inspección respalda la entrega del vehículo ante reclamos por daños preexistentes o pérdidas de objetos.</span></span>
               </div>
             </div>
           </div>

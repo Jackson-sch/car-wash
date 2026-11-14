@@ -44,6 +44,7 @@ export interface Orden {
   comprobanteTipo?: string | null;
   comprobanteSerie?: string | null;
   comprobanteNumero?: string | null;
+  serviciosNombres?: string[] | null;
 }
 
 export interface Lavador {

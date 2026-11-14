@@ -46,7 +46,7 @@ export function LealtadPanel({
         {/* Explicación de reglas de lealtad */}
         <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
           <p className="font-bold text-secondary flex items-center gap-1.5">
-            🎁 ¿Cómo funcionan las reglas de lealtad y puntos?
+            <Gift className="size-4 shrink-0 inline mr-1" /> ¿Cómo funcionan las reglas de lealtad y puntos?
           </p>
           <p className="text-muted-foreground">
             Permite premiar la fidelidad de los clientes mediante un monedero virtual de puntos acumulables que luego se pueden canjear como saldo a favor en caja:

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FlaskConical, Plus, Trash2, Send, Package } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { FlaskConical, Plus, Trash2, Send, Package, TrendingUp } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,14 +11,23 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { getRecetaServicio, asignarRecetaServicio } from "@/lib/actions/servicios";
+import { formatCurrency } from "@/lib/formats";
 
-interface InsumoDisponible {
+export interface InsumoDisponible {
   id: string;
   nombre: string;
   unidad: string | null;
+  precioCompra?: string | null;
+  stock?: string | null;
 }
 
 interface RecetaModalProps {
@@ -26,29 +35,37 @@ interface RecetaModalProps {
   onOpenChange: (open: boolean) => void;
   servicioId: string;
   servicioNombre: string;
+  servicioPrecio?: string | number;
   insumosDisponibles: InsumoDisponible[];
-  onSuccess?: (totalItems: number) => void;
+  onSuccess?: (totalItems: number, costoTotal: number) => void;
 }
 
-export function RecetaModal({
+export function RecetaModal(props: RecetaModalProps) {
+  if (!props.open) return null;
+  return <RecetaModalContent key={props.servicioId} {...props} />;
+}
+
+function RecetaModalContent({
   open,
   onOpenChange,
   servicioId,
   servicioNombre,
+  servicioPrecio = 0,
   insumosDisponibles,
   onSuccess,
 }: RecetaModalProps) {
   const [items, setItems] = useState<
     { id: string; itemId: string; cantidadConsumo: string }[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (open && servicioId) {
-      setIsLoading(true);
+    let active = true;
+    if (servicioId) {
       getRecetaServicio(servicioId)
         .then((receta) => {
+          if (!active) return;
           setItems(
             receta.map((r, idx) => ({
               id: `rec_${idx}_${r.itemId}`,
@@ -57,16 +74,41 @@ export function RecetaModal({
             }))
           );
         })
-        .finally(() => setIsLoading(false));
+        .finally(() => {
+          if (active) setIsLoading(false);
+        });
     }
-  }, [open, servicioId]);
+    return () => {
+      active = false;
+    };
+  }, [servicioId]);
+
+  const insumoSelectItems = useMemo(
+    () => insumosDisponibles.map((i) => ({ value: i.id, label: i.nombre })),
+    [insumosDisponibles]
+  );
+
+  // Cálculo en vivo del costo químico de la receta y margen bruto
+  const costoTotal = useMemo(() => {
+    return items.reduce((acc, it) => {
+      const ins = insumosDisponibles.find((i) => i.id === it.itemId);
+      const precioUnit = parseFloat(ins?.precioCompra || "0") || 0;
+      const qty = parseFloat(it.cantidadConsumo || "0") || 0;
+      return acc + precioUnit * qty;
+    }, 0);
+  }, [items, insumosDisponibles]);
+
+  const tarifaServicio = typeof servicioPrecio === "string"
+    ? parseFloat(servicioPrecio || "0") || 0
+    : servicioPrecio || 0;
+  const margenSoles = tarifaServicio - costoTotal;
+  const margenPct = tarifaServicio > 0 ? Math.round((margenSoles / tarifaServicio) * 100) : 0;
 
   const handleAddItem = () => {
     if (insumosDisponibles.length === 0) {
       toast.error("No hay insumos creados en el inventario");
       return;
     }
-    // Seleccionar automáticamente el siguiente insumo del inventario no asignado
     const selectedIds = new Set(items.map((i) => i.itemId));
     const nextInsumo = insumosDisponibles.find((i) => !selectedIds.has(i.id)) || insumosDisponibles[0];
 
@@ -95,7 +137,7 @@ export function RecetaModal({
       if (res.success) {
         toast.success("Receta de consumo guardada correctamente");
         onOpenChange(false);
-        if (onSuccess) onSuccess(items.length);
+        if (onSuccess) onSuccess(items.length, costoTotal);
       } else {
         toast.error(res.error || "Error al guardar receta");
       }
@@ -108,16 +150,16 @@ export function RecetaModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl bg-card border-border p-6 md:p-8 shadow-2xl">
+      <DialogContent className="sm:max-w-2xl bg-card border-border p-5 sm:p-6 shadow-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-1.5 pb-4 border-b border-border">
-          <DialogTitle className="flex items-center gap-2.5 text-xl font-black tracking-tight">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 border border-purple-500/20">
+          <DialogTitle className="flex items-center gap-2.5 text-lg sm:text-xl font-black tracking-tight">
+            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500 border border-purple-500/20">
               <FlaskConical className="h-5 w-5" />
             </div>
             <span>Receta de Insumos — {servicioNombre}</span>
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
-            Configura los productos del inventario y las cantidades exactas que se descontarán automáticamente al realizar este servicio.
+          <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+            Configura los productos del inventario y las cantidades exactas que se descontarán automáticamente al completar este servicio.
           </DialogDescription>
         </DialogHeader>
 
@@ -127,7 +169,36 @@ export function RecetaModal({
             Cargando receta del servicio...
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+          <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+            {/* Resumen de Rentabilidad en Vivo */}
+            <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-muted/30 border border-border/60 text-xs">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Tarifa Servicio
+                </span>
+                <span className="text-sm font-black font-mono text-foreground">
+                  {formatCurrency(tarifaServicio)}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Costo Insumos
+                </span>
+                <span className="text-sm font-black font-mono text-amber-500">
+                  {formatCurrency(costoTotal)}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Margen Bruto
+                </span>
+                <span className="text-sm font-black font-mono text-emerald-500 inline-flex items-center gap-1">
+                  <TrendingUp className="size-3.5" />
+                  {formatCurrency(margenSoles)} ({margenPct}%)
+                </span>
+              </div>
+            </div>
+
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-black uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -137,90 +208,112 @@ export function RecetaModal({
 
                 <Button
                   type="button"
+                  size="sm"
                   onClick={handleAddItem}
-                  className="h-9 text-xs font-bold gap-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg shadow-sm cursor-pointer"
+                  className="h-8 text-xs font-bold gap-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-sm cursor-pointer"
                 >
-                  <Plus className="h-4 w-4" /> Agregar Insumo a la Receta
+                  <Plus className="h-3.5 w-3.5" /> Agregar Insumo
                 </Button>
               </div>
 
               {items.length === 0 ? (
-                <div className="py-10 px-6 border-2 border-dashed border-border rounded-xl text-center space-y-2 bg-muted/10">
-                  <FlaskConical className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                <div className="py-8 px-6 border-2 border-dashed border-border rounded-xl text-center space-y-2 bg-muted/10">
+                  <FlaskConical className="h-9 w-9 text-muted-foreground/40 mx-auto" />
                   <p className="text-sm font-bold text-muted-foreground">
                     Este servicio aún no tiene receta asignada.
                   </p>
                   <p className="text-xs text-muted-foreground/70 max-w-sm mx-auto">
-                    Haz clic en "Agregar Insumo a la Receta" para vincular productos del inventario (ej. Shampoo, Cera, Desengrasante).
+                    Haz clic en &quot;Agregar Insumo&quot; para vincular productos del inventario (ej. Shampoo, Cera, Desengrasante).
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                  {/* Encabezado de la tabla de receta */}
-                  <div className="flex items-center gap-3 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+                <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                  <div className="flex items-center gap-2 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
                     <div className="flex-1 min-w-0">Producto / Insumo</div>
-                    <div className="w-32 shrink-0 text-center">Cantidad Consumo</div>
-                    <div className="w-24 shrink-0 text-center">Unidad</div>
-                    <div className="w-10 shrink-0 text-right">Quitar</div>
+                    <div className="w-28 shrink-0 text-center">Consumo</div>
+                    <div className="w-20 shrink-0 text-center">Subtotal</div>
+                    <div className="w-8 shrink-0"></div>
                   </div>
 
                   {items.map((item, index) => {
                     const insumoActual = insumosDisponibles.find((i) => i.id === item.itemId);
+                    const subCosto =
+                      (parseFloat(insumoActual?.precioCompra || "0") || 0) *
+                      (parseFloat(item.cantidadConsumo || "0") || 0);
+
                     return (
                       <div
                         key={item.id}
-                        className="flex items-center gap-3 p-3 border border-border rounded-xl bg-card hover:bg-muted/20 transition-colors shadow-sm"
+                        className="flex items-center gap-2 p-2.5 border border-border rounded-xl bg-card hover:bg-muted/20 transition-colors"
                       >
-                        {/* Selector de Insumo (Ocupa todo el espacio disponible sobrante) */}
+                        {/* Selector de Insumo */}
                         <div className="flex-1 min-w-0">
-                          <select
+                          <Select
+                            items={insumoSelectItems}
                             value={item.itemId}
-                            aria-label="Seleccionar insumo"
-                            onChange={(e) => handleItemChange(index, "itemId", e.target.value)}
-                            className="w-full h-10 px-3 rounded-lg border border-border bg-background text-xs md:text-sm font-bold truncate focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                            onValueChange={(val) => {
+                              if (val) handleItemChange(index, "itemId", val);
+                            }}
                           >
-                            {insumosDisponibles.map((ins) => (
-                              <option key={ins.id} value={ins.id}>
-                                {ins.nombre} ({ins.unidad || "unidad"})
-                              </option>
-                            ))}
-                          </select>
+                            <SelectTrigger className="h-9 rounded-lg border-border bg-background text-xs font-medium">
+                              <SelectValue placeholder="Seleccionar insumo...">
+                                {(val) => {
+                                  const found = insumosDisponibles.find((i) => i.id === val);
+                                  return found?.nombre || insumoActual?.nombre || "Seleccionar insumo...";
+                                }}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border bg-card max-h-56">
+                              {insumosDisponibles.map((ins) => (
+                                <SelectItem key={ins.id} value={ins.id} label={ins.nombre}>
+                                  <div className="flex items-center justify-between gap-3 w-full">
+                                    <span className="font-medium text-foreground">{ins.nombre}</span>
+                                    <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                                      {ins.unidad || "unid"}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
-                        {/* Input Cantidad (Ancho fijo 128px) */}
-                        <div className="w-32 shrink-0">
+                        {/* Input Cantidad + Unidad */}
+                        <div className="w-28 shrink-0 relative">
                           <Input
                             type="number"
                             step="0.001"
+                            min="0.001"
                             placeholder="0.050"
                             aria-label="Cantidad de consumo"
                             value={item.cantidadConsumo}
                             onChange={(e) =>
                               handleItemChange(index, "cantidadConsumo", e.target.value)
                             }
-                            className="h-10 text-xs md:text-sm font-black text-center"
+                            className="h-9 text-xs font-mono font-bold text-center pr-9 rounded-lg"
                             required
                           />
-                        </div>
-
-                        {/* Badge Unidad (Ancho fijo 96px) */}
-                        <div className="w-24 shrink-0 text-center">
-                          <span className="inline-block w-full py-2 text-xs font-black bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-lg uppercase truncate">
-                            {insumoActual?.unidad || "unid"}
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground uppercase pointer-events-none">
+                            {(insumoActual?.unidad || "und").slice(0, 3)}
                           </span>
                         </div>
 
-                        {/* Botón Eliminar (Ancho fijo 40px) */}
-                        <div className="w-10 shrink-0 text-right">
+                        {/* Subtotal Costo */}
+                        <div className="w-20 shrink-0 text-right font-mono font-bold text-xs text-foreground">
+                          {formatCurrency(subCosto)}
+                        </div>
+
+                        {/* Botón Eliminar */}
+                        <div className="w-8 shrink-0 text-right">
                           <Button
                             type="button"
                             variant="ghost"
-                            size="icon"
+                            size="icon-sm"
                             aria-label="Eliminar insumo"
                             onClick={() => handleRemoveItem(index)}
-                            className="h-10 w-10 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg cursor-pointer"
+                            className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg cursor-pointer"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>
@@ -230,22 +323,22 @@ export function RecetaModal({
               )}
             </div>
 
-            <div className="pt-4 border-t border-border flex justify-end gap-3">
+            <div className="pt-3 border-t border-border flex justify-end gap-2.5">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="text-xs font-bold h-10 px-5 cursor-pointer"
+                className="text-xs font-bold h-9 px-4 rounded-xl cursor-pointer"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs h-10 gap-2 px-6 shadow-md shadow-purple-950/40 cursor-pointer"
+                className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs h-9 gap-1.5 px-5 rounded-xl shadow-sm cursor-pointer"
               >
-                <Send className="h-4 w-4" />
-                {isSubmitting ? "Guardando Receta..." : "Guardar Receta"}
+                <Send className="h-3.5 w-3.5" />
+                {isSubmitting ? "Guardando..." : "Guardar Receta"}
               </Button>
             </div>
           </form>

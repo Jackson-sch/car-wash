@@ -52,17 +52,17 @@ export function getWhatsAppIngresoUrl(data: WhatsAppNotificationData): string | 
   const sucursal = data.sucursalNombre || "WashMaster Pro";
 
   const message = [
-    `🚗💦 *¡Hola ${data.clienteNombre.trim()}!*`,
+    `*¡Hola ${data.clienteNombre.trim()}!*`,
     ``,
     `Tu *${vehiculoDesc}* con placa *${data.placa.toUpperCase()}* ya ingresó a las bahías de lavado en *${sucursal}*.`,
     ``,
     data.servicios && data.servicios.length > 0 ? `*Servicios solicitados:*` : ``,
     data.servicios && data.servicios.length > 0 ? data.servicios.map((s) => `• ${s}`).join("\n") : ``,
     ``,
-    `📱 Puedes consultar el avance de tu lavado en tiempo real aquí:`,
+    `Puedes consultar el avance de tu lavado en tiempo real aquí:`,
     `${trackingUrl}`,
     ``,
-    `Te avisaremos en cuanto esté listo para entrega. ¡Gracias por confiar en nosotros! ✨`,
+    `Te avisaremos en cuanto esté listo para entrega. ¡Gracias por confiar en nosotros!`,
   ]
     .filter((line, index, arr) => !(line === "" && arr[index - 1] === ""))
     .join("\n");
@@ -83,13 +83,13 @@ export function getWhatsAppListoUrl(data: WhatsAppNotificationData): string | nu
   const totalFormatted = !isNaN(totalParsed) && totalParsed > 0 ? `S/ ${totalParsed.toFixed(2)}` : null;
 
   const message = [
-    `🎉✨ *¡Tu auto está listo para entrega!*`,
+    `*¡Tu auto está listo para entrega!*`,
     ``,
     `Hola *${data.clienteNombre.trim()}*, el servicio de tu *${vehiculoDesc}* (*${data.placa.toUpperCase()}*) ha culminado con éxito.`,
     ``,
-    totalFormatted ? `💰 *Total a pagar:* ${totalFormatted}` : ``,
+    totalFormatted ? `*Total a pagar:* ${totalFormatted}` : ``,
     ``,
-    `Ya puedes acercarte a la caja de *${sucursal}* para recoger tu vehículo y tus llaves. 🔑🚘`,
+    `Ya puedes acercarte a la caja de *${sucursal}* para recoger tu vehículo y tus llaves.`,
     ``,
     `¡Esperamos que disfrutes de tu auto reluciente!`,
   ]
@@ -111,7 +111,7 @@ export function getWhatsAppTicketUrl(data: WhatsAppNotificationData): string | n
   const sucursal = data.sucursalNombre || "WashMaster Pro";
 
   const message = [
-    `📄 *Comprobante de Servicio - ${sucursal}*`,
+    `*Comprobante de Servicio - ${sucursal}*`,
     ``,
     `Estimado(a) *${data.clienteNombre.trim()}*, adjuntamos los detalles de su orden *#${data.nroTicket || data.ordenId.substring(0, 8).toUpperCase()}*:`,
     `• Placa: *${data.placa.toUpperCase()}*`,

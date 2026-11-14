@@ -86,7 +86,7 @@ export function BackupPanel({ sucursal: _sucursal }: BackupPanelProps) {
               <h3 className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Protección de Datos Privados</h3>
               <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 leading-relaxed">
                 Por seguridad de la empresa, es mandatorio que confirmes tu contraseña de acceso para poder iniciar el proceso. 
-                El enlace de descarga generado expira en 60 segundos y puedes descargar el archivo un máximo de **1 vez cada 2 horas**.
+                El enlace de descarga generado expira en 60 segundos y puedes descargar el archivo un máximo de <strong>1 vez cada 2 horas</strong>.
               </p>
             </div>
           </div>

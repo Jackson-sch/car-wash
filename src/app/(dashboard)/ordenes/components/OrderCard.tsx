@@ -1,5 +1,7 @@
 "use client";
 
+import { VehiclePlate } from "@/components/shared/VehiclePlate";
+
 import { useMemo, useCallback } from "react";
 import {
   Car,
@@ -7,6 +9,7 @@ import {
   Truck,
   Bike,
   Sparkles,
+  Flame,
   XCircle,
   Pencil,
   Eye,
@@ -136,14 +139,14 @@ export function OrderCard({
     >
       {/* Barra superior: Placa Vehicular Peruana & Tiempo Transcurrido */}
       <div className="flex items-center justify-between gap-2">
-        {/* Placa Automotriz en Color Sólido Mate (Sin reflejos) */}
-        <div className="relative inline-flex flex-col items-center justify-center px-2.5 py-1 bg-zinc-900 border border-zinc-700/80 rounded-lg shadow-xs select-all shrink-0">
-          <span className="text-[7.5px] font-black tracking-widest text-zinc-400 leading-none uppercase">
-            PERÚ
-          </span>
-          <span className="text-xs sm:text-sm font-mono font-black tracking-wider text-zinc-100 leading-none mt-0.5">
-            {orden.placa}
-          </span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <VehiclePlate plate={orden.placa} size="md" />
+          {orden.prioridad === 1 && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 animate-pulse shrink-0">
+              <Flame className="size-3 fill-amber-500" />
+              VIP
+            </span>
+          )}
         </div>
 
         {/* Tiempo transcurrido con semáforo dinámico */}
@@ -153,7 +156,7 @@ export function OrderCard({
       {/* Datos del Cliente y Vehículo */}
       <div className="flex flex-col gap-1 min-w-0">
         <h4 className="font-extrabold text-sm text-foreground leading-tight truncate">
-          {orden.clienteNombre} {orden.clienteApellido}
+          {orden.clienteApellido && !orden.clienteNombre.toLowerCase().includes(orden.clienteApellido.toLowerCase()) ? `${orden.clienteNombre} ${orden.clienteApellido}` : orden.clienteNombre}
         </h4>
 
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium min-w-0">
@@ -164,10 +167,30 @@ export function OrderCard({
             <span>{meta.label}</span>
           </span>
           <span className="truncate text-foreground/80 font-semibold">
-            {orden.vehiculoMarca} {orden.vehiculoModelo}
+            {[orden.vehiculoMarca, orden.vehiculoModelo].filter(Boolean).join(" ") || "Vehículo sin modelo"}
           </span>
         </div>
       </div>
+
+      {/* Micro chips de servicios contratados */}
+      {orden.serviciosNombres && orden.serviciosNombres.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1">
+          {orden.serviciosNombres.slice(0, 2).map((srv, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary/10 text-secondary border border-secondary/20 max-w-[130px] truncate"
+              title={srv}
+            >
+              {srv}
+            </span>
+          ))}
+          {orden.serviciosNombres.length > 2 && (
+            <span className="text-[9px] font-bold text-muted-foreground px-1 py-0.5 rounded bg-muted border border-border">
+              +{orden.serviciosNombres.length - 2}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Asignación de Lavador */}
       <div className="pt-2 border-t border-border/50">
@@ -185,7 +208,7 @@ export function OrderCard({
                   if (!lav) {
                     return (
                       <span className="text-muted-foreground/80 flex items-center gap-1.5 font-medium">
-                        <UserPlus className="size-3.5 text-muted-foreground/60" />
+                        <UserPlus className="size-3.5 text-muted-foreground" />
                         <span>Sin lavador asignado</span>
                       </span>
                     );

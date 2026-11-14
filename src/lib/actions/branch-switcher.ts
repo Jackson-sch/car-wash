@@ -3,19 +3,10 @@
 import { db } from "@/lib/db";
 import { usuarios, sucursales } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@/lib/auth/config";
-import { headers } from "next/headers";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { getSessionOrThrow } from "./servicios";
 
-export async function getSessionOrThrow() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    throw new Error("No autorizado. Inicie sesión nuevamente.");
-  }
-  return session;
-}
+export { getSessionOrThrow };
 
 // Obtener todas las sucursales pertenecientes a la empresa del usuario logueado
 export async function getEmpresaSucursales() {
@@ -38,25 +29,24 @@ export async function getEmpresaSucursales() {
 
     // Si empresaId es null pero tenemos sucursalId, lo resolvemos desde la sucursal
     if (!empresaId && sucursalId) {
-      const [suc] = await db
+      const [sucursal] = await db
         .select({ empresaId: sucursales.empresaId })
         .from(sucursales)
         .where(eq(sucursales.id, sucursalId))
         .limit(1);
-      if (suc) {
-        empresaId = suc.empresaId;
+
+      if (sucursal?.empresaId) {
+        empresaId = sucursal.empresaId;
       }
     }
 
-    if (!empresaId) {
-      return [];
-    }
+    if (!empresaId) return [];
 
-    // Admins o supervisores ven las sucursales de su propia empresa
     return await db
       .select({
         id: sucursales.id,
         nombre: sucursales.nombre,
+        empresaNombre: sucursales.nombre,
       })
       .from(sucursales)
       .where(and(eq(sucursales.empresaId, empresaId), eq(sucursales.activa, true)));
@@ -66,43 +56,57 @@ export async function getEmpresaSucursales() {
   }
 }
 
-// Cambiar la sucursal activa actual para el usuario autenticado
-export async function switchActiveBranch(sucursalId: string) {
+// Acción para cambiar de sucursal activa
+export async function switchActiveBranch(newBranchId: string) {
   try {
     const session = await getSessionOrThrow();
-    const userId = session.user.id;
-    const { rol, empresaId } = session.user;
 
-    // 1. Validar que la sucursal exista y esté activa
-    const [sucursal] = await db
+    // 1. Obtener la sucursal solicitada y validar que esté activa
+    const [branch] = await db
       .select()
       .from(sucursales)
-      .where(and(eq(sucursales.id, sucursalId), eq(sucursales.activa, true)))
+      .where(and(eq(sucursales.id, newBranchId), eq(sucursales.activa, true)))
       .limit(1);
 
-    if (!sucursal) {
-      return { success: false, error: "La sucursal seleccionada no existe o está inactiva." };
+    if (!branch) {
+      return { success: false, error: "La sucursal seleccionada no existe o no está activa." };
     }
 
-    // 2. Validar propiedad si no es Super Admin
-    if (rol !== "superadmin") {
-      if (!empresaId || sucursal.empresaId !== empresaId) {
-        return { success: false, error: "No autorizado. Esta sucursal no pertenece a tu empresa." };
+    // 2. Si no es superadmin, validar que pertenezca a su misma empresa
+    if (session.user.rol !== "superadmin") {
+      if (branch.empresaId !== session.user.empresaId) {
+        return { success: false, error: "No tienes permiso para acceder a esta sucursal." };
       }
     }
 
-    // 3. Actualizar la sucursal activa del usuario en la base de datos
+    // 3. Actualizar la sucursal asignada en el perfil del usuario
     await db
       .update(usuarios)
-      .set({ sucursalId: sucursal.id, updatedAt: new Date() })
-      .where(eq(usuarios.id, userId));
+      .set({ sucursalId: newBranchId })
+      .where(eq(usuarios.id, session.user.id));
 
-    revalidateTag("dashboard", { expire: 300 });
-    revalidatePath("/");
+    // 4. Invalidar todos los tags de caché vinculados a la sucursal
+    revalidateTag("dashboard", "max");
+    revalidateTag("servicios", "max");
+    revalidateTag("caja", "max");
+    revalidateTag("ordenes", "max");
+
+    // 5. Revalidar todas las rutas del dashboard
     revalidatePath("/dashboard");
-    return { success: true, sucursalNombre: sucursal.nombre };
-  } catch (error) {
+    revalidatePath("/caja");
+    revalidatePath("/ordenes");
+    revalidatePath("/patio");
+
+    return {
+      success: true,
+      branchName: branch.nombre,
+      sucursalNombre: branch.nombre,
+    };
+  } catch (error: unknown) {
     console.error("Error al cambiar de sucursal:", error);
-    return { success: false, error: "Error interno al cambiar de sucursal." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al cambiar de sucursal.",
+    };
   }
 }

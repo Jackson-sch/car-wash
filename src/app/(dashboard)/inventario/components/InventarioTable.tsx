@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import Link from "next/link";
 import {
-  Search,
-  Package,
-  CheckCircle,
-  AlertTriangle,
   ChevronDown,
   ArrowUpDown,
-  Filter,
   Plus,
   Minus,
-  Sparkles,
   SlidersHorizontal,
+  Package,
+  CheckCircle2,
+  AlertTriangle,
+  TrendingDown,
+  History,
+  Pencil,
+  BookOpen,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,13 +27,6 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQueryState, parseAsInteger } from "nuqs";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { formatCurrency } from "@/lib/formats";
@@ -52,54 +46,32 @@ export interface Insumo {
 interface InventarioTableProps {
   insumos: Insumo[];
   onAdjustStock: (insumo: Insumo) => void;
+  onViewKardex?: (insumo: Insumo) => void;
+  onEditInsumo: (insumo: Insumo) => void;
   onQuickAdjust?: (insumo: Insumo, tipo: "entrada" | "salida", delta: number) => void;
+  onClearFilters?: () => void;
+  hasActiveFilters?: boolean;
 }
-
-type StatusFilter = "todos" | "suficiente" | "bajo" | "agotado";
 
 export function InventarioTable({
   insumos,
   onAdjustStock,
+  onViewKardex,
+  onEditInsumo,
   onQuickAdjust,
+  onClearFilters,
+  hasActiveFilters,
 }: InventarioTableProps) {
-  const [searchQuery, setSearchQuery] = useQueryState("search", {
-    defaultValue: "",
-    shallow: true,
-    history: "replace",
-  });
   const [page, setPage] = useQueryState(
     "page",
     parseAsInteger.withDefault(1).withOptions({ shallow: true })
   );
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
-  const [sortField, setSortField] = useState<"nombre" | "stock" | "precio">("nombre");
+  const [sortField, setSortField] = useState<"nombre" | "stock" | "precio" | "total">("nombre");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  // Filtrado
-  const filtered = useMemo(() => {
-    return insumos.filter((item) => {
-      const q = (searchQuery || "").toLowerCase();
-      const matchSearch =
-        item.nombre.toLowerCase().includes(q) ||
-        (item.proveedor && item.proveedor.toLowerCase().includes(q)) ||
-        (item.descripcion && item.descripcion.toLowerCase().includes(q));
-
-      if (!matchSearch) return false;
-
-      const st = parseFloat(item.stock || "0");
-      const min = parseFloat(item.stockMinimo || "0");
-
-      if (statusFilter === "suficiente") return st > min;
-      if (statusFilter === "bajo") return st <= min && st > 0;
-      if (statusFilter === "agotado") return st === 0;
-
-      return true;
-    });
-  }, [insumos, searchQuery, statusFilter]);
 
   // Ordenamiento
   const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
+    return [...insumos].sort((a, b) => {
       let valA: string | number = "";
       let valB: string | number = "";
 
@@ -112,13 +84,16 @@ export function InventarioTable({
       } else if (sortField === "precio") {
         valA = parseFloat(a.precioCompra || "0");
         valB = parseFloat(b.precioCompra || "0");
+      } else if (sortField === "total") {
+        valA = (parseFloat(a.stock || "0") * parseFloat(a.precioCompra || "0"));
+        valB = (parseFloat(b.stock || "0") * parseFloat(b.precioCompra || "0"));
       }
 
       if (valA < valB) return sortOrder === "asc" ? -1 : 1;
       if (valA > valB) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
-  }, [filtered, sortField, sortOrder]);
+  }, [insumos, sortField, sortOrder]);
 
   // Paginación
   const itemsPerPage = 10;
@@ -130,7 +105,7 @@ export function InventarioTable({
   );
 
   const toggleSort = useCallback(
-    (field: "nombre" | "stock" | "precio") => {
+    (field: "nombre" | "stock" | "precio" | "total") => {
       if (sortField === field) {
         setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
       } else {
@@ -141,7 +116,7 @@ export function InventarioTable({
     [sortField]
   );
 
-  const renderSortIcon = (field: "nombre" | "stock" | "precio") => {
+  const renderSortIcon = (field: "nombre" | "stock" | "precio" | "total") => {
     if (sortField !== field) {
       return <ArrowUpDown className="h-3 w-3 ml-1 text-muted-foreground/40" />;
     }
@@ -154,286 +129,291 @@ export function InventarioTable({
     );
   };
 
-  const statsBarLow = insumos.filter((i) => {
-    const st = parseFloat(i.stock || "0");
-    const min = parseFloat(i.stockMinimo || "0");
-    return st <= min && st > 0;
-  }).length;
-
-  const statsBarOut = insumos.filter((i) => parseFloat(i.stock || "0") === 0).length;
+  if (insumos.length === 0) {
+    return (
+      <Card className="p-12 border-dashed border-2 border-border/80 bg-card/50 text-center flex flex-col items-center justify-center space-y-3 rounded-3xl shadow-xs">
+        <div className="size-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
+          <Package className="h-7 w-7" />
+        </div>
+        <h4 className="text-sm font-bold text-foreground">No se encontraron insumos</h4>
+        <p className="text-xs text-muted-foreground max-w-sm">
+          {hasActiveFilters
+            ? "No hay productos que coincidan con la búsqueda o filtros aplicados."
+            : "No hay insumos registrados en el catálogo. Registra tu primer producto con el botón 'Agregar Insumo'."}
+        </p>
+        {hasActiveFilters && onClearFilters && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onClearFilters}
+            className="mt-2 text-xs font-bold rounded-xl cursor-pointer"
+          >
+            Limpiar todos los filtros
+          </Button>
+        )}
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Filters bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por insumo o proveedor..."
-            value={searchQuery || ""}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(null);
-            }}
-            className="pl-9 bg-card border-border hover:border-zinc-400 focus:border-secondary text-xs h-9 rounded-xl text-foreground"
-          />
-        </div>
+    <Card className="border border-border bg-card p-0 overflow-hidden rounded-3xl shadow-xs">
+      <div className="overflow-x-auto">
+        <Table className="min-w-[860px]">
+          <TableHeader>
+            <TableRow className="bg-muted/40 border-b border-border hover:bg-transparent">
+              <TableHead className="py-3.5 px-4">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("nombre")}
+                  className="flex items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Insumo & Detalle
+                  {renderSortIcon("nombre")}
+                </button>
+              </TableHead>
+              <TableHead className="py-3.5 px-4">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("stock")}
+                  className="flex items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Nivel de Stock
+                  {renderSortIcon("stock")}
+                </button>
+              </TableHead>
+              <TableHead className="py-3.5 px-4 text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                Mínimo
+              </TableHead>
+              <TableHead className="py-3.5 px-4 text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                Salud de Stock
+              </TableHead>
+              <TableHead className="py-3.5 px-4 text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                Proveedor
+              </TableHead>
+              <TableHead className="py-3.5 px-4">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("precio")}
+                  className="flex items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Costo Unitario
+                  {renderSortIcon("precio")}
+                </button>
+              </TableHead>
+              <TableHead className="py-3.5 px-4">
+                <button
+                  type="button"
+                  onClick={() => toggleSort("total")}
+                  className="flex items-center text-[10px] uppercase font-black tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Valor Total
+                  {renderSortIcon("total")}
+                </button>
+              </TableHead>
+              <TableHead className="py-3.5 pr-4 text-right text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                Acciones
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-border/40 text-xs">
+            {paginatedData.map((item) => {
+              const stVal = parseFloat(item.stock || "0");
+              const minVal = parseFloat(item.stockMinimo || "0");
+              const costoUnitario = parseFloat(item.precioCompra || "0");
+              const valorTotal = stVal * costoUnitario;
 
-        <Select
-          value={statusFilter}
-          onValueChange={(val: string | null) => {
-            if (val) setStatusFilter(val as StatusFilter);
-            setPage(null);
-          }}
-        >
-          <SelectTrigger className="w-full sm:w-44 bg-card border-border text-xs h-9 rounded-xl px-3 text-foreground">
-            <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-popover text-popover-foreground border border-border">
-            <SelectItem value="todos">Todos los Estados</SelectItem>
-            <SelectItem value="suficiente">Stock Suficiente</SelectItem>
-            <SelectItem value="bajo">Stock Bajo Mínimo</SelectItem>
-            <SelectItem value="agotado">Agotados (0)</SelectItem>
-          </SelectContent>
-        </Select>
+              const status =
+                stVal === 0 ? "agotado" : stVal <= minVal ? "bajo" : "suficiente";
 
-        {filtered.length > 0 && (
-          <div className="hidden sm:flex items-center gap-2.5 ml-auto text-[11px] font-bold text-muted-foreground">
-            {statsBarLow > 0 && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400">
-                <span className="size-2 rounded-full bg-amber-500" />
-                {statsBarLow} bajo mínimo
-              </span>
-            )}
-            {statsBarOut > 0 && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400">
-                <span className="size-2 rounded-full bg-rose-500 animate-pulse" />
-                {statsBarOut} agotados
-              </span>
-            )}
-          </div>
-        )}
+              // Cálculo de porcentaje para el medidor visual
+              const targetCap = minVal > 0 ? minVal * 2.5 : 10;
+              const healthPercent = Math.min(100, Math.round((stVal / targetCap) * 100));
+
+              return (
+                <TableRow
+                  key={item.id}
+                  className="hover:bg-muted/30 transition-colors group"
+                >
+                  {/* Nombre y especificación */}
+                  <TableCell className="py-3.5 px-4">
+                    <div className="font-extrabold text-foreground text-xs sm:text-sm">
+                      {item.nombre}
+                    </div>
+                    {item.descripcion && (
+                      <div className="text-[11px] text-muted-foreground font-medium mt-0.5 line-clamp-1">
+                        {item.descripcion}
+                      </div>
+                    )}
+                  </TableCell>
+
+                  {/* Stock actual con Barra de Salud y Steppers */}
+                  <TableCell className="py-3.5 px-4 min-w-[170px]">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-black text-xs sm:text-sm text-foreground">
+                          {stVal.toFixed(2)}{" "}
+                          <span className="text-[10px] font-bold text-muted-foreground font-sans">
+                            {item.unidad}
+                          </span>
+                        </span>
+
+                        {/* Micro-ajustes rápidos directos */}
+                        {onQuickAdjust && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => onQuickAdjust(item, "salida", 1)}
+                              disabled={stVal <= 0}
+                              className="size-6 rounded-md flex items-center justify-center bg-muted hover:bg-rose-500/15 text-muted-foreground hover:text-rose-600 transition-colors cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                              title="Despachar 1 unidad (-1)"
+                            >
+                              <Minus className="size-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onQuickAdjust(item, "entrada", 1)}
+                              className="size-6 rounded-md flex items-center justify-center bg-muted hover:bg-emerald-500/15 text-muted-foreground hover:text-emerald-600 transition-colors cursor-pointer"
+                              title="Ingresar 1 unidad (+1)"
+                            >
+                              <Plus className="size-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Medidor visual de salud de stock */}
+                      <div className="w-full bg-muted/70 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            status === "agotado"
+                              ? "w-0 bg-transparent"
+                              : status === "bajo"
+                              ? "bg-amber-500"
+                              : "bg-emerald-500"
+                          }`}
+                          style={{ width: `${Math.max(6, healthPercent)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  {/* Mínimo */}
+                  <TableCell className="py-3.5 px-4 font-mono text-muted-foreground font-bold">
+                    {minVal.toFixed(2)} {item.unidad}
+                  </TableCell>
+
+                  {/* Estado / Salud */}
+                  <TableCell className="py-3.5 px-4">
+                    {status === "suficiente" ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <CheckCircle2 className="size-3" />
+                        Óptimo
+                      </span>
+                    ) : status === "bajo" ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <AlertTriangle className="size-3" />
+                        Bajo Mínimo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <TrendingDown className="size-3" />
+                        Agotado
+                      </span>
+                    )}
+                  </TableCell>
+
+                  {/* Proveedor */}
+                  <TableCell className="py-3.5 px-4">
+                    {item.proveedor ? (
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] font-medium border-border/80 bg-muted/30"
+                      >
+                        {item.proveedor}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground/50 italic">—</span>
+                    )}
+                  </TableCell>
+
+                  {/* Costo Unitario */}
+                  <TableCell className="py-3.5 px-4 font-mono text-foreground font-bold">
+                    {costoUnitario > 0 ? (
+                      formatCurrency(costoUnitario)
+                    ) : (
+                      <span className="text-muted-foreground/50 italic">—</span>
+                    )}
+                  </TableCell>
+
+                  {/* Valor Total Valorizado */}
+                  <TableCell className="py-3.5 px-4 font-mono text-secondary font-black">
+                    {valorTotal > 0 ? (
+                      formatCurrency(valorTotal)
+                    ) : (
+                      <span className="text-muted-foreground/50 italic">—</span>
+                    )}
+                  </TableCell>
+
+                  {/* Acciones: Kardex, Ajustar, Editar */}
+                  <TableCell className="py-3.5 pr-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Link href={`/inventario/kardex?insumoId=${item.id}`}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2.5 rounded-xl text-muted-foreground hover:text-secondary hover:bg-secondary/10 text-[11px] font-bold cursor-pointer transition-colors"
+                          title="Ver historial en Libro Kardex"
+                        >
+                          <BookOpen className="size-3.5 sm:mr-1 text-secondary" />
+                          <span className="hidden sm:inline">Kardex</span>
+                        </Button>
+                      </Link>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onAdjustStock(item)}
+                        className="h-8 px-2.5 rounded-xl border-border hover:border-secondary/40 hover:bg-secondary/10 hover:text-secondary text-[11px] font-bold cursor-pointer transition-colors shadow-2xs"
+                        title="Ajustar stock manual"
+                      >
+                        <SlidersHorizontal className="size-3 sm:mr-1" />
+                        <span className="hidden sm:inline">Ajustar</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditInsumo(item)}
+                        className="size-8 p-0 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors"
+                        title="Editar insumo"
+                      >
+                        <Pencil className="size-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
 
-      {/* Table / Empty State */}
-      {filtered.length === 0 ? (
-        <Card className="p-12 border border-border bg-card text-center flex flex-col items-center justify-center space-y-3 max-w-md mx-auto rounded-3xl shadow-xs">
-          <Package className="h-8 w-8 text-muted-foreground" />
-          <h4 className="text-sm font-bold text-foreground">Catálogo vacío</h4>
-          <p className="text-xs text-muted-foreground">
-            {searchQuery || statusFilter !== "todos"
-              ? "No se encontraron insumos con los filtros seleccionados."
-              : "No hay insumos registrados. Agrega tu primer producto."}
-          </p>
-        </Card>
-      ) : (
-        <Card className="border border-border bg-card p-0 overflow-hidden rounded-3xl shadow-xs">
-          <div className="overflow-x-auto">
-            <Table className="min-w-[780px]">
-              <TableHeader>
-                <TableRow className="bg-muted/40 border-b border-border hover:bg-transparent">
-                  <TableHead className="py-3.5 px-4">
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("nombre")}
-                      className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    >
-                      Insumo
-                      {renderSortIcon("nombre")}
-                    </button>
-                  </TableHead>
-                  <TableHead className="py-3.5 px-4">
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("stock")}
-                      className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    >
-                      Nivel de Stock
-                      {renderSortIcon("stock")}
-                    </button>
-                  </TableHead>
-                  <TableHead className="py-3.5 px-4 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                    Mínimo Requerido
-                  </TableHead>
-                  <TableHead className="py-3.5 px-4 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                    Estado
-                  </TableHead>
-                  <TableHead className="py-3.5 px-4 text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                    Proveedor
-                  </TableHead>
-                  <TableHead className="py-3.5 px-4">
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("precio")}
-                      className="flex items-center text-[10px] uppercase font-bold tracking-wider text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    >
-                      Costo Compra
-                      {renderSortIcon("precio")}
-                    </button>
-                  </TableHead>
-                  <TableHead className="py-3.5 pr-4 text-right text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                    Acciones
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-border/40 text-xs">
-                {paginatedData.map((item) => {
-                  const stVal = parseFloat(item.stock || "0");
-                  const minVal = parseFloat(item.stockMinimo || "0");
-                  const status =
-                    stVal === 0 ? "agotado" : stVal <= minVal ? "bajo" : "suficiente";
-
-                  // Porcentaje visual para barra de salud (relativo a 2x el mínimo)
-                  const targetCap = minVal > 0 ? minVal * 2.5 : 10;
-                  const healthPercent = Math.min(100, Math.round((stVal / targetCap) * 100));
-
-                  return (
-                    <TableRow
-                      key={item.id}
-                      className="hover:bg-muted/30 transition-colors group"
-                    >
-                      {/* Insumo y descripción */}
-                      <TableCell className="py-3.5 px-4">
-                        <div className="font-extrabold text-foreground">{item.nombre}</div>
-                        {item.descripcion && (
-                          <div className="text-[10px] text-muted-foreground font-medium mt-0.5 line-clamp-1">
-                            {item.descripcion}
-                          </div>
-                        )}
-                      </TableCell>
-
-                      {/* Stock actual con Barra de Salud */}
-                      <TableCell className="py-3.5 px-4 min-w-[150px]">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono font-black text-xs sm:text-sm text-foreground">
-                              {stVal.toFixed(2)}{" "}
-                              <span className="text-[10px] font-bold text-muted-foreground">
-                                {item.unidad}
-                              </span>
-                            </span>
-
-                            {/* Micro-ajustes directos */}
-                            {onQuickAdjust && (
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
-                                  type="button"
-                                  onClick={() => onQuickAdjust(item, "salida", 1)}
-                                  className="size-5 rounded flex items-center justify-center bg-muted hover:bg-rose-500/15 text-muted-foreground hover:text-rose-600 transition-colors cursor-pointer"
-                                  title="Despachar 1 unidad (-1)"
-                                >
-                                  <Minus className="size-2.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => onQuickAdjust(item, "entrada", 1)}
-                                  className="size-5 rounded flex items-center justify-center bg-muted hover:bg-emerald-500/15 text-muted-foreground hover:text-emerald-600 transition-colors cursor-pointer"
-                                  title="Ingresar 1 unidad (+1)"
-                                >
-                                  <Plus className="size-2.5" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Progress Health Meter */}
-                          <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                status === "agotado"
-                                  ? "w-0 bg-transparent"
-                                  : status === "bajo"
-                                  ? "bg-amber-500"
-                                  : "bg-emerald-500"
-                              }`}
-                              style={{ width: `${Math.max(5, healthPercent)}%` }}
-                            />
-                          </div>
-                        </div>
-                      </TableCell>
-
-                      {/* Mínimo */}
-                      <TableCell className="py-3.5 px-4 font-mono text-muted-foreground font-semibold">
-                        {minVal.toFixed(2)} {item.unidad}
-                      </TableCell>
-
-                      {/* Estado */}
-                      <TableCell className="py-3.5 px-4">
-                        {status === "suficiente" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            <CheckCircle className="size-3" />
-                            Óptimo
-                          </span>
-                        ) : status === "bajo" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            <AlertTriangle className="size-3" />
-                            Bajo Stock
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                            <AlertTriangle className="size-3" />
-                            Agotado
-                          </span>
-                        )}
-                      </TableCell>
-
-                      {/* Proveedor */}
-                      <TableCell className="py-3.5 px-4 text-muted-foreground font-semibold">
-                        {item.proveedor ? (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-normal border-border/80 bg-muted/20"
-                          >
-                            {item.proveedor}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground/40 italic">—</span>
-                        )}
-                      </TableCell>
-
-                      {/* Costo */}
-                      <TableCell className="py-3.5 px-4 font-mono text-foreground font-semibold">
-                        {item.precioCompra ? (
-                          formatCurrency(parseFloat(item.precioCompra))
-                        ) : (
-                          <span className="text-muted-foreground/40 italic">—</span>
-                        )}
-                      </TableCell>
-
-                      {/* Acción */}
-                      <TableCell className="py-3.5 pr-4 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onAdjustStock(item)}
-                          className="h-8 px-3 rounded-xl border-border hover:border-secondary/40 hover:bg-secondary/10 hover:text-secondary text-[11px] font-extrabold cursor-pointer transition-colors"
-                        >
-                          <SlidersHorizontal className="size-3 mr-1" />
-                          Ajustar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-
-          {filtered.length > 0 && (
-            <div className="p-4 border-t border-border bg-card/40">
-              <PaginationControls
-                activePage={activePage}
-                totalPages={totalPages}
-                onPageChange={setPage}
-                showInfo
-                totalItems={filtered.length}
-                itemsPerPage={itemsPerPage}
-              />
-            </div>
-          )}
-        </Card>
+      {sorted.length > 0 && (
+        <div className="p-4 border-t border-border bg-card/40">
+          <PaginationControls
+            activePage={activePage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            showInfo
+            totalItems={sorted.length}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
       )}
-    </div>
+    </Card>
   );
 }

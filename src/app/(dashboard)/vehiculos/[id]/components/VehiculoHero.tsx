@@ -56,7 +56,7 @@ export function VehiculoHero({ vehiculo, onEditClick }: VehiculoHeroProps) {
             </div>
             <Badge 
               variant={vehiculo.activo ? "default" : "secondary"} 
-              className={`text-[9px] font-extrabold tracking-wider uppercase ${
+              className={`text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 ${
                 vehiculo.activo 
                   ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 animate-pulse" 
                   : "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"

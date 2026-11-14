@@ -1,75 +1,72 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Car, ArrowRight, LayoutDashboard, Coins, Users, Clock } from "lucide-react";
+import {
+  Sparkles,
+  Car,
+  ArrowRight,
+  LayoutDashboard,
+  Coins,
+  Users,
+  Clock,
+  ShieldCheck,
+  ChevronRight,
+  Gauge,
+  Tv,
+} from "lucide-react";
 import { FeaturesGrid } from "./components/FeaturesGrid";
 import { GrowthSimulator } from "./components/GrowthSimulator";
 
 export default function Home() {
   return (
-    <div
-      className="min-h-dvh flex flex-col justify-between relative overflow-hidden"
-      style={{
-        backgroundColor: "#050510",
-        backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
-        color: "#e4e4e7",
-      }}
-    >
-      {/* Ambient glow orbs */}
+    <div className="min-h-dvh flex flex-col justify-between bg-black text-zinc-100 relative overflow-hidden font-sans selection:bg-white/20 selection:text-white">
+      {/* Apple-style Cinematic Ambient Lighting */}
       <div
-        className="pointer-events-none absolute top-[-10%] left-[-10%] w-[700px] h-[700px] rounded-full blur-[130px] opacity-25"
-        style={{ background: "radial-gradient(circle, #0ea5e9 0%, transparent 70%)" }}
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] opacity-40 blur-[140px] -z-10"
+        style={{
+          background:
+            "radial-gradient(ellipse 65% 50% at 50% 0%, rgba(56, 189, 248, 0.35), rgba(99, 102, 241, 0.15) 50%, transparent 80%)",
+        }}
       />
       <div
-        className="pointer-events-none absolute bottom-[-15%] right-[-5%] w-[600px] h-[600px] rounded-full blur-[110px] opacity-20"
-        style={{ background: "radial-gradient(circle, #8b5cf6 0%, transparent 70%)" }}
-      />
-      <div
-        className="pointer-events-none absolute top-[40%] right-[10%] w-[400px] h-[400px] rounded-full blur-[90px] opacity-15"
-        style={{ background: "radial-gradient(circle, #10b981 0%, transparent 70%)" }}
+        className="pointer-events-none absolute top-[700px] left-1/2 -translate-x-1/2 w-[900px] h-[450px] opacity-20 blur-[130px] -z-10"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, rgba(16, 185, 129, 0.1) 60%, transparent 80%)",
+        }}
       />
 
-      {/* Header - Glass Navbar */}
-      <header
-        className="sticky top-0 z-50 px-6 py-4 backdrop-blur-xl"
-        style={{
-          backgroundColor: "rgba(5,5,16,0.6)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="h-10 w-10 flex items-center justify-center shrink-0">
-              <Image src="/logo-shield.png" alt="WashMaster Logo" width={40} height={40} className="h-full w-full object-contain" />
+      {/* Header - Apple Translucent Glass Navigation */}
+      <header className="sticky top-0 z-50 px-6 py-3.5 backdrop-blur-2xl bg-black/60 border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          {/* Logo with optical tracking */}
+          <Link href="/" className="flex items-center gap-2.5 group transition-transform duration-200 active:scale-95">
+            <div className="h-9 w-9 flex items-center justify-center shrink-0 rounded-xl bg-white/[0.04] border border-white/10 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] group-hover:border-white/25 transition-colors">
+              <Image
+                src="/logo-shield.png"
+                alt="WashMaster Logo"
+                width={32}
+                height={32}
+                className="h-full w-full object-contain"
+                priority
+              />
             </div>
-            <div>
-              <span
-                className="font-bold text-xl tracking-tight bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(to right, #0ea5e9, #38bdf8)" }}
-              >
-                WashMaster
-              </span>
-              <span className="font-semibold text-xl tracking-tight" style={{ color: "#f4f4f5" }}>
-                {" "}Pro
-              </span>
+            <div className="flex items-center tracking-tight">
+              <span className="font-bold text-lg text-white">WashMaster</span>
+              <span className="font-semibold text-lg text-sky-400 ml-1">Pro</span>
             </div>
-          </div>
+          </Link>
+
+          {/* Navigation Links */}
           <nav className="flex items-center gap-3">
             <Link
               href="/login"
-              className="px-4 py-2 text-sm font-medium transition-colors rounded-lg hover:text-white"
-              style={{ color: "#a1a1aa" }}
+              className="px-4 py-2 text-xs sm:text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-200 active:scale-95"
             >
               Iniciar sesión
             </Link>
             <Link
               href="/registro"
-              className="px-5 py-2.5 text-sm font-bold rounded-xl transition-colors transition-transform hover:scale-[1.02] hover:shadow-lg hover:shadow-secondary/20"
-              style={{
-                background: "linear-gradient(135deg, #0ea5e9, #38bdf8)",
-                color: "#050510",
-                boxShadow: "0 0 20px rgba(14,165,233,0.25)",
-              }}
+              className="px-5 py-2 text-xs sm:text-sm font-semibold rounded-full bg-white text-black hover:bg-zinc-100 transition-all duration-200 active:scale-95 shadow-[0_2px_14px_rgba(255,255,255,0.2),inset_0_1px_0_rgba(255,255,255,0.8)]"
             >
               Registro
             </Link>
@@ -78,182 +75,182 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-7xl mx-auto w-full relative z-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pt-16 sm:pt-24 pb-20 max-w-6xl mx-auto w-full relative z-10">
         
         {/* HERO SECTION */}
-        <div className="text-center max-w-4xl mb-12">
-          {/* Badge */}
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold mb-8 backdrop-blur-md border uppercase tracking-wider"
-            style={{
-              borderColor: "rgba(14,165,233,0.25)",
-              backgroundColor: "rgba(14,165,233,0.08)",
-              color: "#38bdf8",
-              boxShadow: "0 0 15px rgba(14,165,233,0.1)",
-            }}
-          >
-            <Sparkles className="h-3.5 w-3.5 animate-pulse" />
-            Sistema de Gestión Integral Car Wash v1.5
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-18">
+          
+          {/* Eyebrow Badge (Frosted Apple Pill) */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium text-zinc-300 border border-white/15 bg-white/[0.04] backdrop-blur-xl mb-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_4px_16px_rgba(0,0,0,0.2)]">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
+            </span>
+            <span className="tracking-wide">Sistema Operativo v1.5 • Producción en Vivo</span>
           </div>
 
-          {/* Hero Title */}
-          <h1
-            className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6 bg-clip-text text-transparent leading-[1.1]"
-            style={{
-              backgroundImage: "linear-gradient(to bottom right, #ffffff 30%, #e4e4e7, #71717a)",
-            }}
-          >
+          {/* Hero Heading: Apple Optical Typography */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-[-0.035em] leading-[1.04] mb-6 bg-gradient-to-b from-white via-white/95 to-zinc-400 bg-clip-text text-transparent">
             Control absoluto de tu autolavado
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-10 max-w-3xl mx-auto text-gray-400">
-            La plataforma multi-sede definitiva para la gestión operativa en vivo, control de caja con arqueo ciego,
-            programas de puntos automatizados y analítica predictiva de demanda.
+          {/* Subtitle: Clean, human & comfortable leading */}
+          <p className="text-sm sm:text-base md:text-lg text-zinc-400 max-w-2xl mx-auto font-normal leading-relaxed tracking-[-0.01em] mb-9">
+            Gestión en tiempo real de bahías, control de caja con arqueo ciego de alta precisión,
+            programas de puntos automatizados y analítica de rendimiento multi-sede.
           </p>
 
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* CTAs: Response & Spring-like feedback */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4">
             <Link
               href="/login"
-              className="group w-full sm:w-auto px-8 py-4 rounded-2xl font-bold transition-colors transition-transform flex items-center justify-center gap-2.5 text-base hover:scale-[1.01]"
-              style={{
-                background: "linear-gradient(135deg, #0ea5e9, #06b6d4)",
-                color: "#050510",
-                boxShadow: "0 0 30px rgba(14,165,233,0.3), 0 10px 40px rgba(14,165,233,0.15)",
-              }}
+              className="group w-full sm:w-auto px-8 py-3.5 rounded-full font-semibold text-sm sm:text-base bg-white text-black hover:bg-zinc-100 active:scale-[0.97] transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_10px_35px_-8px_rgba(255,255,255,0.3),inset_0_1px_0_rgba(255,255,255,0.9)]"
             >
-              Acceder al Panel de Control
-              <ArrowRight className="h-4.5 w-4.5 transition-transform group-hover:translate-x-1" />
+              <span>Acceder al Panel de Control</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+            </Link>
+
+            <Link
+              href="/consulta/DEMO"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full font-semibold text-sm sm:text-base text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 backdrop-blur-xl active:scale-[0.97] transition-all duration-200 flex items-center justify-center gap-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+            >
+              <Tv className="h-4 w-4 text-sky-400" />
+              <span>Ver Tracking en Vivo</span>
             </Link>
           </div>
         </div>
 
-        {/* DASHBOARD PREVIEW MOCKUP */}
-        <div className="w-full max-w-5xl rounded-3xl border border-white/10 bg-linear-to-b from-white/3 to-white/1 bg-[#0b0b18]/65 p-4 sm:p-6 backdrop-blur-xl shadow-2xl relative mb-12 overflow-hidden">
+        {/* DASHBOARD PREVIEW MOCKUP (macOS / iPadOS Hardware Aesthetic) */}
+        <div className="w-full max-w-5xl rounded-[28px] sm:rounded-[34px] border border-white/[0.12] bg-[#0c0d14]/90 backdrop-blur-3xl shadow-[0_30px_100px_-20px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] relative overflow-hidden mb-16 p-3 sm:p-5 group transition-all duration-500">
           
-          {/* Glassmorphism Background Glow Orbs behind the mockup content */}
-          <div className="absolute -inset-4 -z-10 rounded-[40px] bg-linear-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 blur-xl opacity-75 pointer-events-none" />
+          {/* Specular Top Edge Light Reflection */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
 
-          {/* Mockup Title bar */}
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+          {/* Window Titlebar */}
+          <div className="flex items-center justify-between px-2 pb-3 mb-3 border-b border-white/[0.07]">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500/60 block" />
-              <span className="w-3 h-3 rounded-full bg-yellow-500/60 block" />
-              <span className="w-3 h-3 rounded-full bg-green-500/60 block" />
-              <span className="text-[10px] text-gray-500 font-mono ml-2">washmaster-prod-v1.5</span>
+              <span className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-[inset_0_1px_1px_rgba(0,0,0,0.3)] block" />
+              <span className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-[inset_0_1px_1px_rgba(0,0,0,0.3)] block" />
+              <span className="w-3 h-3 rounded-full bg-[#27c93f] shadow-[inset_0_1px_1px_rgba(0,0,0,0.3)] block" />
+              <span className="text-[11px] text-zinc-500 font-mono ml-2 hidden sm:inline-block">washmaster.terminal • v1.5</span>
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-emerald-450 font-bold bg-emerald-500/5 border border-emerald-500/10 px-2.5 py-0.5 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              Servidor Operativo
+
+            <div className="flex items-center gap-2 text-[10px] text-zinc-300 font-medium bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-zinc-400">Servidor Operativo:</span>
+              <span className="text-emerald-400 font-semibold">18ms</span>
             </div>
           </div>
 
-          {/* Mockup Dashboard Content Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+          {/* Window Workspace Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             
-            {/* Sidebar Mockup */}
-            <div className="hidden md:flex md:col-span-3 flex-col gap-2 border-r border-white/10 pr-4 text-xs font-semibold text-gray-400">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/5 rounded-xl text-white">
-                <LayoutDashboard className="h-3.5 w-3.5 text-secondary" />
+            {/* Frosted Sidebar */}
+            <div className="hidden md:flex md:col-span-3 flex-col gap-1.5 border-r border-white/[0.06] pr-3 text-xs font-medium text-zinc-400">
+              <div className="flex items-center gap-2.5 px-3 py-2 bg-white/[0.09] text-white border border-white/[0.12] rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] font-semibold">
+                <LayoutDashboard className="h-4 w-4 text-sky-400" />
                 <span>Resumen Operativo</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-colors">
-                <Car className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/[0.04] rounded-xl transition-colors text-zinc-400 hover:text-zinc-200 cursor-pointer">
+                <Car className="h-4 w-4" />
                 <span>Órdenes de Lavado</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-colors">
-                <Coins className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/[0.04] rounded-xl transition-colors text-zinc-400 hover:text-zinc-200 cursor-pointer">
+                <Coins className="h-4 w-4" />
                 <span>Cierre de Caja</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 border border-transparent hover:border-white/5 rounded-xl transition-colors">
-                <Users className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/[0.04] rounded-xl transition-colors text-zinc-400 hover:text-zinc-200 cursor-pointer">
+                <Users className="h-4 w-4" />
                 <span>Directorio Clientes</span>
               </div>
             </div>
 
-            {/* Main Area Mockup */}
-            <div className="md:col-span-9 space-y-6">
+            {/* Main Stage */}
+            <div className="md:col-span-9 space-y-4">
               
-              {/* Mini KPI Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Mini KPI Cards (Apple Glass Metrics) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 
-                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg relative overflow-hidden group hover:border-white/20 transition-colors duration-300">
-                  <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Caja Abierta (Efectivo)</span>
-                  <span className="text-base font-black text-white font-mono mt-1 block">S/ 3,420.50</span>
-                  <span className="text-[9px] text-emerald-400 font-medium block mt-0.5">Sede: San Isidro</span>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">Caja Abierta</span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  </div>
+                  <div className="text-lg font-bold text-white font-mono mt-1">S/ 3,420.50</div>
+                  <span className="text-[10px] text-emerald-400 font-medium">Sede: San Isidro</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-colors duration-300">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Órdenes Activas</span>
-                  <span className="text-base font-black text-white font-mono mt-1 block">18 Servicios</span>
-                  <span className="text-[9px] text-gray-450 font-medium block mt-0.5">7 en cola, 11 en lavado</span>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300">
+                  <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">Órdenes en Bahía</span>
+                  <div className="text-lg font-bold text-white font-mono mt-1">18 Servicios</div>
+                  <span className="text-[10px] text-zinc-400 font-medium">7 en espera • 11 lavando</span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-linear-to-br from-white/4 to-transparent bg-black/30 border border-white/10 shadow-lg group hover:border-white/20 transition-colors duration-300">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Fidelización de Clientes</span>
-                  <span className="text-base font-black text-white font-mono mt-1 block">+125 Canjes</span>
-                  <span className="text-[9px] text-gray-450 font-medium block mt-0.5">1 Punto = S/ 0.20 descuento</span>
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:border-white/20 hover:bg-white/[0.05] transition-all duration-300">
+                  <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">Fidelización</span>
+                  <div className="text-lg font-bold text-white font-mono mt-1">+125 Canjes</div>
+                  <span className="text-[10px] text-sky-400 font-medium">Puntos aplicados hoy</span>
                 </div>
 
               </div>
 
-              {/* Kanban Mockup */}
-              <div className="rounded-2xl border border-white/10 bg-[#090911]/85 p-4 shadow-xl backdrop-blur-md">
+              {/* Live Kanban Patio Board (Physical acrylic tiles) */}
+              <div className="rounded-2xl border border-white/[0.08] bg-[#07070d]/90 p-3.5 shadow-xl backdrop-blur-xl">
                 <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-xs font-extrabold text-white flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 text-secondary" />
-                    Patio en Tiempo Real (Cola de Lavado)
+                  <h4 className="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-sky-400" />
+                    Patio en Tiempo Real (Cola de Bahías)
                   </h4>
-                  <span className="text-[9px] font-bold text-gray-500 bg-white/5 border border-white/5 px-2 py-0.5 rounded">Vista de Supervisor</span>
+                  <span className="text-[10px] font-semibold text-zinc-400 bg-white/[0.04] border border-white/[0.06] px-2.5 py-0.5 rounded-full">
+                    Sincronización WebSocket
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   
-                  {/* Column 1: Espera */}
-                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/5 space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-amber-500 uppercase">
+                  {/* Column 1: En Espera */}
+                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-2">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-amber-400 uppercase tracking-wider">
                       <span>En Espera</span>
-                      <span>(2)</span>
+                      <span className="bg-amber-400/10 px-1.5 py-0.5 rounded text-amber-300 font-mono">2</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-amber-500/25 space-y-2 shadow-md hover:border-amber-500/40 transition-colors duration-300">
-                      <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
-                        <span>F4L-101</span>
-                        <span className="text-[9px] text-gray-400 font-sans bg-white/5 px-1.5 py-0.5 rounded">Toyota</span>
+                    <div className="p-2.5 rounded-lg bg-white/[0.04] border border-amber-500/25 space-y-1.5 shadow-sm hover:border-amber-400/40 transition-colors">
+                      <div className="flex justify-between items-center text-[11px] font-mono font-bold text-white">
+                        <span className="tracking-wide">F4L-101</span>
+                        <span className="text-[9px] text-zinc-400 font-sans bg-white/[0.06] px-1.5 py-0.5 rounded">Toyota</span>
                       </div>
-                      <span className="text-[9px] text-gray-400 block">Lavado Completo</span>
+                      <span className="text-[10px] text-zinc-400 block">Lavado Completo</span>
                     </div>
                   </div>
 
-                  {/* Column 2: Lavado */}
-                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/5 space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-blue-500 uppercase">
-                      <span>Lavado / Proceso</span>
-                      <span>(1)</span>
+                  {/* Column 2: Lavado en Proceso */}
+                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-2">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-sky-400 uppercase tracking-wider">
+                      <span>Lavando en Bahía</span>
+                      <span className="bg-sky-400/10 px-1.5 py-0.5 rounded text-sky-300 font-mono">1</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/[0.07] to-white/1 border border-blue-500/30 space-y-2 relative shadow-md hover:border-blue-500/45 transition-colors duration-300">
-                      <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-blue-400 animate-ping" />
-                      <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
-                        <span>B2P-202</span>
-                        <span className="text-[9px] text-blue-450 font-sans bg-blue-500/10 px-1.5 py-0.5 rounded">Hyundai</span>
+                    <div className="p-2.5 rounded-lg bg-white/[0.04] border border-sky-500/30 space-y-1.5 relative shadow-sm hover:border-sky-400/45 transition-colors">
+                      <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-sky-400 animate-ping" />
+                      <div className="flex justify-between items-center text-[11px] font-mono font-bold text-white">
+                        <span className="tracking-wide">B2P-202</span>
+                        <span className="text-[9px] text-sky-300 font-sans bg-sky-400/10 px-1.5 py-0.5 rounded">Hyundai</span>
                       </div>
-                      <span className="text-[9px] text-gray-400 block">Lavado Premium + Cera</span>
+                      <span className="text-[10px] text-zinc-400 block">Lavado Premium + Cera</span>
                     </div>
                   </div>
 
                   {/* Column 3: Completado */}
-                  <div className="p-2.5 rounded-xl bg-black/35 border border-white/5 space-y-2">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-emerald-500 uppercase">
-                      <span>Completado</span>
-                      <span>(3)</span>
+                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] space-y-2">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                      <span>Listo para Entrega</span>
+                      <span className="bg-emerald-400/10 px-1.5 py-0.5 rounded text-emerald-300 font-mono">3</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-linear-to-br from-white/5 to-white/1 border border-emerald-500/30 space-y-2 shadow-md hover:border-emerald-500/45 transition-colors duration-300">
-                      <div className="flex justify-between items-center text-[10px] font-mono font-bold text-white">
-                        <span>K9X-909</span>
-                        <span className="text-[9px] text-emerald-400 font-sans bg-emerald-500/10 px-1.5 py-0.5 rounded">Kia Rio</span>
+                    <div className="p-2.5 rounded-lg bg-white/[0.04] border border-emerald-500/30 space-y-1.5 shadow-sm hover:border-emerald-400/45 transition-colors">
+                      <div className="flex justify-between items-center text-[11px] font-mono font-bold text-white">
+                        <span className="tracking-wide">K9X-909</span>
+                        <span className="text-[9px] text-emerald-300 font-sans bg-emerald-400/10 px-1.5 py-0.5 rounded">Kia Rio</span>
                       </div>
-                      <span className="text-[9px] text-gray-400 block">Espera de Cobro</span>
+                      <span className="text-[10px] text-zinc-400 block">Espera de Cobro</span>
                     </div>
                   </div>
 
@@ -264,36 +261,41 @@ export default function Home() {
           </div>
         </div>
 
-        {/* FEATURES GRID */}
-        <div className="text-center mt-12 w-full">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight">
-            Módulos del Sistema Integrado
+        {/* SECTION: BENTO GRID OF MODULES */}
+        <div className="text-center mt-12 w-full max-w-3xl mx-auto mb-4">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2">
+            <Sparkles className="h-3 w-3" />
+            <span>Ingeniería de Software para Autolavados</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-[-0.03em] leading-tight">
+            Diseñado para fluidez operativa total
           </h2>
-          <p className="text-sm text-gray-400 mt-2 max-w-xl mx-auto">
-            Descubre las características avanzadas diseñadas especialmente para la optimización de tu autolavado.
+          <p className="text-sm sm:text-base text-zinc-400 mt-3 max-w-xl mx-auto">
+            Cada módulo ha sido concebido para eliminar cuellos de botella y maximizar el rendimiento por bahía.
           </p>
         </div>
         <FeaturesGrid />
 
-        {/* GROWTH SIMULATOR */}
+        {/* SECTION: GROWTH SIMULATOR */}
         <GrowthSimulator />
 
       </main>
 
-      {/* Footer - Glass */}
-      <footer
-        className="px-6 py-8 text-center text-xs relative z-10"
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          backgroundColor: "rgba(5,5,16,0.5)",
-          color: "#4b5563",
-        }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p>© 2026 WashMaster Pro. Todos los derechos reservados. Diseñado para rendimiento corporativo y multi-tenant.</p>
-          <div className="flex items-center gap-4 text-[11px] font-semibold">
-            <span className="text-emerald-450 border border-emerald-500/10 px-2 py-0.5 rounded bg-emerald-500/5">PWA Activa</span>
-            <span className="text-gray-500">v1.5_Release</span>
+      {/* Footer - Apple Minimalist Translucent Ground */}
+      <footer className="px-6 py-10 border-t border-white/[0.08] bg-black/80 backdrop-blur-xl relative z-10 text-xs text-zinc-500">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 rounded-md bg-white/[0.05] border border-white/10 flex items-center justify-center p-0.5">
+              <Image src="/logo-shield.png" alt="Logo" width={16} height={16} className="object-contain" />
+            </div>
+            <p>© 2026 WashMaster Pro. Plataforma de alto rendimiento para autolavados y car detailing.</p>
+          </div>
+          <div className="flex items-center gap-4 text-[11px] font-medium">
+            <span className="inline-flex items-center gap-1.5 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full bg-emerald-500/10">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              PWA Instalable
+            </span>
+            <span className="text-zinc-500">v1.5_Release</span>
           </div>
         </div>
       </footer>

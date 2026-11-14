@@ -24,40 +24,41 @@ export function SidebarNavMenu({ items }: SidebarNavMenuProps) {
   return (
     <SidebarMenu className="gap-1">
       {visibleItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          const Icon = item.icon;
+        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        const Icon = item.icon;
 
-          return (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                isActive={isActive}
-                tooltip={item.label}
-                render={
-                  <Link
-                    href={item.href}
-                    onClick={() => {
-                      if (isMobile) setOpenMobile(false);
-                    }}
-                  />
-                }
-                className={`w-full group/btn transition-colors transition-transform duration-200 active:scale-[0.98] h-9.5 px-3 rounded-lg ${
-                  isActive
-                    ? "bg-secondary/15 text-secondary! font-bold"
-                    : "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent/50"
-                }`}
-              >
-                <div className="flex items-center gap-2.5 w-full">
-                  <Icon
-                    className={`h-4 w-4 transition-colors duration-200 ${
-                      isActive ? "text-secondary!" : "text-sidebar-foreground group-hover/btn:text-white"
-                    }`}
-                  />
-                  <span className="group-data-[collapsible=icon]:hidden text-sm">{item.label}</span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          );
-        })}
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              isActive={isActive}
+              tooltip={item.label}
+              render={
+                <Link
+                  href={item.href}
+                  prefetch={false}
+                  onClick={() => {
+                    if (isMobile) setOpenMobile(false);
+                  }}
+                />
+              }
+              className={`w-full group/btn transition-colors transition-transform duration-200 active:scale-[0.98] h-9.5 px-3 rounded-lg ${
+                isActive
+                  ? "bg-secondary/15 text-secondary! font-bold"
+                  : "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent/50"
+              }`}
+            >
+              <div className="flex items-center gap-2.5 w-full">
+                <Icon
+                  className={`h-4 w-4 transition-colors duration-200 ${
+                    isActive ? "text-secondary!" : "text-sidebar-foreground group-hover/btn:text-white"
+                  }`}
+                />
+                <span className="group-data-[collapsible=icon]:hidden text-sm">{item.label}</span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
     </SidebarMenu>
   );
 }

@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { ordenes, vehiculos, clientes, sucursales } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ConsultaClient, type OrdenConsulta } from "./consulta-client";
+import { AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,7 @@ export default async function ConsultaPage({ params }: { params: Promise<{ ticke
       <div className="min-h-dvh bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-4 bg-card border border-border p-8 rounded-2xl shadow-lg">
           <div className="inline-block p-4 bg-rose-500/10 text-rose-400 rounded-full mb-2">
-            🚗❌
+            <AlertCircle className="size-10 text-rose-500 mx-auto" />
           </div>
           <h1 className="text-xl font-black text-foreground uppercase">Ticket no Encontrado</h1>
           <p className="text-xs text-muted-foreground">

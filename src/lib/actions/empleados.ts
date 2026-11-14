@@ -480,7 +480,40 @@ export async function liquidarComisionesEmpleado(data: {
   }
 }
 
-async function getHistorialLiquidaciones(empleadoId: string) {
+// Obtener órdenes pendientes de liquidación de comisión para un lavador
+export async function getOrdenesPendientesLiquidacion(empleadoId: string) {
+  try {
+    const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
+    const sucursalId = session.user.sucursalId!;
+
+    const rows = await db
+      .select({
+        id: ordenes.id,
+        nroTicket: ordenes.nroTicket,
+        total: ordenes.total,
+        createdAt: ordenes.createdAt,
+        placa: vehiculos.placa,
+      })
+      .from(ordenes)
+      .innerJoin(vehiculos, eq(ordenes.vehiculoId, vehiculos.id))
+      .where(
+        and(
+          eq(ordenes.empleadoId, empleadoId),
+          eq(ordenes.sucursalId, sucursalId),
+          sql`${ordenes.liquidacionId} IS NULL`,
+          sql`${ordenes.estado} IN ('completado', 'cobrado')`
+        )
+      )
+      .orderBy(desc(ordenes.createdAt));
+
+    return rows;
+  } catch (error) {
+    console.error("Error al obtener órdenes pendientes de liquidación:", error);
+    return [];
+  }
+}
+
+export async function getHistorialLiquidaciones(empleadoId: string) {
   try {
     const session = await getSessionOrThrow({ modulo: "empleados", accion: "ver" });
     const sucursalId = session.user.sucursalId!;

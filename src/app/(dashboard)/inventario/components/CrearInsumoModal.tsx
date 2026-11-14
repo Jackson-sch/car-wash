@@ -125,7 +125,17 @@ export function CrearInsumoModal({ isOpen, onClose, isPending, onSave }: CrearIn
                       id="itUnit"
                       className="w-full bg-background border-border text-foreground rounded-lg text-xs h-9.5 px-3"
                     >
-                      <SelectValue />
+                      <SelectValue placeholder="Seleccionar unidad">
+                        {unidad === "litros"
+                          ? "Litros (L)"
+                          : unidad === "galones"
+                          ? "Galones (Gal)"
+                          : unidad === "unidades"
+                          ? "Unidades (Und)"
+                          : unidad === "paquetes"
+                          ? "Paquetes (Paq)"
+                          : unidad}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-popover text-popover-foreground border border-border">
                       <SelectItem value="litros">Litros (L)</SelectItem>

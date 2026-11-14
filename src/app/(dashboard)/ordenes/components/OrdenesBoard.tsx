@@ -88,11 +88,11 @@ function EmptyColumnPlaceholder({
   if (!isAnyDragging && !isOver) {
     return (
       <div className="h-44 rounded-2xl border border-dashed border-border/60 bg-muted/10 flex flex-col items-center justify-center gap-2 p-4 text-center w-full select-none transition-colors">
-        <div className="p-2.5 rounded-full bg-muted/40 border border-border/40 text-muted-foreground/60">
+        <div className="p-2.5 rounded-full bg-muted/60 border border-border text-muted-foreground">
           <Icon className="size-5" />
         </div>
         <span className="text-xs font-bold text-foreground/80">{content.title}</span>
-        <span className="text-[11px] text-muted-foreground/70 max-w-[210px] leading-tight">
+        <span className="text-xs text-muted-foreground max-w-[210px] leading-tight">
           {content.description}
         </span>
       </div>
@@ -107,7 +107,7 @@ function EmptyColumnPlaceholder({
           : "border-border/60 text-muted-foreground/70 bg-muted/20"
       }`}
     >
-      <div className={`p-2.5 rounded-full transition-colors ${isOver ? "bg-secondary/20 text-secondary" : "bg-muted/40 text-muted-foreground/60"}`}>
+      <div className={`p-2.5 rounded-full transition-colors ${isOver ? "bg-secondary/20 text-secondary" : "bg-muted/60 text-muted-foreground"}`}>
         <Icon className="size-5" />
       </div>
       <span className="text-xs font-black tracking-tight">

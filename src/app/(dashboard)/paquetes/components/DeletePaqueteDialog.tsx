@@ -27,9 +27,9 @@ export function DeletePaqueteDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Desactivar Paquete</DialogTitle>
+          <DialogTitle>Eliminar Paquete</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro? El paquete quedará inactivo y no estará disponible en nuevas órdenes.
+            ¿Estás seguro de que deseas eliminar este paquete del catálogo? Si solo deseas ocultarlo temporalmente, puedes usar el botón de pausar.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -37,7 +37,7 @@ export function DeletePaqueteDialog({
             Cancelar
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-            {isDeleting ? "Desactivando..." : "Desactivar"}
+            {isDeleting ? "Eliminando..." : "Eliminar permanentemente"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -26,9 +26,9 @@ export function formatWhatsAppMessage({
   const autoStr = vehiculoInfo ? ` (${vehiculoInfo})` : "";
 
   return (
-    `¡Hola ${clienteNombre}! 🚗✨\n\n` +
+    `¡Hola ${clienteNombre}!\n\n` +
     `Tu vehículo con placa *${placa}*${autoStr} ya ha finalizado su servicio *${servicioNombre}*${ticketInfo} y está *listo para ser recogido* en nuestra sucursal *${sucursalNombre}*.\n\n` +
-    `💰 Total a pagar: *S/ ${total.toFixed(2)}*\n\n` +
+    `Total a pagar: *S/ ${total.toFixed(2)}*\n\n` +
     `¡Muchas gracias por tu preferencia!`
   );
 }

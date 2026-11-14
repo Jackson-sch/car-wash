@@ -9,11 +9,17 @@ export const metadata = {
   description: "Estadísticas de facturación, gráficos de ventas e informes de rendimiento de lavado.",
 };
 
-export default async function ReportesPage() {
+interface ReportesPageProps {
+  searchParams?: Promise<{ rango?: string; demo?: string }>;
+}
+
+export default async function ReportesPage({ searchParams }: ReportesPageProps) {
   const session = await getSessionOrThrow();
+  const params = searchParams ? await searchParams : {};
+  const rango = params.rango || "7d";
 
   // Reportes se cachean 2 minutos (datos históricos, no crítica la frescura)
-  const reportesData = await getCachedReportesVentas(session.user.sucursalId!);
+  const reportesData = await getCachedReportesVentas(session.user.sucursalId!, rango);
 
-  return <ReportesClient initialData={reportesData} />;
+  return <ReportesClient initialData={reportesData} currentRango={rango} />;
 }

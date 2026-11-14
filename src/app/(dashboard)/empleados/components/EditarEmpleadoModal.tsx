@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, AlertTriangle, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -197,13 +197,13 @@ function EditarEmpleadoForm({
 
           {isSelf && (
             <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/5 border border-amber-500/10 p-2 rounded-xl">
-              ⚠️ Estás editando tu propia cuenta. Por seguridad, no puedes rebajar o cambiar tu propio rol de administrador.
+              <span className="flex items-center gap-1.5"><AlertTriangle className="size-3.5 shrink-0 text-amber-500" /><span>Estás editando tu propia cuenta. Por seguridad, no puedes rebajar o cambiar tu propio rol de administrador.</span></span>
             </p>
           )}
 
           {isSuperAdmin && (
             <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-500/5 border border-indigo-500/10 p-2 rounded-xl">
-              🛡️ Esta es una cuenta de Super Administrador del sistema. Las modificaciones están restringidas.
+              <span className="flex items-center gap-1.5"><ShieldAlert className="size-3.5 shrink-0 text-indigo-500" /><span>Esta es una cuenta de Super Administrador del sistema. Las modificaciones están restringidas.</span></span>
             </p>
           )}
 

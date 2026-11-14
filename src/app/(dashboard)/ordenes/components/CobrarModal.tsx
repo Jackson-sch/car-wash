@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition, useReducer } from "react";
-import { X, Receipt } from "lucide-react";
+import { X, Receipt, CheckCircle2, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { abrirTurnoCaja } from "@/lib/actions/caja";
@@ -43,7 +43,6 @@ interface CouponApplied {
   descuentoCalculado: number;
 }
 
-// --- Types para useReducer del formulario ---
 interface CobroFormState {
   paymentMethod: PaymentMethod;
   paymentReference: string;
@@ -190,8 +189,6 @@ export function CobrarModal({
     dispatchForm({ type: "RESET_FORM" });
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const totalNum = parseFloat(orden.total || "0");
   const descuentoCoupon = couponApplied?.descuentoCalculado || 0;
   const descuentoPuntos = canjearPuntos ? (parseInt(puntosACanjear) || 0) * 0.20 : 0;
@@ -200,6 +197,59 @@ export function CobrarModal({
   const change = cashReceivedNum - totalConDescuento;
   const isCashInsufficient =
     paymentMethod === "efectivo" && cashReceived.trim() !== "" && change < 0;
+
+  // Atajos de teclado rápidos para el cajero
+  useEffect(() => {
+    if (!isOpen || !cajaAbierta) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      const isInput =
+        activeEl instanceof HTMLInputElement ||
+        activeEl instanceof HTMLTextAreaElement;
+
+      // Escape siempre cierra el modal
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      // Atajos activos cuando no se está digitando en un input
+      if (!isInput) {
+        if (e.key === "1") {
+          e.preventDefault();
+          handlePaymentMethodChange("efectivo");
+        } else if (e.key === "2") {
+          e.preventDefault();
+          handlePaymentMethodChange("yape");
+        } else if (e.key === "3") {
+          e.preventDefault();
+          handlePaymentMethodChange("plin");
+        } else if (e.key === "4") {
+          e.preventDefault();
+          handlePaymentMethodChange("tarjeta");
+        } else if (e.key === "5") {
+          e.preventDefault();
+          handlePaymentMethodChange("transferencia");
+        } else if (e.key === "6") {
+          e.preventDefault();
+          handlePaymentMethodChange("otro");
+        } else if (e.key.toLowerCase() === "e") {
+          e.preventDefault();
+          dispatchForm({
+            type: "SET_CASH_RECEIVED",
+            received: totalConDescuento.toFixed(2),
+          });
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, cajaAbierta, totalConDescuento, onClose]);
+
+  if (!isOpen) return null;
 
   const handleValidateCupon = () => {
     const code = cuponCode.trim();
@@ -293,27 +343,32 @@ export function CobrarModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md transition-opacity duration-200 p-3 sm:p-4 md:p-6">
-      <div className="bg-card border border-border w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl transition-all duration-200 text-foreground flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md transition-opacity duration-200 p-3 sm:p-4 md:p-6 animate-in fade-in">
+      <div className="bg-card border border-border/90 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl transition-all duration-200 text-foreground flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
+        <div className="p-4 sm:p-5 border-b border-border/80 flex items-center justify-between bg-muted/40 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-secondary/10 text-secondary shadow-xs border border-secondary/20">
+            <div className="p-2.5 rounded-2xl bg-secondary/15 text-secondary shadow-xs border border-secondary/25">
               <Receipt className="size-5 text-secondary" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-foreground tracking-tight">
-                Registrar Cobro
-              </h3>
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
-                Ticket: {orden.nroTicket || "S/N"}
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-extrabold text-foreground tracking-tight">
+                  Registrar Cobro de Ticket
+                </h3>
+                <span className="px-2 py-0.5 rounded-md bg-secondary/15 text-secondary border border-secondary/25 font-mono text-[11px] font-black">
+                  #{orden.nroTicket || "S/N"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground font-semibold mt-0.5">
+                {sucursal?.nombre || "WashMaster Pro"} • Verifique los datos de pago y entregue comprobante
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label="Cerrar modal de cobro"
             className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="size-4.5" />
@@ -373,7 +428,7 @@ export function CobrarModal({
                   </div>
 
                   {/* Columna Derecha: Método de Pago, Denominaciones y Vuelto */}
-                  <div className="space-y-4 bg-muted/20 p-4 sm:p-5 rounded-2xl border border-border/70">
+                  <div className="space-y-4 bg-muted/20 p-4 sm:p-5 rounded-2xl border border-border/80">
                     <MetodoPagoSelector
                       paymentMethod={paymentMethod}
                       setPaymentMethod={handlePaymentMethodChange}
@@ -392,27 +447,44 @@ export function CobrarModal({
               </div>
 
               {/* Modal Actions Footer - Siempre Visible y Fijo */}
-              <div className="p-4 sm:px-6 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/30 shrink-0">
+              <div className="p-4 sm:px-6 border-t border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card shrink-0">
                 {/* Resumen rápido para el cajero */}
                 <div className="flex items-center gap-4 text-xs">
                   <div>
-                    <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider block">
+                    <span className="text-muted-foreground text-[10px] uppercase font-black tracking-wider block">
                       Total a Cobrar
                     </span>
-                    <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400">
+                    <span className="text-lg sm:text-2xl font-black font-mono text-secondary">
                       {formatCurrency(totalConDescuento)}
                     </span>
                   </div>
+
                   {paymentMethod === "efectivo" && cashReceived.trim() !== "" && change >= 0 && (
                     <div className="border-l border-border pl-4">
-                      <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider block">
-                        Vuelto a Dar
+                      <span className="text-emerald-600 dark:text-emerald-400 text-[10px] uppercase font-black tracking-wider block">
+                        Vuelto a Entregar
                       </span>
-                      <span className="text-base sm:text-lg font-black font-mono text-emerald-500">
+                      <span className="text-lg sm:text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(change)}
                       </span>
                     </div>
                   )}
+                </div>
+
+                {/* Atajos de teclado en el footer */}
+                <div className="hidden lg:flex items-center gap-2 text-[11px] text-muted-foreground border-l border-border pl-4">
+                  <Keyboard className="size-3.5 text-secondary shrink-0" />
+                  <span className="inline-flex items-center gap-1">
+                    <kbd className="px-1.5 py-0.2 rounded bg-muted font-mono font-bold text-[10px] text-foreground">1-6</kbd> Método
+                  </span>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <kbd className="px-1.5 py-0.2 rounded bg-muted font-mono font-bold text-[10px] text-foreground">E</kbd> Exacto
+                  </span>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <kbd className="px-1.5 py-0.2 rounded bg-muted font-mono font-bold text-[10px] text-foreground">Esc</kbd> Salir
+                  </span>
                 </div>
 
                 {/* Botones de acción */}
@@ -421,20 +493,24 @@ export function CobrarModal({
                     type="button"
                     variant="ghost"
                     onClick={onClose}
-                    className="text-xs font-bold text-muted-foreground hover:text-foreground h-10 px-4 rounded-xl cursor-pointer"
+                    className="text-xs font-bold text-muted-foreground hover:text-foreground h-11 px-4 rounded-xl cursor-pointer"
                   >
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
                     disabled={isPending || isCashInsufficient}
-                    className={`font-black text-xs sm:text-sm h-10 px-6 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5 transition-all active:scale-95 ${
+                    className={`font-black text-xs sm:text-sm h-11 px-5 sm:px-6 rounded-xl shadow-md cursor-pointer flex items-center gap-2 transition-all active:scale-95 ${
                       isCashInsufficient
                         ? "border border-border cursor-not-allowed opacity-50 bg-muted text-muted-foreground"
-                        : "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-950/20"
+                        : "bg-secondary hover:bg-sky-400 text-slate-950 shadow-secondary/20"
                     }`}
                   >
-                    {isPending ? "Procesando..." : "Confirmar Cobro"}
+                    <CheckCircle2 className="size-4 text-slate-950 shrink-0" />
+                    <span>{isPending ? "Cobrando..." : "Cobrar"}</span>
+                    <kbd className="hidden sm:inline px-1.5 py-0.2 rounded bg-slate-950/20 text-slate-950 font-mono font-black text-[10px]">
+                      ↵ Enter
+                    </kbd>
                   </Button>
                 </div>
               </div>

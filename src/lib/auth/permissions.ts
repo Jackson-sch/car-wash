@@ -26,6 +26,10 @@ export const PERMISSIONS = {
     ver:       ['admin', 'supervisor'],
     gestionar: ['admin', 'supervisor'],
   },
+  compras: {
+    ver:       ['admin', 'supervisor'],
+    gestionar: ['admin', 'supervisor'],
+  },
   reportes: {
     ver:      ['admin', 'supervisor'],
     exportar: ['admin', 'supervisor'],

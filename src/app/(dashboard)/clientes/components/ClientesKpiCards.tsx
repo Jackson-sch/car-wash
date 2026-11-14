@@ -15,101 +15,88 @@ export function ClientesKpiCards({ clientesList }: ClientesKpiCardsProps) {
   const totalVehiculosRegistrados = clientesList.reduce((acc, curr) => acc + curr.totalVehiculos, 0);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Card 1: Total Clientes */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Total de Clientes
+    <Card className="border border-border bg-card/60 backdrop-blur-md rounded-2xl p-0 overflow-hidden shadow-xs">
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border/50">
+        {/* 1. Total Clientes */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+            <Users className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block truncate">
+              Directorio Clientes
             </span>
-            <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-              {totalClientes} <span className="text-sm font-medium text-muted-foreground">clientes</span>
-            </h3>
-          </div>
-          <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
-            <Users className="h-5 w-5" />
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-foreground leading-none">
+                {totalClientes}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                registrados
+              </span>
+            </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
-          <span>Clientes registrados en el sistema</span>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
 
-      {/* Card 2: Vehículos Asociados */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Vehículos Asociados
+        {/* 2. Vehículos Asociados */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+            <Car className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block truncate">
+              Flota Vinculada
             </span>
-            <h3 className="text-3xl font-extrabold text-blue-500 tracking-tight">
-              {totalVehiculosRegistrados} <span className="text-sm font-medium text-muted-foreground">autos</span>
-            </h3>
-          </div>
-          <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
-            <Car className="h-5 w-5" />
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-blue-400 leading-none">
+                {totalVehiculosRegistrados}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                vehículos
+              </span>
+            </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-          <span>Vehículos vinculados a propietarios</span>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
 
-      {/* Card 3: Puntos Activos */}
-      <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-amber-500/50">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+        {/* 3. Puntos Activos */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+            <Gift className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block truncate">
               Puntos Activos
             </span>
-            <h3 className="text-3xl font-extrabold text-amber-500 tracking-tight">
-              {totalCirculationPoints} <span className="text-sm font-medium text-muted-foreground">pts</span>
-            </h3>
-          </div>
-          <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-500 transition-transform group-hover:scale-110 duration-300">
-            <Gift className="h-5 w-5" />
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-amber-600 dark:text-amber-400 leading-none">
+                {totalCirculationPoints}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                pts circulantes
+              </span>
+            </div>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-          <span>Puntos circulantes por canjear</span>
-        </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
 
-      {/* Card 4: Programa de Puntos */}
-      <Card className="p-6 border-amber-500/20 bg-card shadow-sm hover:border-amber-500/40 transition-colors flex flex-col justify-between relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transition-transform group-hover:scale-110 duration-300">
-          <Award className="h-24 w-24 text-amber-500" />
-        </div>
-        <div className="space-y-2.5 relative z-10">
-          <div className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-amber-500 animate-pulse" />
-            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">
-              Programa de Puntos
+        {/* 4. Programa de Fidelización */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+            <Award className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block truncate">
+              Canje de Puntos
             </span>
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Fidelización automática para clientes. Acumula y canjea en cada servicio de autolavado.
-          </p>
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="bg-muted/30 border border-border rounded-lg p-2 flex flex-col justify-center">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Acumulación</span>
-              <span className="text-xs font-extrabold mt-0.5">{formatCurrency(10)} = 1 pt</span>
-            </div>
-            <div className="bg-muted/30 border border-border rounded-lg p-2 flex flex-col justify-center">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Canje / Descuento</span>
-              <span className="text-xs font-extrabold text-amber-500 mt-0.5">1 pt = {formatCurrency(0.20)}</span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-base sm:text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                {formatCurrency(0.20)}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                / pt (S/ 10 = 1 pt)
+              </span>
             </div>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </Card>
-    </div>
+      </div>
+    </Card>
   );
 }

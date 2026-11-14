@@ -131,7 +131,7 @@ export function NotificationDropdown() {
                   {n.mensaje && (
                     <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">{n.mensaje}</p>
                   )}
-                  <p className="text-[9px] text-muted-foreground/60 mt-1">
+                  <p className="text-[10px] text-muted-foreground mt-1 font-medium">
                     {n.createdAt ? timeAgo(new Date(n.createdAt)) : ""}
                   </p>
                 </div>

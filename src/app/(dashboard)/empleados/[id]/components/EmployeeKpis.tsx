@@ -25,132 +25,176 @@ export function EmployeeKpis({ rol, kpis }: EmployeeKpisProps) {
 
   if (isLavador) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Servicios Realizados */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-emerald-500/30 transition-colors duration-300 flex items-center justify-between group">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-              Servicios Lavados
-            </span>
-            <div className="text-2xl font-black text-foreground group-hover:text-emerald-500 transition-colors">
-              {kpis.totalServicios}
+      <Card className="border border-border bg-card/60 backdrop-blur-md rounded-2xl p-0 overflow-hidden shadow-xs">
+        <div className="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border/50">
+          {/* 1. Servicios Lavados */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+            <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+              <WashingMachine className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block truncate">
+                Servicios Lavados
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                  {kpis.totalServicios}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  autos
+                </span>
+              </div>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-            <WashingMachine className="h-5 w-5" />
-          </div>
-        </Card>
 
-        {/* KPI 2: Ingresos Generados */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-blue-500/30 transition-colors duration-300 flex items-center justify-between group">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-              Monto Lavados
-            </span>
-            <div className="text-2xl font-black text-foreground group-hover:text-blue-500 transition-colors">
-              {formatCurrency(kpis.montoTotal)}
+          {/* 2. Monto Lavados */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+            <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+              <Coins className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block truncate">
+                Monto Lavados
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-blue-400 leading-none">
+                  {formatCurrency(kpis.montoTotal)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  facturado
+                </span>
+              </div>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-            <Coins className="h-5 w-5" />
-          </div>
-        </Card>
 
-        {/* KPI 3: Comisión Acumulada */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-secondary/30 transition-colors duration-300 flex items-center justify-between group">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-              Comisión Acumulada (30%)
-            </span>
-            <div className="text-2xl font-black text-secondary">
-              {formatCurrency(kpis.comisionAcumulada)}
+          {/* 3. Comisión Acumulada */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+            <div className="size-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+              <TrendingUp className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block truncate">
+                Comisión (30%)
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-secondary leading-none">
+                  {formatCurrency(kpis.comisionAcumulada)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  a liquidar
+                </span>
+              </div>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-secondary/15 text-secondary group-hover:scale-110 transition-transform">
-            <TrendingUp className="h-5 w-5" />
-          </div>
-        </Card>
 
-        {/* KPI 4: Ticket Promedio */}
-        <Card className="p-6 border border-border bg-card shadow-sm hover:border-purple-500/30 transition-colors duration-300 flex items-center justify-between group">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-              Promedio por Servicio
-            </span>
-            <div className="text-2xl font-black text-foreground group-hover:text-purple-500 transition-colors">
-              {formatCurrency(kpis.ticketPromedio)}
+          {/* 4. Promedio por Servicio */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+            <div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+              <Receipt className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-purple-500 uppercase tracking-wider block truncate">
+                Ticket Promedio
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-purple-500 leading-none">
+                  {formatCurrency(kpis.ticketPromedio)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  por auto
+                </span>
+              </div>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
-            <Receipt className="h-5 w-5" />
-          </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
     );
   }
 
   // Cajero / Admin / Supervisor
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* KPI 1: Órdenes Registradas */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-emerald-500/30 transition-colors duration-300 flex items-center justify-between group">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Órdenes Registradas
-          </span>
-          <div className="text-2xl font-black text-foreground group-hover:text-emerald-500 transition-colors">
-            {kpis.totalServicios}
+    <Card className="border border-border bg-card/60 backdrop-blur-md rounded-2xl p-0 overflow-hidden shadow-xs">
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border/50">
+        {/* 1. Órdenes Registradas */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+            <ClipboardList className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block truncate">
+              Órdenes Registradas
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                {kpis.totalServicios}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                tickets
+              </span>
+            </div>
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
-          <ClipboardList className="h-5 w-5" />
-        </div>
-      </Card>
 
-      {/* KPI 2: Monto Total Procesado */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-blue-500/30 transition-colors duration-300 flex items-center justify-between group">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Monto Total Cobrado
-          </span>
-          <div className="text-2xl font-black text-foreground group-hover:text-blue-500 transition-colors">
-            {formatCurrency(kpis.montoTotal)}
+        {/* 2. Monto Total Cobrado */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+            <Coins className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block truncate">
+              Monto Cobrado
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-blue-400 leading-none">
+                {formatCurrency(kpis.montoTotal)}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                total
+              </span>
+            </div>
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
-          <Coins className="h-5 w-5" />
-        </div>
-      </Card>
 
-      {/* KPI 3: Turnos de Caja Gestionados */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-amber-500/30 transition-colors duration-300 flex items-center justify-between group">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Turnos de Caja
-          </span>
-          <div className="text-2xl font-black text-foreground group-hover:text-amber-500 transition-colors">
-            {kpis.turnosTotales}
+        {/* 3. Turnos de Caja */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+            <CalendarCheck2 className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block truncate">
+              Turnos de Caja
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-amber-600 dark:text-amber-400 leading-none">
+                {kpis.turnosTotales}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                arqueados
+              </span>
+            </div>
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform">
-          <CalendarCheck2 className="h-5 w-5" />
-        </div>
-      </Card>
 
-      {/* KPI 4: Ticket Promedio */}
-      <Card className="p-6 border border-border bg-card shadow-sm hover:border-purple-500/30 transition-colors duration-300 flex items-center justify-between group">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Ticket Promedio
-          </span>
-          <div className="text-2xl font-black text-foreground group-hover:text-purple-500 transition-colors">
-            {formatCurrency(kpis.ticketPromedio)}
+        {/* 4. Ticket Promedio */}
+        <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+          <div className="size-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
+            <Receipt className="size-4.5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-purple-500 uppercase tracking-wider block truncate">
+              Ticket Promedio
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-0.5">
+              <span className="text-lg sm:text-xl font-black font-mono text-purple-500 leading-none">
+                {formatCurrency(kpis.ticketPromedio)}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                por cobro
+              </span>
+            </div>
           </div>
         </div>
-        <div className="p-3 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
-          <Receipt className="h-5 w-5" />
-        </div>
-      </Card>
-    </div>
+      </div>
+    </Card>
   );
 }

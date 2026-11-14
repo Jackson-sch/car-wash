@@ -132,14 +132,14 @@
   --secondary: #0284c7;
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
-  --muted-foreground: #475569;
+  --muted-foreground: #334155;
   --accent: #f1f5f9;
   --accent-foreground: #0f172a;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
+  --border: #cbd5e1;
   --input: #cbd5e1;
-  --ring: #0ea5e9;
+  --ring: #0284c7;
   --radius: 0.5rem;
 
   --sidebar: #0f172a;
@@ -219,9 +219,9 @@
   --primary: oklch(0.965 0.003 260);
   --primary-foreground: oklch(0.18 0.006 260);
   --secondary: #0ea5e9;
-  --secondary-foreground: oklch(0.965 0.003 260);
+  --secondary-foreground: #020617;
   --muted: oklch(0.22 0.006 260);
-  --muted-foreground: oklch(0.68 0.008 260);
+  --muted-foreground: oklch(0.78 0.01 260);
   --accent: oklch(0.22 0.006 260);
   --accent-foreground: oklch(0.965 0.003 260);
   --destructive: oklch(0.65 0.2 22);
@@ -231,9 +231,9 @@
   --ring: #0ea5e9;
 
   --sidebar: oklch(0.18 0.006 260);
-  --sidebar-foreground: oklch(0.68 0.008 260);
+  --sidebar-foreground: oklch(0.78 0.01 260);
   --sidebar-primary: #0ea5e9;
-  --sidebar-primary-foreground: oklch(0.965 0.003 260);
+  --sidebar-primary-foreground: #020617;
   --sidebar-accent: oklch(0.22 0.006 260);
   --sidebar-accent-foreground: oklch(0.965 0.003 260);
   --sidebar-border: oklch(0.25 0.007 260);
@@ -248,11 +248,11 @@
   --chart-growth-light: #6ee7b7;
 
   /* Overrides for custom Stitch variables in dark mode */
-  --on-surface-variant: oklch(0.68 0.008 260);
+  --on-surface-variant: oklch(0.78 0.01 260);
   --outline-variant: oklch(0.28 0.008 260);
   --secondary-container: oklch(0.22 0.006 260);
   --primary-container: oklch(0.18 0.006 260);
-  --on-primary-container: oklch(0.68 0.008 260);
+  --on-primary-container: oklch(0.78 0.01 260);
   --on-primary-fixed-variant: oklch(0.22 0.006 260);
   --surface-container-lowest: oklch(0.12 0.005 260);
   --surface-container-low: oklch(0.16 0.006 260);

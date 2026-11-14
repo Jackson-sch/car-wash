@@ -16,14 +16,18 @@ const COLORS = ["var(--color-chart-1)", "var(--color-chart-2)", "var(--color-cha
 const CustomBarTooltip = ({ active, payload }: { active?: boolean; payload?: { value?: number; payload?: { name?: string; total?: number } }[] }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-popover text-popover-foreground border border-border p-3 rounded-lg shadow-xl text-xs">
-        <p className="font-bold text-muted-foreground mb-1">{payload[0].payload?.name ?? ""}</p>
-        <div className="space-y-0.5">
-          <p className="text-muted-foreground font-bold text-[10px]">
-            Servicios: <span className="text-foreground font-extrabold">{payload[0].value ?? 0}</span>
+      <div className="bg-popover text-popover-foreground border border-border p-3 rounded-xl shadow-xl text-xs space-y-1.5">
+        <p className="font-bold text-foreground">{payload[0].payload?.name ?? ""}</p>
+        <div className="space-y-1 border-t border-border/40 pt-1">
+          <p className="text-muted-foreground font-medium text-xs flex justify-between gap-4">
+            <span>Servicios:</span>
+            <span className="text-foreground font-bold font-mono">{payload[0].value ?? 0}</span>
           </p>
-          <p className="text-secondary font-bold text-[10px]">
-            Recaudación: <span className="font-extrabold">S/ {Number(payload[0].payload?.total ?? 0).toFixed(2)}</span>
+          <p className="text-muted-foreground font-medium text-xs flex justify-between gap-4">
+            <span>Facturación:</span>
+            <span className="text-secondary font-bold font-mono">
+              S/ {Number(payload[0].payload?.total ?? 0).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
           </p>
         </div>
       </div>

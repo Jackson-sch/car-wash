@@ -1,35 +1,31 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserCog, ClipboardCheck, Coins, UserPlus, Lightbulb } from "lucide-react";
+import {
+  UserCog,
+  ClipboardCheck,
+  Coins,
+  UserPlus,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   registrarEmpleado,
   actualizarEmpleado,
   cambiarEstadoEmpleado,
+  getOrdenesPendientesLiquidacion,
 } from "@/lib/actions/empleados";
 import { toast } from "sonner";
-import { EmpleadosGrid } from "./components/EmpleadosGrid";
+import { EmpleadosGrid, type Empleado } from "./components/EmpleadosGrid";
 import { CrearEmpleadoModal } from "./components/CrearEmpleadoModal";
 import { EditarEmpleadoModal } from "./components/EditarEmpleadoModal";
-import { LiquidarComisionModal } from "./components/LiquidarComisionModal";
+import { LiquidarComisionModal, type OrdenPendiente } from "./components/LiquidarComisionModal";
 import { formatCurrency } from "@/lib/formats";
 import { useSession } from "@/lib/auth-client";
-
-interface Empleado {
-  id: string;
-  nombre: string;
-  apellido: string | null;
-  email: string;
-  telefono: string | null;
-  rol: "superadmin" | "admin" | "supervisor" | "cajero" | "lavador";
-  activo: boolean | null;
-  totalLavados: number;
-  montoLavado: number;
-  comisionAcumulada: number;
-  tiempoPromedioMin?: number;
-  sucursalNombre?: string | null;
-}
 
 interface EmpleadosClientProps {
   initialEmpleados: Empleado[];
@@ -41,13 +37,18 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
 
   const [empleados, setEmpleados] = useState<Empleado[]>(initialEmpleados);
   const [isPending, startTransition] = useTransition();
+  const [showGuide, setShowGuide] = useState(false);
 
   // Estados de modales
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedEmpleado, setSelectedEmpleado] = useState<Empleado | null>(null);
 
-  // Registrar empleado
+  // Estado para Liquidación de Comisiones
+  const [liquidarOpen, setLiquidarOpen] = useState(false);
+  const [liquidarEmpleado, setLiquidarEmpleado] = useState<Empleado | null>(null);
+  const [ordenesPendientes, setOrdenesPendientes] = useState<OrdenPendiente[]>([]);
+
   const handleSave = async (data: {
     nombre: string;
     apellido: string;
@@ -66,6 +67,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             totalLavados: 0,
             montoLavado: 0,
             comisionAcumulada: 0,
+            ordenesPendientesLiquidar: 0,
           } as Empleado;
           setEmpleados((prev) => [...prev, newEmp]);
           resolve(true);
@@ -77,7 +79,6 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
     });
   };
 
-  // Modificar empleado
   const handleEditSave = async (
     id: string,
     data: {
@@ -115,7 +116,6 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
     });
   };
 
-  // Dar de baja o reactivar empleado
   const handleToggleStatus = async (id: string, active: boolean) => {
     startTransition(async () => {
       const res = await cambiarEstadoEmpleado(id, active);
@@ -127,14 +127,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
             : "Personal dado de baja con éxito"
         );
         setEmpleados((prev) =>
-          prev.map((emp) =>
-            emp.id === id
-              ? {
-                  ...emp,
-                  activo: active,
-                }
-              : emp
-          )
+          prev.map((emp) => (emp.id === id ? { ...emp, activo: active } : emp))
         );
       } else {
         toast.error(res.error || "No se pudo cambiar el estado del personal.");
@@ -147,33 +140,75 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
     setIsEditOpen(true);
   };
 
-  // KPIs (Only counting active employees for personal stats)
+  const handleLiquidarClick = async (emp: Empleado) => {
+    setLiquidarEmpleado(emp);
+    const rows = await getOrdenesPendientesLiquidacion(emp.id);
+    setOrdenesPendientes(rows);
+    setLiquidarOpen(true);
+  };
+
+  const handleLiquidacionSuccess = (montoLiquidado: number, ordenesLiquidadas: number) => {
+    if (!liquidarEmpleado) return;
+    setEmpleados((prev) =>
+      prev.map((emp) =>
+        emp.id === liquidarEmpleado.id
+          ? {
+              ...emp,
+              comisionAcumulada: Math.max(0, emp.comisionAcumulada - montoLiquidado),
+              ordenesPendientesLiquidar: Math.max(
+                0,
+                (emp.ordenesPendientesLiquidar ?? emp.totalLavados) - ordenesLiquidadas
+              ),
+            }
+          : emp
+      )
+    );
+  };
+
+  // KPIs
   const empleadosActivos = empleados.filter((e) => e.activo);
   const totalPersonal = empleadosActivos.length;
   const totalLavadores = empleadosActivos.filter((e) => e.rol === "lavador").length;
+  const totalServiciosLavados = empleados.reduce((acc, curr) => acc + curr.totalLavados, 0);
   const totalComisiones = empleadosActivos.reduce(
     (acc, curr) => acc + curr.comisionAcumulada,
     0
   );
 
   return (
-    <div suppressHydrationWarning className="space-y-5 sm:space-y-6 md:space-y-8 text-foreground transition-opacity duration-300">
+    <div
+      suppressHydrationWarning
+      className="space-y-5 sm:space-y-6 text-foreground transition-opacity duration-300"
+    >
       {/* Header */}
-      <div suppressHydrationWarning className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div
+        suppressHydrationWarning
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
         <div suppressHydrationWarning>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
             <UserCog className="h-7 w-7 text-secondary" />
-            Gestión de Empleados
+            Gestión de Empleados y Comisiones
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Administración del personal, comisiones devengadas por servicios de
-            lavado completados.
+            Directorio de personal, productividad en bahía y liquidación de comisiones (30%).
           </p>
         </div>
-        <div suppressHydrationWarning>
+        <div suppressHydrationWarning className="flex items-center gap-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowGuide((prev) => !prev)}
+            className="h-10 text-xs font-bold gap-1.5 rounded-xl border-border bg-card/80 hover:bg-muted text-foreground cursor-pointer shadow-xs"
+          >
+            <Lightbulb className="size-4 text-amber-500" />
+            <span className="hidden sm:inline">Política de Comisiones</span>
+            {showGuide ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+          </Button>
           <Button
             onClick={() => setIsCreateOpen(true)}
-            className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-lg shadow-sm"
+            className="bg-secondary hover:bg-secondary/90 text-white font-bold gap-2 cursor-pointer h-10 rounded-xl shadow-sm"
           >
             <UserPlus className="h-4.5 w-4.5" />
             Registrar Personal
@@ -181,103 +216,111 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
         </div>
       </div>
 
-      {/* KPI Stats */}
-      <div suppressHydrationWarning className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card 1: Total Personal */}
-        <div suppressHydrationWarning className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-secondary/50">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Total de Personal Activo
-              </span>
-              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-                {totalPersonal} <span className="text-sm font-medium text-muted-foreground">colaboradores</span>
-              </h3>
-            </div>
-            <div className="p-3.5 rounded-xl bg-secondary/10 text-secondary transition-transform group-hover:scale-110 duration-300">
-              <UserCog className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
-            <span>Colaboradores registrados y activos</span>
-          </div>
-          {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Guía desplegable de comisiones */}
+      {showGuide && (
+        <div className="p-4 rounded-2xl border border-secondary/25 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed animate-in fade-in-0">
+          <p className="font-bold text-secondary flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-secondary shrink-0" />
+            ¿Cómo funciona el cálculo y liquidación de comisiones?
+          </p>
+          <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+            <li>
+              <strong>Base de Cálculo:</strong> Cada orden completada o cobrada asignada a un lavador suma automáticamente a su producción.
+            </li>
+            <li>
+              <strong>Comisión del 30%:</strong> Los operarios de lavado devengan una comisión fija del <strong>30%</strong> sobre el importe de los servicios atendidos.
+            </li>
+            <li>
+              <strong>Liquidación Directa:</strong> Haz clic en <em>Liquidar Comisión</em> en la tarjeta del lavador para seleccionar los tickets pendientes y registrar el pago.
+            </li>
+          </ul>
         </div>
+      )}
 
-        {/* Card 2: Lavadores Activos */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-blue-500/50">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Lavadores Activos
+      {/* 4-Card Compact KPI Dock */}
+      <Card className="border border-border bg-card/60 backdrop-blur-md rounded-2xl p-0 overflow-hidden shadow-xs w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border/50">
+          {/* 1. Personal Activo */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+            <div className="size-9 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+              <UserCog className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block truncate">
+                Personal Activo
               </span>
-              <h3 className="text-3xl font-extrabold text-blue-500 tracking-tight">
-                {totalLavadores} <span className="text-sm font-medium text-muted-foreground">lavadores</span>
-              </h3>
-            </div>
-            <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-500 transition-transform group-hover:scale-110 duration-300">
-              <ClipboardCheck className="h-5 w-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            {totalPersonal > 0 ? (
-              <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className="h-full rounded-full bg-blue-500 transition-colors duration-500"
-                  style={{ width: `${(totalLavadores / totalPersonal) * 100}%` }}
-                />
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-foreground leading-none">
+                  {totalPersonal}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  de {empleados.length} registrados
+                </span>
               </div>
-            ) : (
-              <div className="h-1.5" />
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              Operarios en bahía de lavado
-            </p>
+            </div>
           </div>
-          {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </div>
 
-        {/* Card 3: Comisiones por Pagar */}
-        <div className="relative group overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-300 hover:shadow-md hover:border-emerald-500/50">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1.5">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Comisiones por Pagar
+          {/* 2. Lavadores en Patio */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors border-l border-border/50 lg:border-l-0">
+            <div className="size-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+              <ClipboardCheck className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block truncate">
+                Operarios de Lavado
               </span>
-              <h3 className="text-3xl font-extrabold text-emerald-500 tracking-tight">
-                {formatCurrency(totalComisiones)}
-              </h3>
-            </div>
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110 duration-300">
-              <Coins className="h-5 w-5" />
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-blue-400 leading-none">
+                  {totalLavadores}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  en bahías activas
+                </span>
+              </div>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Suma acumulada por pagar</span>
-          </div>
-          {/* Subtle gradient glow */}
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </div>
-      </div>
 
-      {/* Explicación de comisiones de lavadores */}
-      <div className="p-4 rounded-xl border border-secondary/20 bg-secondary/5 text-secondary text-xs space-y-2 leading-relaxed">
-        <p className="font-bold text-secondary flex items-center gap-2">
-          <Lightbulb className="h-4 w-4 text-secondary shrink-0" />
-          ¿Cómo funcionan las comisiones de lavado?
-        </p>
-        <p className="text-muted-foreground">
-          La comisión devengada por el personal de lavado se calcula de manera transparente al completarse un servicio asignado:
-        </p>
-        <ul className="list-disc pl-5 text-muted-foreground/80 space-y-1">
-          <li><strong>Monto del Lavado:</strong> Representa la facturación bruta total de los servicios que el lavador atendió directamente.</li>
-          <li><strong>Comisión Acumulada:</strong> Por política de negocio, los lavadores reciben una tasa fija del <strong>30%</strong> calculada sobre el precio base de cada servicio realizado, acumulándose automáticamente en su saldo.</li>
-        </ul>
-      </div>
+          {/* 3. Servicios Atendidos */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors">
+            <div className="size-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-500 shrink-0">
+              <Sparkles className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider block truncate">
+                Órdenes Atendidas
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-foreground leading-none">
+                  {totalServiciosLavados}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  lavados completados
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Comisiones por Pagar */}
+          <div className="p-3 sm:p-3.5 flex items-center gap-3 hover:bg-muted/20 transition-colors border-l border-border/50 lg:border-l-0">
+            <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+              <Coins className="size-4.5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block truncate">
+                Comisiones por Liquidar
+              </span>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 leading-none">
+                  {formatCurrency(totalComisiones)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium truncate">
+                  tasa 30%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Employees Grid Component */}
       <EmpleadosGrid
@@ -285,6 +328,7 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
         currentUserId={currentUserId}
         onEditClick={handleEditClick}
         onToggleStatus={handleToggleStatus}
+        onLiquidarClick={handleLiquidarClick}
       />
 
       {/* CREATE EMPLOYEE MODAL */}
@@ -310,11 +354,16 @@ export function EmpleadosClient({ initialEmpleados }: EmpleadosClientProps) {
 
       {/* LIQUIDAR COMISION MODAL */}
       <LiquidarComisionModal
-        open={false}
-        onOpenChange={() => {}}
-        empleadoId=""
-        empleadoNombre=""
-        ordenesPendientes={[]}
+        open={liquidarOpen}
+        onOpenChange={setLiquidarOpen}
+        empleadoId={liquidarEmpleado?.id || ""}
+        empleadoNombre={
+          liquidarEmpleado
+            ? `${liquidarEmpleado.nombre} ${liquidarEmpleado.apellido || ""}`.trim()
+            : ""
+        }
+        ordenesPendientes={ordenesPendientes}
+        onSuccess={handleLiquidacionSuccess}
       />
     </div>
   );

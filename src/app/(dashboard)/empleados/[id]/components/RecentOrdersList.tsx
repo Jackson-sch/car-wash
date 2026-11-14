@@ -53,7 +53,7 @@ export function RecentOrdersList({ ordenes }: RecentOrdersListProps) {
         <div className="overflow-x-auto">
           <table className="w-full text-[11px] text-left border-collapse">
             <thead>
-              <tr className="border-b border-border text-muted-foreground uppercase font-bold text-[9px] tracking-wider">
+              <tr className="border-b border-border text-slate-700 dark:text-slate-300 uppercase font-extrabold text-xs tracking-wider">
                 <th className="py-2.5 px-3">Ticket</th>
                 <th className="py-2.5 px-3">Vehículo</th>
                 <th className="py-2.5 px-3 hidden sm:table-cell">Cliente</th>
@@ -95,7 +95,7 @@ export function RecentOrdersList({ ordenes }: RecentOrdersListProps) {
                     </td>
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-block text-[9px] font-bold rounded px-1.5 py-0.5 border uppercase ${
+                        className={`inline-block text-[10px] font-extrabold rounded px-2 py-0.5 border uppercase ${
                           ESTADOS_BADGES[order.estado] || ""
                         }`}
                       >
